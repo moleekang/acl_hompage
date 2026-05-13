@@ -1,9 +1,16 @@
 // AICONLAB 풋터 — 모든 페이지 하단 자동 노출
 // Claude 시스템 시그니처: dark navy + 4컬럼 (Never inverts)
 
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 export function Footer() {
+  const pathname = usePathname();
+  // /admin 영역에서는 풋터 숨김
+  if (pathname?.startsWith("/admin")) return null;
+
   return (
     <footer className="bg-[var(--ink-900)] py-16 text-[var(--ink-300)] md:py-20">
       <div className="container mx-auto max-w-6xl px-6">

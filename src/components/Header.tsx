@@ -6,6 +6,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 
 // 헤더 메뉴 정의 — 4개 메뉴 + 멤버십 CTA = 5개
@@ -22,6 +23,10 @@ const navItems = [
 export function Header() {
   // 모바일 메뉴 토글 상태
   const [isOpen, setIsOpen] = useState(false);
+  const pathname = usePathname();
+
+  // /admin 영역에서는 메인 헤더 숨김 (admin 자체 사이드바를 사용)
+  if (pathname?.startsWith("/admin")) return null;
 
   return (
     <header

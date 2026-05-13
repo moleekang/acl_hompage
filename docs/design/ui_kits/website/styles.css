@@ -1,0 +1,56 @@
+/* AICONLAB — Website UI Kit shared styles (v2 light paper) */
+@import url('../../colors_and_type.css');
+
+* { box-sizing: border-box; }
+
+#root { position: relative; z-index: 2; }
+
+.container { max-width: 1200px; margin: 0 auto; padding: 0 32px; }
+.container-wide { max-width: 1440px; margin: 0 auto; padding: 0 32px; }
+
+/* Buttons */
+.btn { display:inline-flex; align-items:center; gap:8px; padding:13px 22px; border-radius:8px; font-weight:700; font-size:16px; border:0; cursor:pointer; transition: all 180ms var(--ease-snap); font-family:var(--font-body); text-decoration:none; }
+.btn-primary { background: var(--ink-900); color: var(--paper); }
+.btn-primary:hover { box-shadow: var(--shadow-paper); transform: translateY(-1px); }
+.btn-primary:active { transform: scale(0.98); box-shadow: none; }
+.btn-secondary { background: var(--surface-1); color: var(--fg-1); border:1px solid var(--border-2); }
+.btn-secondary:hover { border-color: var(--ink-900); }
+.btn-mint { background: var(--mint-400); color: var(--ink-900); border:2px solid var(--ink-900); box-shadow: var(--shadow-stamp); }
+.btn-mint:hover { transform: translate(-1px,-1px); box-shadow: 3px 3px 0 var(--ink-900); }
+.btn-lg { padding: 16px 28px; font-size: 18px; }
+
+/* Sections */
+.section { padding: 96px 0; position: relative; }
+.section-tight { padding: 64px 0; }
+.eyebrow { font-family: var(--font-mono); font-size:12px; font-weight:500; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-mint); display:inline-flex; align-items:center; gap:8px; }
+.eyebrow::before { content:"●"; }
+
+/* Cards */
+.card-white { background: var(--surface-1); border:1px solid var(--border-1); border-radius: 14px; padding: 28px; box-shadow: var(--shadow-card); transition: transform 180ms, box-shadow 180ms; }
+.card-paper { background: var(--surface-2); border-radius: 6px; padding: 28px; box-shadow: var(--shadow-paper); border: 1px solid var(--border-1); }
+
+/* Sticker */
+.sticker { display:inline-flex; align-items:center; gap:6px; padding: 6px 14px; background: var(--sun-400); color: var(--ink-900); font-family: var(--font-hand); font-weight: 700; font-size: 22px; border:2px solid var(--ink-900); border-radius: 999px; box-shadow: var(--shadow-stamp); transform: rotate(-3deg); }
+.sticker-mint { background: var(--mint-400); }
+.sticker-hot { background: var(--hot-500); color: var(--paper); }
+
+/* Marker (highlight) */
+.marker { background: linear-gradient(transparent 0%, transparent calc(100% - 0.35em), var(--sun-400) calc(100% - 0.35em), var(--sun-400) 100%); padding: 0 4px; color: inherit; }
+
+/* Hand-drawn underline (squiggly) — for inline emphasis */
+.underline-hand { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 12' preserveAspectRatio='none'><path d='M2 7 Q 25 2, 50 6 T 98 7' fill='none' stroke='%23FF6B47' stroke-width='2.5' stroke-linecap='round'/></svg>"); background-repeat: no-repeat; background-position: bottom; background-size: 100% 0.4em; padding-bottom: 0.15em; }
+
+/* Display headlines — Gaegu shines big */
+.h-gaegu { font-family: var(--font-hand); font-weight: 700; letter-spacing: -0.01em; line-height: 1.1; }
+
+/* Pill */
+.pill { display:inline-flex; align-items:center; gap:6px; padding: 5px 12px; border-radius: 999px; font-size: 13px; font-weight: 500; background: var(--surface-1); border: 1px solid var(--border-2); }
+.pill-mint { background: rgba(124,245,196,0.30); border-color: var(--text-mint); color: var(--text-mint); }
+.pill-hot { background: rgba(255,107,71,0.18); border-color: var(--text-hot); color: var(--text-hot); }
+.pill-sun { background: rgba(255,210,63,0.30); border-color: var(--text-sun); color: var(--text-sun); }
+
+/* Tape (hand-attached note feel) */
+.tape::before, .tape::after { content:""; position:absolute; width: 80px; height: 22px; background: rgba(255,210,63,0.55); top: -10px; }
+.tape::before { left: 24px; transform: rotate(-3deg); }
+.tape::after { right: 24px; transform: rotate(2deg); }
+.tape { position: relative; }

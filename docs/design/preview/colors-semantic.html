@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8"><title>Semantic Colors</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  body{margin:0;padding:24px;background:var(--ink-900);font-family:var(--font-body);color:var(--fg-1)}
+  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  .item{padding:14px;border-radius:14px;border:1px solid var(--border-1);background:var(--ink-800)}
+  .dot{width:24px;height:24px;border-radius:999px;margin-bottom:10px}
+  .lbl{font-size:14px;font-weight:600}
+  .role{font-size:11px;color:var(--fg-3);font-family:var(--font-mono);margin-top:2px}
+</style></head>
+<body>
+<div class="grid">
+  <div class="item"><div class="dot" style="background:var(--success)"></div><div class="lbl">Success</div><div class="role">--success → mint-400</div></div>
+  <div class="item"><div class="dot" style="background:var(--info)"></div><div class="lbl">Info</div><div class="role">--info → electric-500</div></div>
+  <div class="item"><div class="dot" style="background:var(--warn)"></div><div class="lbl">Warning</div><div class="role">--warn → sun-400</div></div>
+  <div class="item"><div class="dot" style="background:var(--danger)"></div><div class="lbl">Danger</div><div class="role">--danger → hot-500</div></div>
+</div>
+</body></html>

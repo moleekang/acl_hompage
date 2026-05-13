@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>Ai-Con Lab — Sample Deck</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<script src="deck-stage.js"></script>
+<style>
+  body { margin: 0; background: #000; }
+  deck-stage section {
+    background: var(--ink-900);
+    color: var(--fg-1);
+    font-family: var(--font-body);
+    padding: 96px 120px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  deck-stage section::before {
+    content:""; position:absolute; inset:0; pointer-events:none;
+    background-image: url("../assets/grain.svg");
+    opacity: 0.06; mix-blend-mode: overlay;
+  }
+  .eyebrow { font-size:18px; font-weight:500; letter-spacing:0.08em; text-transform:uppercase; color:var(--mint-400); margin-bottom:24px; }
+  .eyebrow::before { content:"●  "; }
+  .footer-bar { position:absolute; bottom:48px; left:120px; right:120px; display:flex; justify-content:space-between; align-items:center; font-family:var(--font-mono); font-size:14px; color:var(--fg-3); border-top:1px solid var(--border-1); padding-top:16px; }
+  .marker { background: linear-gradient(transparent 60%, var(--sun-400) 60%); padding: 0 6px; color: var(--ink-900); }
+  .sticker-pill { display:inline-flex; align-items:center; padding: 8px 22px; background: var(--sun-400); color: var(--ink-900); font-family: var(--font-hand); font-weight: 700; font-size: 28px; border:2px solid var(--ink-900); border-radius: 999px; box-shadow: 3px 3px 0 var(--ink-900); transform: rotate(-3deg); }
+</style>
+</head>
+<body>
+
+<script type="application/json" id="speaker-notes">[]</script>
+
+<deck-stage>
+
+  <!-- 01 TITLE -->
+  <section data-screen-label="01 Title">
+    <div style="position:absolute;top:-200px;left:50%;transform:translateX(-50%);width:1400px;height:900px;background:radial-gradient(ellipse,rgba(90,124,255,0.20),transparent 60%);pointer-events:none"></div>
+    <div style="margin:auto 0;position:relative">
+      <div class="eyebrow">B2B 제안서 · 2026</div>
+      <h1 style="font-size:140px;line-height:1.0;font-weight:800;letter-spacing:-0.04em;margin:0 0 32px">
+        AI 자동화,<br/>
+        더는 <span class="marker">미루지</span> 마세요.
+      </h1>
+      <p style="font-size:32px;line-height:1.5;color:var(--fg-2);max-width:1100px;margin:0">
+        어렵게 설명 안 할게요.<br/>
+        <span style="font-family:var(--font-hand);color:var(--sun-400);font-size:36px">— 40~60대도 6주면 사내에 정착시킵니다.</span>
+      </p>
+    </div>
+    <div class="footer-bar">
+      <div style="display:flex;align-items:center;gap:12px"><img src="../assets/logo-mark.svg" style="height:24px"/><span style="font-weight:700;color:var(--fg-2)">Ai-Con Lab</span></div>
+      <div>aiconlab.kr · 2026.05</div>
+    </div>
+  </section>
+
+  <!-- 02 SECTION HEADER -->
+  <section data-screen-label="02 Section">
+    <div style="margin:auto 0">
+      <div class="eyebrow" style="color:var(--hot-500)">Section 01</div>
+      <h2 style="font-size:120px;line-height:1.05;font-weight:800;letter-spacing:-0.04em;margin:0 0 24px">우리가<br/>하는 일.</h2>
+      <p style="font-family:var(--font-hand);font-size:40px;color:var(--sun-400);margin:0">(이름은 거창한데, 별 거 아닙니다.)</p>
+    </div>
+    <div class="footer-bar"><div>Ai-Con Lab</div><div>02 / 06</div></div>
+  </section>
+
+  <!-- 03 BIG STAT -->
+  <section data-screen-label="03 Big Stat">
+    <div style="margin:auto 0;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center">
+      <div>
+        <div class="eyebrow">실증된 결과</div>
+        <h2 style="font-size:60px;line-height:1.1;font-weight:700;letter-spacing:-0.02em;margin:0 0 24px">
+          영상 제작 시간을<br/>
+          <span style="color:var(--mint-400)">2.4배</span> 줄였습니다.
+        </h2>
+        <p style="font-size:22px;line-height:1.6;color:var(--fg-2);margin:0">
+          12개 기업 평균 데이터. AI 파이프라인 도입 전후 비교.
+        </p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:24px">
+        <div style="background:var(--ink-800);border:1px solid var(--border-1);border-radius:14px;padding:40px">
+          <div class="mono" style="font-size:18px;color:var(--fg-3);margin-bottom:12px">BEFORE</div>
+          <div style="font-family:var(--font-mono);font-size:80px;font-weight:700;line-height:1;color:var(--fg-2)">5일</div>
+        </div>
+        <div style="background:var(--mint-400);color:var(--ink-900);border-radius:14px;padding:40px;position:relative">
+          <div class="mono" style="font-size:18px;opacity:.6;margin-bottom:12px">AFTER</div>
+          <div style="font-family:var(--font-mono);font-size:80px;font-weight:700;line-height:1">18시간</div>
+          <span class="sticker-pill" style="position:absolute;top:-20px;right:-30px;font-size:22px">2.4× faster</span>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bar"><div>Ai-Con Lab</div><div>03 / 06</div></div>
+  </section>
+
+  <!-- 04 COMPARISON -->
+  <section data-screen-label="04 Comparison">
+    <div class="eyebrow">기존 vs Ai-Con Lab</div>
+    <h2 style="font-size:64px;line-height:1.1;font-weight:700;letter-spacing:-0.02em;margin:0 0 56px">뭐가 다른가요?</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;flex:1">
+      <div style="background:var(--ink-800);border:1px solid var(--border-1);border-radius:14px;padding:40px">
+        <div style="font-size:18px;color:var(--fg-3);margin-bottom:24px;font-weight:600">기존 외주</div>
+        <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:18px;font-size:22px;line-height:1.5;color:var(--fg-2)">
+          <li>✕ &nbsp; 영상 1편 평균 5일</li>
+          <li>✕ &nbsp; 매번 새로 의뢰</li>
+          <li>✕ &nbsp; 사내 역량 안 쌓임</li>
+          <li>✕ &nbsp; 비용 매번 발생</li>
+        </ul>
+      </div>
+      <div style="background:linear-gradient(180deg,var(--ink-800),var(--ink-700));border:1px solid var(--mint-400);border-radius:14px;padding:40px;position:relative">
+        <div style="font-size:18px;color:var(--mint-400);margin-bottom:24px;font-weight:600">Ai-Con Lab 방식</div>
+        <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:18px;font-size:22px;line-height:1.5;color:var(--fg-1)">
+          <li><span style="color:var(--mint-400)">✓</span> &nbsp; 평균 18시간</li>
+          <li><span style="color:var(--mint-400)">✓</span> &nbsp; 한 번 셋업, 반복 사용</li>
+          <li><span style="color:var(--mint-400)">✓</span> &nbsp; 6주 후 사내 자생</li>
+          <li><span style="color:var(--mint-400)">✓</span> &nbsp; 일회성 도입 비용</li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bar"><div>Ai-Con Lab</div><div>04 / 06</div></div>
+  </section>
+
+  <!-- 05 BIG QUOTE -->
+  <section data-screen-label="05 Quote" style="background:var(--ink-800)">
+    <div style="margin:auto 0;max-width:1400px">
+      <div style="font-size:200px;line-height:.5;color:var(--hot-500);font-weight:800;margin-bottom:24px">"</div>
+      <p style="font-size:64px;line-height:1.25;font-weight:600;letter-spacing:-0.02em;margin:0 0 56px;text-wrap:pretty">
+        6주 만에 사내 영상팀이 바뀌었어요.<br/>
+        <span style="color:var(--fg-3)">솔직히 반신반의했는데...</span>
+      </p>
+      <div style="display:flex;align-items:center;gap:20px">
+        <div style="width:64px;height:64px;border-radius:999px;background:var(--mint-400);color:var(--ink-900);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700">김</div>
+        <div>
+          <div style="font-size:22px;font-weight:600">김영수 부장</div>
+          <div style="font-size:18px;color:var(--fg-3)">제조업 · 56세 · 12명 영상팀</div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bar"><div>Ai-Con Lab</div><div>05 / 06</div></div>
+  </section>
+
+  <!-- 06 CLOSING CTA -->
+  <section data-screen-label="06 CTA">
+    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:1200px;height:800px;background:radial-gradient(ellipse,rgba(124,245,196,0.18),transparent 60%);pointer-events:none"></div>
+    <div style="margin:auto;text-align:center;position:relative">
+      <h2 style="font-size:120px;line-height:1.05;font-weight:800;letter-spacing:-0.04em;margin:0 0 32px">
+        일단, 무료로<br/>한 번 봐볼까요?
+      </h2>
+      <p style="font-size:30px;line-height:1.5;color:var(--fg-2);max-width:900px;margin:0 auto 56px">
+        30분 진단 미팅. 강요 없습니다.<br/>
+        <span style="font-family:var(--font-hand);color:var(--sun-400);font-size:34px">안 맞으면 그냥 가셔도 됩니다~</span>
+      </p>
+      <div style="display:inline-flex;align-items:center;gap:14px;padding:24px 44px;background:var(--mint-400);color:var(--ink-900);border-radius:12px;font-size:28px;font-weight:700">
+        hello@aiconlab.kr →
+      </div>
+    </div>
+    <div class="footer-bar"><div>Ai-Con Lab</div><div>06 / 06</div></div>
+  </section>
+
+</deck-stage>
+</body>
+</html>

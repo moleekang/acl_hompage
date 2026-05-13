@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8"><title>Radii</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  body{margin:0;padding:24px;background:var(--ink-900);color:var(--fg-1);font-family:var(--font-body)}
+  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  .item{display:flex;flex-direction:column;align-items:center;gap:8px}
+  .box{width:90px;height:60px;background:var(--ink-700);border:1px solid var(--border-2)}
+  .lbl{font-family:var(--font-mono);font-size:11px;color:var(--fg-2)}
+  .role{font-size:10px;color:var(--fg-3)}
+</style></head>
+<body>
+<div class="grid">
+  <div class="item"><div class="box" style="border-radius:4px"></div><div class="lbl">--r-notebook · 4px</div><div class="role">tags · inputs</div></div>
+  <div class="item"><div class="box" style="border-radius:8px"></div><div class="lbl">--r-input · 8px</div><div class="role">forms</div></div>
+  <div class="item"><div class="box" style="border-radius:14px"></div><div class="lbl">--r-card · 14px</div><div class="role">cards · dialogs</div></div>
+  <div class="item"><div class="box" style="border-radius:999px;width:60px"></div><div class="lbl">--r-pill · 999px</div><div class="role">pills · avatars</div></div>
+</div>
+</body></html>

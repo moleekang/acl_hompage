@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 60" width="120" height="60">
+  
+  <g transform="translate(60 30) rotate(-8)">
+    <rect x="-52" y="-22" width="104" height="44" rx="4" fill="#FF6B47" stroke="#0E1116" stroke-width="2.5"></rect>
+    <text x="0" y="8" text-anchor="middle" font-family="Pretendard, sans-serif" font-size="20" font-weight="800" fill="#F5F1E8">★ NEW</text>
+  </g>
+</svg>

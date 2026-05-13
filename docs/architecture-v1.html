@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AICONLAB 홈페이지 아키텍처 v1</title>
+<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@300;400;700&family=Gowun+Dodum&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* AICONLAB Design System v2 — Paper-first + Gaegu/Gowun Dodum */
+@page { size: A3 landscape; margin: 10mm; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { word-break: keep-all; overflow-wrap: break-word; }
+body {
+  font-family: 'Gowun Dodum', -apple-system, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  background: #F5F1E8; /* paper */
+  color: #1A1813;     /* paper-ink */
+  -webkit-print-color-adjust: exact; print-color-adjust: exact;
+}
+
+/* SIDEBAR — white card on paper */
+.sidebar { width: 244px; background: #FFFFFF; border-right: 1px solid rgba(0,0,0,0.08); position: fixed; top: 0; left: 0; height: 100vh; overflow-y: auto; z-index: 1000; display: flex; flex-direction: column; box-shadow: 2px 0 24px rgba(0,0,0,0.06); }
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.16); border-radius: 4px; }
+.sidebar-header { display: flex; align-items: center; gap: 12px; padding: 20px 18px 16px; border-bottom: 1px solid rgba(0,0,0,0.08); flex-shrink: 0; }
+.sidebar-logo { width: 38px; height: 38px; background: #7CF5C4; border: 2px solid #0E1116; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; transform: rotate(-3deg); box-shadow: 2px 2px 0 #0E1116; color: #0E1116; font-family: 'Gaegu', cursive; font-weight: 700; }
+.sidebar-title { font-family: 'Gaegu', 'Gowun Dodum', cursive; font-size: 18px; font-weight: 700; color: #1A1813; line-height: 1.2; }
+.sidebar-title small { font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 500; color: rgba(26,24,19,0.52); display: block; margin-top: 2px; letter-spacing: 0.04em; }
+.progress-container { padding: 12px 18px 4px; flex-shrink: 0; }
+.progress-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; color: rgba(26,24,19,0.52); text-transform: uppercase; letter-spacing: 0.08em; display: flex; justify-content: space-between; margin-bottom: 4px; }
+.progress-bar { height: 4px; background: rgba(0,0,0,0.08); border-radius: 999px; overflow: hidden; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, #7CF5C4, #5A7CFF); border-radius: 999px; transition: width 0.3s ease; width: 0%; }
+.nav-section-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; color: rgba(26,24,19,0.52); text-transform: uppercase; letter-spacing: 0.1em; padding: 14px 18px 4px; }
+.nav-list { list-style: none; padding: 0 10px; }
+.nav-item { margin-bottom: 2px; }
+.nav-link { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 8px; text-decoration: none; color: rgba(26,24,19,0.72); font-size: 13px; font-weight: 500; transition: all 0.15s ease; cursor: pointer; }
+.nav-link:hover { background: #FAF6E9; color: #1A1813; }
+.nav-link.active { background: #0E1116; color: #7CF5C4; font-weight: 700; box-shadow: 2px 2px 0 rgba(124,245,196,0.4); }
+.nav-number { width: 22px; height: 22px; border-radius: 999px; background: rgba(0,0,0,0.06); display: flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; flex-shrink: 0; color: rgba(26,24,19,0.72); }
+.nav-link.active .nav-number { background: #7CF5C4; color: #0E1116; }
+.nav-icon { font-size: 14px; width: 20px; text-align: center; flex-shrink: 0; }
+.nav-divider { height: 1px; background: rgba(0,0,0,0.08); margin: 6px 18px; }
+.sidebar-footer { padding: 14px 18px; border-top: 1px solid rgba(0,0,0,0.08); background: #FAF6E9; margin-top: auto; flex-shrink: 0; }
+.sidebar-footer .pj-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; color: rgba(26,24,19,0.52); text-transform: uppercase; letter-spacing: 0.08em; }
+.sidebar-footer .pj-name { font-family: 'Gaegu', cursive; font-size: 16px; font-weight: 700; color: #1A1813; margin-top: 2px; }
+.sidebar-footer .pj-ver { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: rgba(26,24,19,0.52); margin-top: 2px; }
+.sidebar-footer .pj-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+.sidebar-footer .pj-tag { font-family: 'JetBrains Mono', monospace; font-size: 10px; padding: 2px 8px; border-radius: 4px; background: #FFFFFF; border: 1px solid rgba(0,0,0,0.16); color: rgba(26,24,19,0.72); font-weight: 600; }
+
+/* MAIN */
+.main-content { margin-left: 244px; padding: 24px 32px; }
+.slide { width: 400mm; height: 277mm; background: #FFFFFF; padding: 20mm 25mm 25mm 25mm; position: relative; display: flex; flex-direction: column; border: 1px solid rgba(0,0,0,0.08); page-break-after: always; page-break-inside: avoid; margin-bottom: 24px; border-radius: 14px; box-shadow: 0 8px 24px rgba(0,0,0,0.10); scroll-margin-top: 16px; }
+.slide:last-child { page-break-after: auto; }
+
+/* Title Slide — paper hero */
+.slide.title-slide { justify-content: center; align-items: center; text-align: center; border: 3px solid #0E1116; background: #F5F1E8; position: relative; overflow: hidden; }
+.slide.title-slide::before { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse at 30% 20%, rgba(124,245,196,0.22), transparent 55%), radial-gradient(ellipse at 70% 80%, rgba(90,124,255,0.16), transparent 55%); pointer-events: none; }
+.slide.title-slide > * { position: relative; z-index: 1; }
+.slide.title-slide h1 { font-family: 'Gaegu', cursive; color: #1A1813; font-size: 96px; font-weight: 700; margin-bottom: 16px; letter-spacing: -0.01em; line-height: 1.05; }
+.slide.title-slide .subtitle { font-family: 'Gaegu', cursive; color: #0A7A4F; font-size: 36px; margin-bottom: 12px; font-weight: 700; }
+.slide.title-slide .desc { color: rgba(26,24,19,0.72); font-size: 22px; margin-bottom: 40px; line-height: 1.6; }
+.title-stats { display: flex; gap: 24px; margin-top: 40px; }
+.title-stat { text-align: center; padding: 18px 28px; background: #FFFFFF; border: 2px solid #0E1116; border-radius: 4px; box-shadow: 2px 2px 0 #0E1116; transform: rotate(-1.2deg); }
+.title-stat:nth-child(even) { transform: rotate(1.2deg); }
+.title-stat-value { font-family: 'JetBrains Mono', monospace; font-size: 44px; font-weight: 700; color: #0A7A4F; line-height: 1; }
+.title-stat:nth-child(2) .title-stat-value { color: #2C46C9; }
+.title-stat:nth-child(3) .title-stat-value { color: #C13E1F; }
+.title-stat:nth-child(4) .title-stat-value { color: #8A6A00; }
+.title-stat-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: rgba(26,24,19,0.52); margin-top: 6px; letter-spacing: 0.12em; font-weight: 700; }
+
+/* Section Slide — paper hero variant */
+.slide.section-slide { justify-content: center; align-items: center; border: 3px solid #0E1116; background: #FAF6E9; position: relative; overflow: hidden; }
+.slide.section-slide::before { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 50%, rgba(255,210,63,0.22), transparent 60%); pointer-events: none; }
+.slide.section-slide > * { position: relative; z-index: 1; }
+.slide.section-slide h2 { font-family: 'Gaegu', cursive; color: #1A1813; font-size: 64px; font-weight: 700; text-align: center; border: none; padding: 0; margin: 0; letter-spacing: -0.01em; }
+.slide.section-slide .section-num { font-family: 'JetBrains Mono', monospace; color: rgba(193,62,31,0.85); font-size: 96px; font-weight: 700; margin-bottom: 20px; letter-spacing: -0.04em; }
+
+/* Headings */
+h2 { font-family: 'Gaegu', cursive; color: #1A1813; font-size: 40px; font-weight: 700; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 3px solid #7CF5C4; letter-spacing: -0.01em; line-height: 1.2; }
+h3 { font-family: 'Gaegu', cursive; color: #1A1813; font-size: 24px; font-weight: 700; margin: 12px 0 8px 0; }
+.content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.two-column { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; flex: 1; }
+.three-column { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; flex: 1; }
+.column { display: flex; flex-direction: column; }
+
+/* Table */
+table { width: 100%; border-collapse: collapse; font-size: 17px; margin: 8px 0; background: #FFFFFF; }
+th { background: #0E1116; color: #FFFFFF; padding: 10px 12px; text-align: left; font-family: 'Gaegu', cursive; font-weight: 700; font-size: 18px; border: 1px solid #0E1116; letter-spacing: 0.01em; }
+td { padding: 8px 12px; border: 1px solid rgba(0,0,0,0.08); color: #1A1813; font-size: 16px; }
+tr:nth-child(even) td { background: #FAF6E9; }
+
+/* Card — white paper card */
+.card { background: #FFFFFF; border-radius: 4px; padding: 14px 16px; border: 2px solid #0E1116; border-left: 6px solid #0A7A4F; margin-bottom: 12px; box-shadow: 2px 2px 0 rgba(14,17,22,0.15); }
+.card.orange { border-left-color: #C13E1F; }
+.card.green { border-left-color: #0A7A4F; }
+.card.purple { border-left-color: #2C46C9; }
+.card.red { border-left-color: #C13E1F; }
+.card-title { font-family: 'Gaegu', cursive; font-weight: 700; color: #1A1813; font-size: 22px; margin-bottom: 4px; }
+.card-content { color: rgba(26,24,19,0.72); font-size: 15px; line-height: 1.55; }
+
+/* Highlight Box — mint signal */
+.highlight-box { background: #FFFFFF; border: 2px dashed #0A7A4F; border-radius: 4px; padding: 14px 16px; margin: 10px 0; position: relative; }
+.highlight-box::before { content: "✦"; position: absolute; top: -10px; left: 12px; background: #7CF5C4; border: 2px solid #0E1116; color: #0E1116; width: 22px; height: 22px; border-radius: 999px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; }
+.highlight-box-title { font-family: 'Gaegu', cursive; font-weight: 700; color: #0A7A4F; font-size: 21px; margin-bottom: 4px; padding-left: 26px; }
+.highlight-box-content { color: #1A1813; font-size: 15px; line-height: 1.55; }
+
+/* Variable Box — sun/hot warning */
+.variable-box { background: #FFFBEB; border: 2px dashed #C13E1F; border-radius: 4px; padding: 14px 16px; margin-top: 10px; position: relative; }
+.variable-box::before { content: "⚠"; position: absolute; top: -10px; left: 12px; background: #FFD23F; border: 2px solid #0E1116; color: #0E1116; width: 22px; height: 22px; border-radius: 999px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+.variable-box-title { font-family: 'Gaegu', cursive; font-weight: 700; color: #C13E1F; font-size: 21px; margin-bottom: 4px; padding-left: 26px; }
+.variable-box-content { color: #1A1813; font-size: 15px; line-height: 1.55; }
+
+/* List */
+ul { list-style: none; padding-left: 0; }
+ul li { position: relative; padding-left: 20px; margin-bottom: 6px; font-size: 16px; color: #1A1813; line-height: 1.5; }
+ul li::before { content: "▸"; position: absolute; left: 0; color: #0A7A4F; font-size: 14px; font-weight: 700; }
+
+/* Badge */
+.badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 13px; font-weight: 700; background: #FFFFFF; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.04em; }
+.badge.new { border: 2px solid #2C46C9; color: #2C46C9; background: rgba(90,124,255,0.10); }
+.badge.legacy { border: 2px solid rgba(0,0,0,0.16); color: rgba(26,24,19,0.72); background: #FAF6E9; }
+.badge.success { border: 2px solid #0A7A4F; color: #0A7A4F; background: rgba(124,245,196,0.18); }
+.badge.warning { border: 2px solid #C13E1F; color: #C13E1F; background: rgba(255,210,63,0.18); }
+
+/* Page Number */
+.page-number { position: absolute; bottom: 10mm; left: 50%; transform: translateX(-50%); font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 700; color: rgba(26,24,19,0.52); background: #FAF6E9; padding: 5px 16px; border-radius: 999px; border: 1px solid rgba(0,0,0,0.08); letter-spacing: 0.08em; }
+
+/* Code Block — ink */
+.code-block { background: #0E1116; color: #E4E7EC; border-radius: 4px; padding: 16px 18px; font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.55; overflow: hidden; white-space: pre-wrap; border: 2px solid #0E1116; box-shadow: 2px 2px 0 rgba(14,17,22,0.15); }
+.code-block .key { color: #8AA1FF; }
+.code-block .str { color: #B0FADB; }
+.code-block .num { color: #FFE07A; }
+.code-block .comment { color: #9AA3B2; font-style: italic; }
+
+/* Arch Diagram */
+.arch-diagram { background: #0E1116; border-radius: 4px; padding: 22px; font-family: 'JetBrains Mono', monospace; font-size: 13.5px; line-height: 1.5; overflow-x: auto; white-space: pre; color: #E4E7EC; border: 2px solid #0E1116; box-shadow: 2px 2px 0 rgba(14,17,22,0.15); }
+
+/* Folder Tree */
+.folder-tree { font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.7; color: #1A1813; background: #FAF6E9; border-radius: 4px; padding: 16px; border: 1px solid rgba(0,0,0,0.08); }
+.folder-tree .dir { color: #2C46C9; font-weight: 700; }
+.folder-tree .file { color: rgba(26,24,19,0.72); }
+.folder-tree .comment { color: #0A7A4F; font-style: italic; }
+
+/* Phase Box + Flow Arrow */
+.phase-box { background: #FFFFFF; border: 2px solid #0E1116; border-radius: 4px; padding: 14px 16px; margin: 8px 0; border-left: 6px solid #2C46C9; box-shadow: 2px 2px 0 rgba(14,17,22,0.15); }
+.phase-title { font-family: 'Gaegu', cursive; font-weight: 700; color: #2C46C9; font-size: 22px; margin-bottom: 6px; }
+.phase-content { color: #1A1813; font-size: 15px; line-height: 1.55; }
+.flow-arrow { text-align: center; color: #C13E1F; font-size: 28px; margin: 6px 0; line-height: 1; font-weight: 700; }
+
+/* Comparison Table */
+.comparison-table td:first-child { font-weight: 700; color: #1A1813; background: #FAF6E9; }
+
+/* Inline code */
+code { background: #FAF6E9; padding: 2px 6px; border-radius: 4px; font-size: 14px; font-family: 'JetBrains Mono', monospace; color: #2C46C9; border: 1px solid rgba(0,0,0,0.08); }
+
+/* Hand-marker emphasis (Gaegu inline) */
+.hand { font-family: 'Gaegu', cursive; }
+.marker { background: linear-gradient(transparent 55%, #FFD23F 55%); padding: 0 4px; }
+
+/* Print */
+@media print {
+  .sidebar { display: none !important; }
+  .main-content { margin-left: 0 !important; padding: 0 !important; }
+  .slide { margin-bottom: 0; border-radius: 0; box-shadow: none; scroll-margin-top: 0; }
+  body { background: white; }
+}
+</style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">✦</div>
+    <div class="sidebar-title">
+      AICONLAB 아키텍처
+      <small>v1.1 · 2026-05-13</small>
+    </div>
+  </div>
+
+  <div class="progress-container">
+    <div class="progress-label">
+      <span>읽기 진행률</span>
+      <span id="progress-text">0%</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+  </div>
+
+  <div class="nav-section-label">Overview</div>
+  <ul class="nav-list">
+    <li class="nav-item"><a class="nav-link active" data-target="slide-1"><span class="nav-icon">🏠</span>표지</a></li>
+    <li class="nav-item"><a class="nav-link" data-target="slide-2"><span class="nav-icon">📐</span>01 · 시스템 개요</a></li>
+    <li class="nav-item"><a class="nav-link" data-target="slide-3"><span class="nav-number">1</span>전체 다이어그램</a></li>
+    <li class="nav-item"><a class="nav-link" data-target="slide-4"><span class="nav-number">2</span>페이지 14개 분류</a></li>
+  </ul>
+  <div class="nav-divider"></div>
+
+  <div class="nav-section-label">Auth & 권한</div>
+  <ul class="nav-list">
+    <li class="nav-item"><a class="nav-link" data-target="slide-5"><span class="nav-icon">🔐</span>02 · Auth & 권한</a></li>
+    <li class="nav-item"><a class="nav-link" data-target="slide-6"><span class="nav-number">3</span>가입 흐름</a></li>
+    <li class="nav-item"><a class="nav-link" data-target="slide-7"><span class="nav-number">4</span>RLS 정책</a></li>
+  </ul>
+  <div class="nav-divider"></div>
+
+  <div class="nav-section-label">DB 스키마</div>
+  <ul class="nav-list">
+    <li class="nav-item"><a class="nav-link" data-target="slide-8"><span class="nav-icon">🗄️</span>03 · DB 스키마</a></li>
+    <li class="nav-item"><a class="nav-link" data-target="slide-9"><span class="nav-number">5</span>핵심 테이블</a></li>
+    <li class="nav-item"><a class="nav-link" data-target="slide-10"><span class="nav-number">6</span>위키 테이블</a></li>
+    <li class="nav-item"><a class="nav-link" data-target="slide-11"><span class="nav-number">7</span>이벤트 테이블</a></li>
+  </ul>
+  <div class="nav-divider"></div>
+
+  <div class="nav-section-label">Roadmap</div>
+  <ul class="nav-list">
+    <li class="nav-item"><a class="nav-link" data-target="slide-12"><span class="nav-icon">🚀</span>04 · 빌드 단계</a></li>
+    <li class="nav-item"><a class="nav-link" data-target="slide-13"><span class="nav-number">8</span>Phase 1·2</a></li>
+    <li class="nav-item"><a class="nav-link" data-target="slide-14"><span class="nav-number">9</span>Phase 3·4·5</a></li>
+    <li class="nav-item"><a class="nav-link" data-target="slide-15"><span class="nav-icon">✅</span>확정 & 다음 액션</a></li>
+    <li class="nav-item"><a class="nav-link" data-target="slide-16"><span class="nav-icon">🔁</span>v1 → v1.1 변경</a></li>
+  </ul>
+
+  <div class="sidebar-footer">
+    <div class="pj-label">PROJECT</div>
+    <div class="pj-name">aiconlab-homepage</div>
+    <div class="pj-ver">Next.js 16 · Supabase</div>
+    <div class="pj-tags">
+      <span class="pj-tag">Next.js</span>
+      <span class="pj-tag">React 19</span>
+      <span class="pj-tag">Supabase</span>
+      <span class="pj-tag">Tailwind v4</span>
+    </div>
+  </div>
+</nav>
+
+<div class="main-content">
+
+<!-- ───────────── SLIDE 1 : TITLE ───────────── -->
+<div class="slide title-slide" id="slide-1">
+  <div style="font-size: 72px; margin-bottom: 20px;">✦</div>
+  <h1>AICONLAB 홈페이지 아키텍처</h1>
+  <div class="subtitle">v1.1 · 빌드 완료 시점 갱신</div>
+  <div class="desc">
+    Next.js 16 App Router + Supabase 기반<br>
+    공개 콘텐츠 · 멤버 게이트 · Admin 운영의 3-Layer 구조
+  </div>
+  <div class="title-stats">
+    <div class="title-stat">
+      <div class="title-stat-value">14</div>
+      <div class="title-stat-label">PAGES</div>
+    </div>
+    <div class="title-stat">
+      <div class="title-stat-value">7</div>
+      <div class="title-stat-label">DB TABLES</div>
+    </div>
+    <div class="title-stat">
+      <div class="title-stat-value">5</div>
+      <div class="title-stat-label">PHASES</div>
+    </div>
+    <div class="title-stat">
+      <div class="title-stat-value">2</div>
+      <div class="title-stat-label">ROLES</div>
+    </div>
+  </div>
+  <div class="page-number">1 / 15</div>
+</div>
+
+<!-- ───────────── SLIDE 2 : SECTION 01 ───────────── -->
+<div class="slide section-slide" id="slide-2">
+  <div class="section-num">01</div>
+  <h2>시스템 개요</h2>
+  <div class="page-number">2 / 15</div>
+</div>
+
+<!-- ───────────── SLIDE 3 : SYSTEM DIAGRAM ───────────── -->
+<div class="slide" id="slide-3">
+  <h2>1. 전체 시스템 다이어그램</h2>
+  <div class="content">
+    <div class="arch-diagram">┌──────────────────────────────────────────────────────────────────────────────┐
+│                                BROWSER                                       │
+│   방문자 ─ 비로그인       멤버 (active)        운영자 (admin)                │
+└────────────┬──────────────────┬──────────────────────┬─────────────────────┘
+             │                  │                      │
+             ▼                  ▼                      ▼
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                       Next.js 16  ·  App Router                              │
+│                                                                              │
+│   ┌─ 공개 ─────────┐   ┌─ 멤버 게이트 ──────┐   ┌─ Admin (role=admin) ──┐    │
+│   │  /             │   │  /llm-wiki         │   │  /admin/members        │   │
+│   │  /about        │   │  /insights*        │   │  /admin/posts          │   │
+│   │  /products     │   │   *초대된 사람만   │   │  /admin/products       │   │
+│   │  /log          │   │                    │   │  /admin/wiki           │   │
+│   │  /community    │   │                    │   │  /admin/events         │   │
+│   │  /membership   │   │                    │   │                        │   │
+│   └────────────────┘   └────────────────────┘   └────────────────────────┘   │
+│                                                                              │
+│                  Server Components  +  Server Actions                        │
+└──────────────────────────────────┬──────────────────────────────────────────┘
+                                   │  @supabase/ssr
+                                   ▼
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                              SUPABASE                                        │
+│                                                                              │
+│   Auth (이메일·소셜)    Postgres + RLS         Storage (위키 첨부)           │
+│   ─────────────────    ──────────────────     ────────────────────           │
+│   auth.users           profiles  products      wiki-attachments/             │
+│                        posts     wiki_pages                                  │
+│                        wiki_revisions                                        │
+│                        events    event_invitations                           │
+└──────────────────────────────────────────────────────────────────────────────┘</div>
+    <div class="highlight-box" style="margin-top:18px">
+      <div class="highlight-box-title">핵심 아이디어</div>
+      <div class="highlight-box-content">
+        모든 접근 통제는 <b>DB의 RLS(Row Level Security)</b>에서 결정한다. UI 가드는 UX, 진짜 보안은 RLS.
+        멤버 게이트가 깨져도 RLS가 마지막 방어선.
+      </div>
+    </div>
+  </div>
+  <div class="page-number">3 / 15</div>
+</div>
+
+<!-- ───────────── SLIDE 4 : 14 PAGES ───────────── -->
+<div class="slide" id="slide-4">
+  <h2>2. 페이지 14개 — 분류표</h2>
+  <div class="content">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:22%">페이지</th>
+          <th style="width:14%">접근</th>
+          <th style="width:18%">데이터 소스</th>
+          <th>비고</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><code>/</code> 메인</td><td><span class="badge success">공개</span></td><td>TSX 고정</td><td>Hero · About 요약 · Stats · 운영자 카드 — 정체성 영역</td></tr>
+        <tr><td><code>/about</code></td><td><span class="badge success">공개</span></td><td>TSX 고정</td><td>5대 가치·NorthStar·Definition — 변경 빈도 낮음</td></tr>
+        <tr><td><code>/community</code></td><td><span class="badge success">공개</span></td><td>TSX 고정</td><td>단톡방 링크 1개</td></tr>
+        <tr><td><code>/membership</code></td><td><span class="badge success">공개</span></td><td>Supabase Auth</td><td>가입 신청 폼 → profiles INSERT (status=pending)</td></tr>
+        <tr><td><code>/products</code></td><td><span class="badge success">공개</span></td><td>DB <code>products</code></td><td>Congen + Coming Soon — admin CRUD</td></tr>
+        <tr><td><code>/log</code> · <code>/log/[slug]</code></td><td><span class="badge success">공개</span></td><td>DB <code>posts</code></td><td>현재 posts.ts → DB 마이그레이션 (Phase 5)</td></tr>
+        <tr><td><code>/automation</code> <code>/content-automation</code> <code>/journal</code> <code>/projects</code> <code>/resources</code> <code>/tools</code></td><td><span class="badge legacy">미정</span></td><td>TSX 고정</td><td>현재 placeholder — 통폐합·삭제 여부 별도 결정</td></tr>
+        <tr><td><code>/llm-wiki</code> · <code>/llm-wiki/[slug]</code></td><td><span class="badge new">멤버</span></td><td>DB <code>wiki_pages</code> + <code>wiki_revisions</code></td><td><b>active 멤버 누구나 읽기·쓰기</b>. 수정 이력으로 복원 가능</td></tr>
+        <tr><td><code>/insights</code> 공유회</td><td><span class="badge warning">초대</span></td><td>DB <code>events</code> + <code>event_invitations</code></td><td>운영자가 명시 초대한 멤버에게만 노출</td></tr>
+        <tr><td><code>/admin/*</code></td><td><span class="badge warning">운영자</span></td><td>DB 전부</td><td>role=admin만. 멤버 승인 · 콘텐츠 CRUD · 이벤트 초대</td></tr>
+      </tbody>
+    </table>
+    <div class="variable-box">
+      <div class="variable-box-title">결정 보류</div>
+      <div class="variable-box-content">
+        Stats (9,490 시청자 / 57K 뷰)는 일단 하드코딩 유지. YouTube Data API 연동은 Phase 6+ 백로그.
+      </div>
+    </div>
+  </div>
+  <div class="page-number">4 / 15</div>
+</div>
+
+<!-- ───────────── SLIDE 5 : SECTION 02 ───────────── -->
+<div class="slide section-slide" id="slide-5">
+  <div class="section-num">02</div>
+  <h2>Auth &amp; 권한 모델</h2>
+  <div class="page-number">5 / 15</div>
+</div>
+
+<!-- ───────────── SLIDE 6 : SIGNUP FLOW ───────────── -->
+<div class="slide" id="slide-6">
+  <h2>3. 가입 → 승인 → active 흐름</h2>
+  <div class="content">
+    <div class="two-column">
+      <div class="column">
+        <h3>흐름 (운영자 수동 승인제)</h3>
+        <div class="phase-box">
+          <div class="phase-title">① 신청</div>
+          <div class="phase-content">방문자가 <code>/membership</code>에서 이메일·소셜 가입. <code>auth.users</code> + <code>profiles</code>(status=<b>pending</b>, role=member) 생성.</div>
+        </div>
+        <div class="flow-arrow">▼</div>
+        <div class="phase-box">
+          <div class="phase-title">② 운영자 검토</div>
+          <div class="phase-content"><code>/admin/members</code>에 pending 목록 노출. 운영자가 승인/거절.</div>
+        </div>
+        <div class="flow-arrow">▼</div>
+        <div class="phase-box">
+          <div class="phase-title">③ 승인 → active</div>
+          <div class="phase-content">profiles.status → <b>active</b>, approved_at·approved_by 기록. 이메일 알림(선택).</div>
+        </div>
+        <div class="flow-arrow">▼</div>
+        <div class="phase-box">
+          <div class="phase-title">④ 멤버 게이트 해제</div>
+          <div class="phase-content"><code>/llm-wiki</code> 읽기·쓰기, 초대된 <code>/insights</code> 이벤트 접근 가능.</div>
+        </div>
+      </div>
+      <div class="column">
+        <h3>역할 매트릭스</h3>
+        <table class="comparison-table">
+          <thead>
+            <tr><th>능력</th><th>비로그인</th><th>pending</th><th>active</th><th>admin</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>공개 페이지 보기</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+            <tr><td>가입 신청</td><td>✅</td><td>—</td><td>—</td><td>—</td></tr>
+            <tr><td>위키 읽기</td><td>❌</td><td>❌</td><td>✅</td><td>✅</td></tr>
+            <tr><td>위키 쓰기</td><td>❌</td><td>❌</td><td>✅</td><td>✅</td></tr>
+            <tr><td>초대된 이벤트 보기</td><td>❌</td><td>❌</td><td>✅</td><td>✅</td></tr>
+            <tr><td>멤버 승인</td><td>❌</td><td>❌</td><td>❌</td><td>✅</td></tr>
+            <tr><td>콘텐츠 CRUD</td><td>❌</td><td>❌</td><td>❌</td><td>✅</td></tr>
+            <tr><td>이벤트 생성·초대</td><td>❌</td><td>❌</td><td>❌</td><td>✅</td></tr>
+          </tbody>
+        </table>
+        <div class="highlight-box">
+          <div class="highlight-box-title">2축 모델</div>
+          <div class="highlight-box-content">
+            <b>status</b>(pending / active / suspended) × <b>role</b>(member / admin).<br>
+            상태와 역할을 분리해 "승인 대기 운영자" 같은 모순 상태 없음.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="page-number">6 / 15</div>
+</div>
+
+<!-- ───────────── SLIDE 7 : RLS ───────────── -->
+<div class="slide" id="slide-7">
+  <h2>4. RLS 정책 — 보안의 마지막 방어선</h2>
+  <div class="content">
+    <div class="highlight-box">
+      <div class="highlight-box-title">원칙</div>
+      <div class="highlight-box-content">
+        모든 테이블 RLS <b>ENABLED</b>. UI 라우팅이 깨져도 DB가 거부.
+        SECURITY DEFINER 함수 <code>is_active()</code> / <code>is_admin()</code>로 정책 단순화.
+      </div>
+    </div>
+    <div class="two-column">
+      <div class="column">
+        <h3>공개 데이터 (posts, products)</h3>
+        <div class="code-block"><span class="comment">-- 모두 읽기, admin만 쓰기</span>
+CREATE POLICY "read_published"
+  ON posts FOR SELECT
+  USING (published_at IS NOT NULL);
+
+CREATE POLICY "admin_write"
+  ON posts FOR ALL
+  USING (is_admin())
+  WITH CHECK (is_admin());</div>
+
+        <h3 style="margin-top:14px">위키 (자유 협업)</h3>
+        <div class="code-block"><span class="comment">-- active 멤버 누구나 읽기·쓰기</span>
+CREATE POLICY "wiki_member_read"
+  ON wiki_pages FOR SELECT
+  USING (is_active());
+
+CREATE POLICY "wiki_member_write"
+  ON wiki_pages FOR INSERT
+  WITH CHECK (is_active());
+
+CREATE POLICY "wiki_member_update"
+  ON wiki_pages FOR UPDATE
+  USING (is_active())
+  WITH CHECK (is_active());
+
+<span class="comment">-- 삭제는 admin만 (soft delete)</span></div>
+      </div>
+      <div class="column">
+        <h3>이벤트 (초대된 멤버만)</h3>
+        <div class="code-block"><span class="comment">-- 본인이 초대된 이벤트만 보임</span>
+CREATE POLICY "event_invited_read"
+  ON events FOR SELECT
+  USING (
+    is_admin() OR EXISTS (
+      SELECT 1 FROM event_invitations ei
+      WHERE ei.event_id = events.id
+        AND ei.user_id  = auth.uid()
+    )
+  );
+
+CREATE POLICY "event_admin_write"
+  ON events FOR ALL
+  USING (is_admin());</div>
+
+        <h3 style="margin-top:14px">profiles (자기 자신 + admin)</h3>
+        <div class="code-block"><span class="comment">-- 본인 row만 읽기, admin은 전체</span>
+CREATE POLICY "profile_self_read"
+  ON profiles FOR SELECT
+  USING (id = auth.uid() OR is_admin());
+
+<span class="comment">-- status·role 변경은 admin 전용</span>
+CREATE POLICY "profile_admin_update"
+  ON profiles FOR UPDATE
+  USING (is_admin());</div>
+      </div>
+    </div>
+    <div class="variable-box">
+      <div class="variable-box-title">함정 주의</div>
+      <div class="variable-box-content">
+        <code>is_admin()</code>를 SECURITY DEFINER로 만들지 않으면 profiles SELECT 정책이 자기참조해서 무한루프. 반드시 SECURITY DEFINER + 명시적 schema 지정.
+      </div>
+    </div>
+  </div>
+  <div class="page-number">7 / 15</div>
+</div>
+
+<!-- ───────────── SLIDE 8 : SECTION 03 ───────────── -->
+<div class="slide section-slide" id="slide-8">
+  <div class="section-num">03</div>
+  <h2>DB 스키마</h2>
+  <div class="page-number">8 / 15</div>
+</div>
+
+<!-- ───────────── SLIDE 9 : CORE TABLES ───────────── -->
+<div class="slide" id="slide-9">
+  <h2>5. 핵심 테이블 — profiles · products · posts</h2>
+  <div class="content">
+    <div class="two-column">
+      <div class="column">
+        <div class="card purple">
+          <div class="card-title">profiles</div>
+          <div class="card-content">auth.users 확장. 멤버십 상태·역할의 단일 진실.</div>
+        </div>
+        <div class="code-block">CREATE TABLE profiles (
+  id           uuid PRIMARY KEY
+                REFERENCES auth.users
+                ON DELETE CASCADE,
+  status       text NOT NULL DEFAULT 'pending',
+               <span class="comment">-- pending | active | suspended</span>
+  role         text NOT NULL DEFAULT 'member',
+               <span class="comment">-- member | admin</span>
+  nickname     text,
+  avatar_url   text,
+  applied_at   timestamptz NOT NULL DEFAULT now(),
+  approved_at  timestamptz,
+  approved_by  uuid REFERENCES profiles(id),
+  CHECK (status IN ('pending','active','suspended')),
+  CHECK (role IN ('member','admin'))
+);
+
+<span class="comment">-- auth.users INSERT 시 자동 profiles row 생성</span>
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION
+    public.handle_new_user();</div>
+      </div>
+      <div class="column">
+        <div class="card">
+          <div class="card-title">products</div>
+          <div class="card-content">자동화앱 카드. Congen + Coming Soon 카드들이 들어감.</div>
+        </div>
+        <div class="code-block">CREATE TABLE products (
+  slug         text PRIMARY KEY,
+  name         text NOT NULL,
+  pitch        text NOT NULL,
+  status       text NOT NULL,
+               <span class="comment">-- beta | coming | live | retired</span>
+  hero_image   text,
+  body_mdx     text,
+  release_at   text, <span class="comment">-- "2026 Q3" 같은 자유 표기</span>
+  order_idx    int  NOT NULL DEFAULT 0,
+  published    boolean NOT NULL DEFAULT false,
+  created_at   timestamptz DEFAULT now(),
+  updated_at   timestamptz DEFAULT now()
+);</div>
+
+        <div class="card green" style="margin-top:14px">
+          <div class="card-title">posts</div>
+          <div class="card-content">팀 블로그. 현재 posts.ts → 그대로 마이그레이션.</div>
+        </div>
+        <div class="code-block">CREATE TABLE posts (
+  slug         text PRIMARY KEY,
+  title        text NOT NULL,
+  sub          text,
+  body_mdx     text NOT NULL,
+  cat          text NOT NULL,
+  author_id    uuid REFERENCES profiles(id),
+  read_time    text,
+  published_at timestamptz,
+  created_at   timestamptz DEFAULT now(),
+  updated_at   timestamptz DEFAULT now()
+);</div>
+      </div>
+    </div>
+  </div>
+  <div class="page-number">9 / 15</div>
+</div>
+
+<!-- ───────────── SLIDE 10 : WIKI TABLES ───────────── -->
+<div class="slide" id="slide-10">
+  <h2>6. 위키 테이블 — 자유 협업 + 수정 이력</h2>
+  <div class="content">
+    <div class="two-column">
+      <div class="column">
+        <div class="card">
+          <div class="card-title">wiki_pages — 현재 상태</div>
+          <div class="card-content">한 슬러그 = 한 페이지. body_mdx는 최신 본문만 가짐.</div>
+        </div>
+        <div class="code-block">CREATE TABLE wiki_pages (
+  id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  slug        text UNIQUE NOT NULL,
+  title       text NOT NULL,
+  body_mdx    text NOT NULL,
+  created_by  uuid REFERENCES profiles(id),
+  updated_by  uuid REFERENCES profiles(id),
+  created_at  timestamptz DEFAULT now(),
+  updated_at  timestamptz DEFAULT now(),
+  deleted_at  timestamptz   <span class="comment">-- soft delete (admin)</span>
+);
+
+CREATE INDEX wiki_pages_updated_idx
+  ON wiki_pages (updated_at DESC)
+  WHERE deleted_at IS NULL;</div>
+
+        <div class="highlight-box">
+          <div class="highlight-box-title">soft delete 이유</div>
+          <div class="highlight-box-content">
+            자유 협업이라 실수·악의로 페이지가 날아갈 위험. <code>deleted_at</code>으로 표시만 하고 admin이 복원 가능.
+          </div>
+        </div>
+      </div>
+      <div class="column">
+        <div class="card orange">
+          <div class="card-title">wiki_revisions — 모든 저장의 스냅샷</div>
+          <div class="card-content">한 페이지의 매 저장마다 한 row. 자유 협업의 안전망.</div>
+        </div>
+        <div class="code-block">CREATE TABLE wiki_revisions (
+  id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  page_id    uuid NOT NULL
+              REFERENCES wiki_pages(id)
+              ON DELETE CASCADE,
+  title      text NOT NULL,
+  body_mdx   text NOT NULL,
+  edited_by  uuid REFERENCES profiles(id),
+  edited_at  timestamptz DEFAULT now(),
+  comment    text          <span class="comment">-- 수정 사유 (선택)</span>
+);
+
+CREATE INDEX wiki_rev_page_time_idx
+  ON wiki_revisions (page_id, edited_at DESC);
+
+<span class="comment">-- wiki_pages UPDATE 시 자동으로</span>
+<span class="comment">-- wiki_revisions에 이전 본문 INSERT 트리거</span></div>
+
+        <div class="variable-box">
+          <div class="variable-box-title">운영 규칙</div>
+          <div class="variable-box-content">
+            <code>wiki_revisions</code>는 <b>append-only</b>. UPDATE·DELETE 정책 자체를 만들지 않음. 이력은 영원.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="page-number">10 / 15</div>
+</div>
+
+<!-- ───────────── SLIDE 11 : EVENT TABLES ───────────── -->
+<div class="slide" id="slide-11">
+  <h2>7. 이벤트 테이블 — 초대제 공유회</h2>
+  <div class="content">
+    <div class="two-column">
+      <div class="column">
+        <div class="card">
+          <div class="card-title">events</div>
+          <div class="card-content">공유회·워크샵 기본 정보. 결제는 미래(price_cents 컬럼만 미리 두기).</div>
+        </div>
+        <div class="code-block">CREATE TABLE events (
+  id           uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  slug         text UNIQUE NOT NULL,
+  title        text NOT NULL,
+  body_mdx     text,
+  starts_at    timestamptz NOT NULL,
+  ends_at      timestamptz,
+  location     text,         <span class="comment">-- 온/오프라인 표기</span>
+  capacity     int,
+  price_cents  int NOT NULL DEFAULT 0,
+              <span class="comment">-- 0 = 무료. 결제는 Phase 6+</span>
+  status       text NOT NULL DEFAULT 'draft',
+              <span class="comment">-- draft | open | closed | done</span>
+  created_at   timestamptz DEFAULT now()
+);</div>
+
+        <div class="highlight-box">
+          <div class="highlight-box-title">결제 미래 대비</div>
+          <div class="highlight-box-content">
+            <code>price_cents</code> 컬럼은 지금 두고 값은 0. Phase 6에서 <code>event_payments</code> 테이블 추가하면 끝.<br>
+            지금 결제 로직은 만들지 않음.
+          </div>
+        </div>
+      </div>
+      <div class="column">
+        <div class="card orange">
+          <div class="card-title">event_invitations — 게이트의 핵심</div>
+          <div class="card-content">운영자가 명시 초대한 user만 이 이벤트를 볼 수 있다. RLS의 USING 조건이 이 테이블을 본다.</div>
+        </div>
+        <div class="code-block">CREATE TABLE event_invitations (
+  event_id    uuid NOT NULL
+               REFERENCES events(id)
+               ON DELETE CASCADE,
+  user_id     uuid NOT NULL
+               REFERENCES profiles(id)
+               ON DELETE CASCADE,
+  invited_by  uuid REFERENCES profiles(id),
+  invited_at  timestamptz DEFAULT now(),
+  viewed_at   timestamptz,
+              <span class="comment">-- 멤버가 첫 조회 시 기록</span>
+  rsvp        text DEFAULT 'pending',
+              <span class="comment">-- pending | going | declined</span>
+  PRIMARY KEY (event_id, user_id)
+);
+
+CREATE INDEX inv_user_idx
+  ON event_invitations (user_id);</div>
+
+        <div class="variable-box">
+          <div class="variable-box-title">UX 흐름</div>
+          <div class="variable-box-content">
+            <code>/insights</code> = "내가 초대받은 공유회" 목록. 초대 안 받은 멤버에겐 "현재 초대된 공유회가 없어요" 화면.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="page-number">11 / 15</div>
+</div>
+
+<!-- ───────────── SLIDE 12 : SECTION 04 ───────────── -->
+<div class="slide section-slide" id="slide-12">
+  <div class="section-num">04</div>
+  <h2>빌드 단계</h2>
+  <div class="page-number">12 / 15</div>
+</div>
+
+<!-- ───────────── SLIDE 13 : PHASE 1·2 ───────────── -->
+<div class="slide" id="slide-13">
+  <h2>8. Phase 1·2 — 인프라 + Admin</h2>
+  <div class="content">
+    <div class="two-column">
+      <div class="column">
+        <div class="phase-box">
+          <div class="phase-title">Phase 1 · 인프라 셋업 (1–2일)</div>
+          <div class="phase-content">
+            <ul>
+              <li>Supabase 프로젝트 생성, <code>.env.local</code>에 키 설정</li>
+              <li>SQL 마이그레이션 — 7개 테이블 + 트리거 + RLS 정책</li>
+              <li><code>@supabase/ssr</code> 설치, server·browser 클라이언트 헬퍼</li>
+              <li><code>middleware.ts</code>로 세션 갱신</li>
+              <li><code>/auth/callback</code> 라우트</li>
+              <li>handle_new_user 트리거 검증 (가입 시 profiles 자동 생성)</li>
+            </ul>
+          </div>
+        </div>
+        <div class="highlight-box">
+          <div class="highlight-box-title">완료 기준</div>
+          <div class="highlight-box-content">
+            테스트 계정 가입 → profiles에 status=pending row 자동 생성 → RLS로 본인 row만 SELECT 가능.
+          </div>
+        </div>
+      </div>
+      <div class="column">
+        <div class="phase-box">
+          <div class="phase-title">Phase 2 · Admin (2–3일)</div>
+          <div class="phase-content">
+            <ul>
+              <li><code>/admin</code> 레이아웃 + role=admin 미들웨어 가드</li>
+              <li><code>/admin/members</code> — pending 목록 + 승인/거절</li>
+              <li><code>/admin/posts</code> — 블로그 CRUD (MDX 에디터)</li>
+              <li><code>/admin/products</code> — 제품 카드 CRUD</li>
+              <li><code>/admin/wiki</code> — 위키 페이지 일괄 관리 + soft delete 복원</li>
+              <li>이미지 업로드 (Supabase Storage)</li>
+            </ul>
+          </div>
+        </div>
+        <div class="variable-box">
+          <div class="variable-box-title">초기 admin 시드</div>
+          <div class="variable-box-content">
+            첫 admin은 SQL로 직접 생성:<br>
+            <code>UPDATE profiles SET role='admin', status='active' WHERE id='...';</code>
+          </div>
+        </div>
+        <div class="highlight-box">
+          <div class="highlight-box-title">완료 기준</div>
+          <div class="highlight-box-content">
+            admin이 로그인 → 멤버 승인 → 승인된 멤버가 다시 로그인 → 멤버 게이트 통과.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="page-number">13 / 15</div>
+</div>
+
+<!-- ───────────── SLIDE 14 : PHASE 3·4·5 ───────────── -->
+<div class="slide" id="slide-14">
+  <h2>9. Phase 3·4·5 — 멤버 콘텐츠 + 이벤트 + 마이그레이션</h2>
+  <div class="content">
+    <div class="three-column">
+      <div class="column">
+        <div class="phase-box">
+          <div class="phase-title">Phase 3 · 위키 (2–3일)</div>
+          <div class="phase-content">
+            <ul>
+              <li><code>/llm-wiki</code> 목록 (active 게이트)</li>
+              <li><code>/llm-wiki/[slug]</code> 뷰</li>
+              <li><code>/llm-wiki/[slug]/edit</code> 인라인 에디터</li>
+              <li>저장 시 wiki_revisions 자동 INSERT (트리거)</li>
+              <li><code>/llm-wiki/[slug]/history</code> 이력 + diff + 복원</li>
+              <li>첨부 이미지 (Storage)</li>
+            </ul>
+          </div>
+        </div>
+        <div class="highlight-box">
+          <div class="highlight-box-title">완료 기준</div>
+          <div class="highlight-box-content">
+            멤버 A·B가 같은 페이지 저장 → revisions 2개 row → admin이 옛 버전으로 복원.
+          </div>
+        </div>
+      </div>
+      <div class="column">
+        <div class="phase-box">
+          <div class="phase-title">Phase 4 · 이벤트 (1–2일)</div>
+          <div class="phase-content">
+            <ul>
+              <li><code>/admin/events</code> 생성·편집</li>
+              <li>초대 관리 UI — 멤버 검색 + 다중 초대</li>
+              <li><code>/insights</code> — 내 초대 이벤트 목록</li>
+              <li><code>/insights/[slug]</code> — 상세 + RSVP</li>
+              <li>viewed_at 자동 기록</li>
+            </ul>
+          </div>
+        </div>
+        <div class="variable-box">
+          <div class="variable-box-title">결제 인터페이스</div>
+          <div class="variable-box-content">
+            price_cents > 0인 이벤트는 "결제 준비 중" 배지만 표시. 실제 결제 버튼은 Phase 6+.
+          </div>
+        </div>
+        <div class="highlight-box">
+          <div class="highlight-box-title">완료 기준</div>
+          <div class="highlight-box-content">
+            초대 안 받은 멤버에겐 빈 화면, 초대 받은 멤버에겐 본인 이벤트만 노출.
+          </div>
+        </div>
+      </div>
+      <div class="column">
+        <div class="phase-box">
+          <div class="phase-title">Phase 5 · 마이그레이션 (0.5일)</div>
+          <div class="phase-content">
+            <ul>
+              <li>현재 <code>src/app/log/posts.ts</code>의 정적 배열 → <code>posts</code> 테이블 seed</li>
+              <li>현재 <code>/products</code>의 Congen + Coming Soon 데이터 → <code>products</code> seed</li>
+              <li><code>/log</code>·<code>/products</code>를 DB fetch로 전환</li>
+              <li>오래된 placeholder 페이지 (automation·journal·resources·tools) — 통폐합/삭제 결정</li>
+            </ul>
+          </div>
+        </div>
+        <div class="highlight-box">
+          <div class="highlight-box-title">완료 기준</div>
+          <div class="highlight-box-content">
+            posts.ts 삭제 후에도 <code>/log</code>가 정상 렌더. admin에서 새 글 추가 → 즉시 반영.
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="variable-box" style="margin-top:14px">
+      <div class="variable-box-title">총 소요 (현실치)</div>
+      <div class="variable-box-content">
+        모든 Phase 합산 <b>약 7–11일</b>. 단, 운영 데이터 모델·콘텐츠 작성 시간은 별도. Phase 5까지 끝나면 운영자 한 명이 사이트를 코드 수정 없이 운영 가능한 상태.
+      </div>
+    </div>
+  </div>
+  <div class="page-number">14 / 15</div>
+</div>
+
+<!-- ───────────── SLIDE 15 : NEXT ACTION ───────────── -->
+<div class="slide" id="slide-15">
+  <h2>확정 &amp; 다음 액션</h2>
+  <div class="content">
+    <div class="two-column">
+      <div class="column">
+        <h3>이번 설계에서 확정된 것</h3>
+        <ul>
+          <li><b>백엔드</b> : Supabase (Auth + Postgres + Storage + RLS)</li>
+          <li><b>가입</b> : 신청 승인제 (운영자 수동 승인)</li>
+          <li><b>위키</b> : active 멤버 누구나 읽기·쓰기 (자유 협업 + revisions 안전망)</li>
+          <li><b>이벤트</b> : 운영자 초대 명시제. 결제는 Phase 6+</li>
+          <li><b>고정 페이지</b> : <code>/</code> <code>/about</code> <code>/community</code> <code>/membership</code></li>
+          <li><b>DB 페이지</b> : <code>/products</code> <code>/log</code> <code>/llm-wiki</code> <code>/insights</code></li>
+          <li><b>2축 권한</b> : status(pending/active/suspended) × role(member/admin)</li>
+        </ul>
+        <div class="highlight-box">
+          <div class="highlight-box-title">의도적으로 미루는 것</div>
+          <div class="highlight-box-content">
+            결제(Stripe/Toss) · 위키 댓글 · YouTube 통계 자동 갱신 · placeholder 페이지 정리 — 백로그.
+          </div>
+        </div>
+      </div>
+      <div class="column">
+        <h3>OK 하시면 바로 실행하는 것</h3>
+        <div class="phase-box">
+          <div class="phase-title">① 기록</div>
+          <div class="phase-content">
+            <code>wiki/decisions/architecture-v1.md</code> 작성 (이 결정 영구 보존)<br>
+            <code>wiki/entities/db-schema.md</code> 작성 (테이블 정의 박제)<br>
+            <code>wiki/log.md</code>에 decision 항목 append
+          </div>
+        </div>
+        <div class="phase-box">
+          <div class="phase-title">② Phase 1 시작</div>
+          <div class="phase-content">
+            Supabase 프로젝트 생성 안내 → 환경변수 받기 → SQL 마이그레이션 작성<br>
+            <span style="color:#9CA3AF">(Supabase 계정·프로젝트 생성은 사용자가 직접)</span>
+          </div>
+        </div>
+        <div class="variable-box">
+          <div class="variable-box-title">수정 요청 받습니다</div>
+          <div class="variable-box-content">
+            테이블 컬럼·페이지 분류·Phase 순서·권한 모델 — 어느 슬라이드든 짚어 주시면 반영해서 v1.1로 갱신합니다.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="page-number">15 / 16</div>
+</div>
+
+<!-- ───────────── SLIDE 16 : v1 → v1.1 CHANGELOG ───────────── -->
+<div class="slide" id="slide-16">
+  <h2>🔁 v1 → v1.1 변경 — 빌드 중 확정된 차이</h2>
+  <div class="content">
+    <div class="two-column">
+      <div class="column">
+        <h3>가입 정책</h3>
+        <div class="card orange">
+          <div class="card-title">v1 (초안) — 신청 승인제</div>
+          <div class="card-content">가입 → status=<b>pending</b> → 운영자 승인 → status=active</div>
+        </div>
+        <div class="card green">
+          <div class="card-title">v1.1 (확정) — 자유 가입 + 별도 위키 승급</div>
+          <div class="card-content">가입 = 즉시 <b>guest</b>. 위키 권한은 운영자가 <b>member</b>로 승급 시 부여.</div>
+        </div>
+
+        <h3>profiles 컬럼</h3>
+        <div class="code-block"><span class="comment">-- v1 → v1.1</span>
+status: 'pending'|'active'|'suspended'
+     → 'active'|'suspended'        <span class="comment">(pending 제거)</span>
+
+role:   'member'|'admin'
+     → 'guest'|'member'|'admin'    <span class="comment">(guest 추가)</span>
+
+<span class="comment">+ helper</span>
+is_wiki_member()  <span class="comment">-- role IN ('member','admin')</span>
+                  <span class="comment">   AND status='active'</span></div>
+
+        <h3>위키 RLS</h3>
+        <div class="code-block">CREATE POLICY wiki_pages_select
+  ON wiki_pages FOR SELECT
+  USING (<b>is_wiki_member()</b>);     <span class="comment">-- 이전엔 is_active()</span></div>
+      </div>
+
+      <div class="column">
+        <h3>인프라 발견</h3>
+        <div class="highlight-box">
+          <div class="highlight-box-title">launcher는 Supabase 안 씀</div>
+          <div class="highlight-box-content">
+            launcher는 Express + Railway PG + raw pg + jsonwebtoken. acl_hompage는 별도 Supabase 프로젝트로 진행.<br>
+            Google OAuth Client는 재사용 가능 (redirect URI만 추가).
+          </div>
+        </div>
+
+        <h3>빌드 결과</h3>
+        <ul>
+          <li><b>Phase 1·2·3 완료</b> — 인프라 + Admin UI 9 라우트 + 멤버 게이트 (/llm-wiki, /insights) 전부 컴파일 통과</li>
+          <li><b>Admin 디자인 적용</b> — Claude Design 시안 그대로 이식. 9 화면 + atoms 5종 + admin.css (.admin-shell 스코프)</li>
+          <li><b>SQL 마이그레이션 3개</b> — 0001 init / 0002 wiki·events / 0003 seed (posts.ts 9개 · products 3개)</li>
+          <li><b>위키 박제</b> — `wiki/` 디렉토리 + decisions/architecture-v1 + entities/db-schema + entities/admin-ui</li>
+        </ul>
+
+        <h3>다음 운영자 작업</h3>
+        <div class="phase-box">
+          <div class="phase-title">사용자가 해야 할 5단계</div>
+          <div class="phase-content">
+            ① Supabase SQL Editor에서 0001 → 0002 → 0003 순서 실행<br>
+            ② 첫 admin 시드 한 줄 실행 (이메일 기준)<br>
+            ③ Authentication → Providers → Google 활성화 (docs/SETUP_GOOGLE_OAUTH.md)<br>
+            ④ GCP Console에 redirect URI 2개 추가<br>
+            ⑤ /login 첫 로그인 → profiles row 자동 생성 확인
+          </div>
+        </div>
+
+        <div class="variable-box">
+          <div class="variable-box-title">production 전 OFF</div>
+          <div class="variable-box-content">
+            <code>NEXT_PUBLIC_ADMIN_PREVIEW_MODE</code> 토글이 dev에서 기본 ON. production 빌드에서는 무시되어 자동 OFF되지만, 환경변수에서도 명시 제거 권장.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="page-number">16 / 16 · v1.1</div>
+</div>
+
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const navLinks = document.querySelectorAll('.nav-link[data-target]');
+  const slides = document.querySelectorAll('.slide[id]');
+  const progressFill = document.getElementById('progress-fill');
+  const progressText = document.getElementById('progress-text');
+
+  navLinks.forEach(link => {
+    link.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.getElementById(link.dataset.target);
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        navLinks.forEach(l => l.classList.toggle('active', l.dataset.target === id));
+        const activeNav = document.querySelector('.nav-link.active');
+        if (activeNav) activeNav.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    });
+  }, { rootMargin: '-10% 0px -70% 0px', threshold: 0 });
+  slides.forEach(s => obs.observe(s));
+
+  window.addEventListener('scroll', () => {
+    const h = document.documentElement.scrollHeight - window.innerHeight;
+    const p = h > 0 ? Math.min(Math.round((window.scrollY / h) * 100), 100) : 0;
+    progressFill.style.width = p + '%';
+    progressText.textContent = p + '%';
+  });
+});
+</script>
+</body>
+</html>

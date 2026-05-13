@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 80" width="160" height="80">
+  
+  <g transform="translate(80 40) rotate(-6)">
+    <path d="M -68 -22 Q -72 -24 -70 -18 L -68 18 Q -70 24 -64 22 L 64 24 Q 72 22 68 16 L 70 -18 Q 72 -24 64 -22 Z" fill="#FFD23F" stroke="#0E1116" stroke-width="2.5" stroke-linejoin="round"></path>
+    <text x="0" y="6" text-anchor="middle" font-family="Gaegu, &#39;Comic Sans MS&#39;, cursive" font-size="28" font-weight="700" fill="#0E1116">이거 보세요!</text>
+  </g>
+</svg>

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8"><title>Shadows</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  body{margin:0;padding:32px;background:var(--ink-900);color:var(--fg-1);font-family:var(--font-body)}
+  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+  .item{display:flex;flex-direction:column;align-items:center;gap:10px}
+  .box{width:140px;height:80px;border-radius:14px;background:var(--ink-800);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--fg-2)}
+  .paper{background:var(--paper);color:var(--paper-ink)}
+  .stamp{background:var(--sun-400);color:var(--ink-900);transform:rotate(-3deg);border-radius:6px;border:2px solid var(--ink-900)}
+  .lbl{font-family:var(--font-mono);font-size:10px;color:var(--fg-3);text-align:center}
+</style></head>
+<body>
+<div class="grid">
+  <div class="item"><div class="box" style="box-shadow:var(--shadow-mint)">CTA · hover</div><div class="lbl">--shadow-mint</div></div>
+  <div class="item"><div class="box" style="box-shadow:var(--shadow-electric)">focus · active</div><div class="lbl">--shadow-electric</div></div>
+  <div class="item"><div class="box paper" style="box-shadow:var(--shadow-paper)">paper card</div><div class="lbl">--shadow-paper</div></div>
+  <div class="item"><div class="box stamp" style="box-shadow:var(--shadow-stamp)">★ STICKER</div><div class="lbl">--shadow-stamp · no blur</div></div>
+</div>
+</body></html>

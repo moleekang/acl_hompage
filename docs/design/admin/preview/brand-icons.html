@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8"><title>Iconography</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+  body{margin:0;padding:24px;background:var(--ink-900);font-family:var(--font-body);color:var(--fg-1)}
+  .grid{display:grid;grid-template-columns:repeat(8,1fr);gap:14px}
+  .item{display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px 6px;border-radius:10px;border:1px solid var(--border-1);background:var(--ink-800)}
+  .lbl{font-family:var(--font-mono);font-size:10px;color:var(--fg-3)}
+  i[data-lucide]{color:var(--fg-1);width:24px;height:24px}
+</style></head>
+<body>
+<div class="grid">
+  <div class="item"><i data-lucide="play"></i><div class="lbl">play</div></div>
+  <div class="item"><i data-lucide="bot"></i><div class="lbl">bot</div></div>
+  <div class="item"><i data-lucide="sparkles"></i><div class="lbl">sparkles</div></div>
+  <div class="item"><i data-lucide="zap"></i><div class="lbl">zap</div></div>
+  <div class="item"><i data-lucide="video"></i><div class="lbl">video</div></div>
+  <div class="item"><i data-lucide="users"></i><div class="lbl">users</div></div>
+  <div class="item"><i data-lucide="check"></i><div class="lbl">check</div></div>
+  <div class="item"><i data-lucide="arrow-right"></i><div class="lbl">arrow</div></div>
+</div>
+<script>lucide.createIcons();</script>
+</body></html>
