@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 120" width="480" height="120">
+  <defs>
+    
+  </defs>
+  
+  <g transform="translate(60 60)">
+    <circle r="42" fill="#7CF5C4"></circle>
+    <circle r="42" fill="none" stroke="#0E1116" stroke-width="3"></circle>
+    <path d="M -12 -16 L -12 16 L 18 0 Z" fill="#0E1116"></path>
+    
+  </g>
+  
+  <text x="120" y="58" class="wm-text" font-size="44" fill="#F5F1E8">Ai-Con</text>
+  <text x="120" y="98" class="wm-han" font-size="28" fill="#7CF5C4">Lab <tspan fill="#F5F1E8" font-weight="500">에이아이콘 랩</tspan></text>
+</svg>

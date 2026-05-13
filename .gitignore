@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Claude Code / OMC 작업 흔적 (저장소에 올리지 않음)
+.claude/
+.omc/
+.playwright-mcp/
+

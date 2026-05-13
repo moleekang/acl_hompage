@@ -1,26 +1,752 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* ============================================================
+   AICONLAB Design System v2 — colors_and_type.css 적용
+   - 베이스: Light paper (#F5F1E8) + 따뜻한 잉크 텍스트
+   - 폰트: Gaegu(손글씨 display) + Gowun Dodum(둥근 sans body)
+   - 줄바꿈 글로벌: word-break: keep-all (한국어 띄어쓰기 단위)
+   - 폰트는 layout.tsx의 next/font가 변수로 주입함 (--font-gaegu / --font-gowun-dodum / --font-jetbrains-mono)
+   ============================================================ */
+
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  /* ==== Tailwind v4 토큰 매핑 ==== */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+
+  /* shadcn 컴포넌트가 참조하는 토큰들 */
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* 차트/사이드바 토큰 */
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* 폰트 — font-display(Gaegu)는 font-serif와 같이 쓸 수 있게 별칭 */
+  --font-sans: var(--font-body);
+  --font-serif: var(--font-display);
+  --font-display: var(--font-display);
+  --font-mono: var(--font-mono);
+  --font-heading: var(--font-display);
+
+  /* 라운드 — AICONLAB 시스템(4/8/14/999) 기준으로 재정의 */
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* ==============================================
+   AICONLAB Design Tokens — Light paper (default)
+   ============================================== */
+:root {
+  /* ---- 잉크 스케일 (스티커/액센트/다크용) ---- */
+  --ink-900: #0E1116;
+  --ink-800: #161A23;
+  --ink-700: #222732;
+  --ink-600: #2E3441;
+  --ink-500: #404858;
+  --ink-400: #6B7384;
+  --ink-300: #9AA3B2;
+  --ink-200: #C7CCD5;
+  --ink-100: #E4E7EC;
+
+  /* ---- Paper — 메인 캔버스 ---- */
+  --paper:     #F5F1E8;
+  --paper-dim: #EAE5D6;
+  --paper-ink: #1A1813;
+
+  /* ---- 브랜드 시그널 (스티커·필 채움용 풀 채도) ---- */
+  --mint-400:  #7CF5C4;
+  --mint-500:  #4DE0A6;
+  --mint-300:  #B0FADB;
+  --electric-500: #5A7CFF;
+  --electric-600: #3D5DEB;
+  --electric-400: #8AA1FF;
+  --hot-500:   #FF6B47;
+  --hot-600:   #E85530;
+  --hot-400:   #FF8E72;
+  --sun-400:   #FFD23F;
+  --sun-500:   #F5BD15;
+  --sun-300:   #FFE07A;
+
+  /* ---- Light 모드 텍스트-안전 액센트 (작은 글씨용 어두운 변형) ---- */
+  --text-mint:     #0A7A4F;
+  --text-electric: #2C46C9;
+  --text-sun:      #8A6A00;
+  --text-hot:      #C13E1F;
+
+  /* ---- Surfaces ---- */
+  --bg-canvas:   #F5F1E8;
+  --bg-surface:  #FFFFFF;
+  --bg-elevated: #FAF6E9;
+  --surface-1:   #FFFFFF;
+  --surface-2:   #FAF6E9;
+  --surface-3:   #EFE9D8;
+
+  /* ---- Foreground (잉크 위계) ---- */
+  --fg-1: rgba(26, 24, 19, 1.00);
+  --fg-2: rgba(26, 24, 19, 0.72);
+  --fg-3: rgba(26, 24, 19, 0.52);
+  --fg-4: rgba(26, 24, 19, 0.28);
+
+  --border-1: rgba(0, 0, 0, 0.08);
+  --border-2: rgba(0, 0, 0, 0.16);
+
+  /* ============================================
+     shadcn 토큰 매핑 — AICONLAB paper 시스템으로
+     기존 컴포넌트(`bg-background`, `text-primary` 등)는
+     수정 없이 새 톤을 자동으로 받음
+     ============================================ */
+  --background: var(--bg-canvas);
+  --foreground: var(--paper-ink);
+
+  --card: var(--bg-surface);
+  --card-foreground: var(--paper-ink);
+
+  --popover: var(--bg-surface);
+  --popover-foreground: var(--paper-ink);
+
+  /* Primary — AICONLAB의 .btn-primary는 ink-900에 paper 텍스트 (검정 잉크 스탬프 톤) */
+  --primary: var(--ink-900);
+  --primary-foreground: var(--paper);
+
+  /* Secondary — 한 단계 깊은 페이퍼 (섹션 구분용) */
+  --secondary: var(--bg-elevated);
+  --secondary-foreground: var(--paper-ink);
+
+  --muted: var(--surface-3);
+  --muted-foreground: var(--fg-3);
+
+  --accent: var(--mint-300);
+  --accent-foreground: var(--text-mint);
+
+  --destructive: var(--text-hot);
+
+  --border: var(--border-1);
+  --input: var(--border-1);
+  --ring: var(--electric-500);
+
+  /* 차트 — 4가지 시그널 컬러 + 잉크 */
+  --chart-1: var(--mint-500);
+  --chart-2: var(--electric-500);
+  --chart-3: var(--sun-400);
+  --chart-4: var(--hot-500);
+  --chart-5: var(--ink-900);
+
+  /* AICONLAB 표준 라운드: card 14px = 0.875rem */
+  --radius: 0.875rem;
+
+  /* Sidebar (shadcn 기본) — paper 톤으로 정렬 */
+  --sidebar: var(--bg-canvas);
+  --sidebar-foreground: var(--paper-ink);
+  --sidebar-primary: var(--ink-900);
+  --sidebar-primary-foreground: var(--paper);
+  --sidebar-accent: var(--bg-elevated);
+  --sidebar-accent-foreground: var(--paper-ink);
+  --sidebar-border: var(--border-1);
+  --sidebar-ring: var(--electric-500);
+
+  /* ============================================
+     폰트 패밀리 — layout.tsx의 next/font 변수 fallback 포함
+     --font-gaegu / --font-gowun-dodum / --font-jetbrains-mono 가 주입됨
+     ============================================ */
+  --font-display: var(--font-gaegu), 'Gaegu', 'Gowun Dodum',
+                  'Apple SD Gothic Neo', 'Malgun Gothic', cursive, sans-serif;
+  --font-body:    var(--font-gowun-dodum), 'Gowun Dodum',
+                  -apple-system, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  --font-hand:    var(--font-gaegu), 'Gaegu', 'Gowun Dodum', cursive;
+  --font-mono:    var(--font-jetbrains-mono), 'JetBrains Mono',
+                  'SF Mono', Menlo, monospace;
+
+  /* ============================================
+     스페이싱 / 라운드 / 모션 / 그림자 (AICONLAB 토큰)
+     ============================================ */
+  --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px; --s-5: 24px;
+  --s-6: 32px; --s-7: 48px; --s-8: 64px; --s-9: 96px; --s-10: 128px;
+
+  --r-notebook: 4px;
+  --r-input:    8px;
+  --r-card:     14px;
+  --r-pill:     999px;
+
+  --shadow-mint:     0 0 0 1px rgba(77,224,166,0.30), 0 10px 24px rgba(77,224,166,0.25);
+  --shadow-electric: 0 0 0 1px rgba(90,124,255,0.25), 0 10px 24px rgba(90,124,255,0.20);
+  --shadow-paper:    0 8px 24px rgba(0,0,0,0.10), 0 1px 0 rgba(0,0,0,0.06);
+  --shadow-card:     0 1px 2px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.08);
+  --shadow-stamp:    2px 2px 0 var(--ink-900);
+
+  --ease-snap:      cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-overshoot: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-out:       cubic-bezier(0.22, 1, 0.36, 1);
+  --t-fast: 120ms; --t-normal: 180ms; --t-slow: 320ms; --t-hero: 600ms;
+}
+
+/* ==============================================
+   Dark mode — [data-theme="dark"] 또는 .dark
+   AICONLAB 시스템은 다크가 보조이지만 살려둠
+   ============================================== */
+[data-theme="dark"],
+.dark {
+  --background:  #0E1116;
+  --foreground:  #F5F1E8;
+
+  --card:        #161A23;
+  --card-foreground: #F5F1E8;
+  --popover:     #161A23;
+  --popover-foreground: #F5F1E8;
+
+  --primary: var(--mint-400);
+  --primary-foreground: var(--ink-900);
+
+  --secondary:   #222732;
+  --secondary-foreground: #F5F1E8;
+
+  --muted:       #222732;
+  --muted-foreground: rgba(245, 241, 232, 0.52);
+
+  --accent:      #2E3441;
+  --accent-foreground: #F5F1E8;
+
+  --destructive: var(--hot-400);
+
+  --border: rgba(255, 255, 255, 0.08);
+  --input:  rgba(255, 255, 255, 0.16);
+  --ring:   var(--electric-400);
+
+  /* 다크에서는 텍스트-안전 액센트가 밝은 시그널로 뒤집힘 */
+  --text-mint:     var(--mint-400);
+  --text-electric: var(--electric-400);
+  --text-sun:      var(--sun-400);
+  --text-hot:      var(--hot-400);
+
+  --shadow-paper: 0 12px 32px rgba(0,0,0,0.4), 0 1px 0 rgba(0,0,0,0.08);
+
+  --sidebar: #0E1116;
+  --sidebar-foreground: #F5F1E8;
+  --sidebar-primary: var(--mint-400);
+  --sidebar-primary-foreground: var(--ink-900);
+  --sidebar-accent: #222732;
+  --sidebar-accent-foreground: #F5F1E8;
+  --sidebar-border: rgba(255, 255, 255, 0.08);
+  --sidebar-ring: var(--electric-400);
+}
+
+/* ==============================================
+   Base 스타일 — paper canvas + 한국어 줄바꿈 + 폰트
+   ============================================== */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  /* 한국어 줄바꿈 글로벌: 띄어쓰기 단위로만 끊김 + 너무 긴 단어만 강제 분리
+     Gaegu(손글씨)는 폭이 넓어서 keep-all 없이는 어색하게 잘림 */
+  html, body {
+    word-break: keep-all;
+    overflow-wrap: break-word;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-body);
+    font-size: 17px;
+    line-height: 1.7;          /* Gowun Dodum은 loose leading이 어울림 */
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  html {
+    font-family: var(--font-body);
+  }
+
+  /* 모든 헤드라인 — Gaegu (손글씨 display) */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  h1, h2, h3, p { text-wrap: pretty; }
+
+  /* 폰트 클래스 별칭 — 기존 코드의 font-serif 그대로 사용 가능 */
+  .font-serif {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+  }
+  .font-display {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ==============================================
+   AICONLAB 유틸 클래스 — 노트북 톤 (스티커, 마커 등)
+   - .sticker      : 손도장 풍 콜아웃 (sun/mint/hot)
+   - .marker       : 형광펜 노란 줄
+   - .hand         : Gaegu 손글씨 (인라인 메모용)
+   - .eyebrow      : 섹션 라벨 (mono · 점 · 민트)
+   - .underline-hand : 손그림 squiggly underline (hot 색)
+   - .pill-mint/hot/sun : 컬러 필
+   ============================================== */
+.hand {
+  font-family: var(--font-hand);
+  font-weight: 700;
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-feature-settings: "tnum" 1;
+}
+
+/* 마커 — 원본 회사소개 페이지 의도 따라 비활성화 (일반 텍스트로 노출)
+   형광펜 효과가 필요하면 .marker-yellow를 사용 */
+.marker {
+  background: none;
+  padding: 0;
+  color: inherit;
+}
+.marker-yellow {
+  background: linear-gradient(
+    transparent 0%,
+    transparent calc(100% - 0.35em),
+    var(--sun-400) calc(100% - 0.35em),
+    var(--sun-400) 100%
+  );
+  padding: 0 4px;
+  color: inherit;
+}
+
+/* 손그림 squiggly underline — hot 색 */
+.underline-hand {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 12' preserveAspectRatio='none'><path d='M2 7 Q 25 2, 50 6 T 98 7' fill='none' stroke='%23FF6B47' stroke-width='2.5' stroke-linecap='round'/></svg>");
+  background-repeat: no-repeat;
+  background-position: bottom;
+  background-size: 100% 0.4em;
+  padding-bottom: 0.15em;
+}
+
+/* 섹션 라벨 — eyebrow (16섹션 회사소개 톤에 맞춤: 13px, weight 700) */
+.eyebrow {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-mint);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.eyebrow::before { content: "●"; font-size: 8px; }
+
+/* 스티커 — 손도장 풍 강조 (히어로/콜아웃 전용) */
+.sticker {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: var(--sun-400);
+  color: var(--ink-900);
+  font-family: var(--font-hand);
+  font-weight: 700;
+  font-size: 18px;
+  border: 2px solid var(--ink-900);
+  border-radius: 999px;
+  box-shadow: var(--shadow-stamp);
+  transform: rotate(-3deg);
+}
+.sticker-mint { background: var(--mint-400); }
+.sticker-hot  { background: var(--hot-500); color: var(--paper); }
+
+/* Pill — 작은 정보 칩 */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  background: var(--surface-1);
+  border: 1px solid var(--border-2);
+}
+.pill-mint { background: rgba(124, 245, 196, 0.30); border-color: var(--text-mint); color: var(--text-mint); }
+.pill-hot  { background: rgba(255, 107, 71, 0.18); border-color: var(--text-hot);  color: var(--text-hot); }
+.pill-sun  { background: rgba(255, 210, 63, 0.30); border-color: var(--text-sun);  color: var(--text-sun); }
+
+/* Card 변형 — paper-rotated (살짝 회전된 메모지 톤) */
+.card-paper {
+  background: var(--surface-2);
+  border-radius: 6px;
+  padding: 28px;
+  box-shadow: var(--shadow-paper);
+  border: 1px solid var(--border-1);
+}
+
+/* 코드 인라인 — mint 톤 */
+code, .code {
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+  background: rgba(10, 122, 79, 0.10);
+  color: var(--text-mint);
+  padding: 2px 6px;
+  border-radius: var(--r-notebook);
+}
+
+::selection { background: var(--sun-400); color: var(--ink-900); }
+
+/* ==============================================
+   Paper grain — multiply blend으로 페이퍼 노이즈
+   (assets/grain.svg 대신 인라인 SVG로 외부 요청 절약)
+   ============================================== */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.6 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/></svg>");
+  opacity: 0.06;
+  mix-blend-mode: multiply;
+}
+
+/* ============================================================
+   16섹션 회사소개 페이지 전용 유틸
+   - 컨테이너/섹션, hero typography, marquee, 그리드, 비교 테이블,
+     status pill, quote-block, hero-radial, timeline-step, card-dark
+   ============================================================ */
+
+/* 콘테이너 — 1200px 그리드 */
+.aicon-container { max-width: 1200px; margin: 0 auto; padding: 0 32px; }
+@media (max-width: 720px) {
+  .aicon-container { padding: 0 22px; }
+}
+
+/* 섹션 수직 패딩 — 페이퍼는 숨이 통해야 함 (96px) */
+.aicon-section { padding: 96px 0; position: relative; }
+@media (max-width: 720px) {
+  .aicon-section { padding: 72px 0; }
+}
+
+/* Hero — 큰 손글씨 헤드라인 (clamp 반응형) */
+.hero-headline {
+  font-family: var(--font-display);
+  font-size: clamp(48px, 7.8vw, 100px);
+  line-height: 1.15;
+  font-weight: 700;
+  letter-spacing: 0;
+  margin: 0 0 28px;
+  text-wrap: balance;
+}
+.hero-sub {
+  font-family: var(--font-body);
+  font-size: clamp(18px, 1.5vw, 21px);
+  line-height: 1.7;
+  color: var(--fg-2);
+  max-width: 620px;
+  margin: 0 0 36px;
+  letter-spacing: -0.005em;
+}
+
+/* 섹션 헤드라인 사이즈 — Gaegu display */
+.display-2 {
+  font-family: var(--font-display);
+  font-size: clamp(38px, 5vw, 66px);
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+.aicon-h1 {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 3.4vw, 40px);
+  line-height: 1.25;
+  font-weight: 700;
+}
+.aicon-h2 {
+  font-family: var(--font-display);
+  font-size: clamp(22px, 2.4vw, 28px);
+  line-height: 1.3;
+  font-weight: 700;
+}
+.aicon-h3 {
+  font-family: var(--font-display);
+  font-size: 22px;
+  line-height: 1.4;
+  font-weight: 700;
+}
+
+/* Hero radial — 부드러운 일렉트릭 워시 */
+.hero-radial {
+  position: absolute;
+  top: -160px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 1100px;
+  height: 700px;
+  background: radial-gradient(ellipse, rgba(90, 124, 255, 0.14), transparent 60%);
+  pointer-events: none;
+}
+
+/* Marquee — 흘러가는 챕터 라벨 */
+.marquee {
+  overflow: hidden;
+  mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+}
+.marquee-track {
+  display: flex;
+  gap: 56px;
+  width: max-content;
+  animation: aicon-marq 40s linear infinite;
+}
+@keyframes aicon-marq {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* 그리드 유틸 — 데스크톱 fixed columns, 모바일 자동 1-2 컬럼 */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; }
+@media (max-width: 980px) {
+  .grid-2, .grid-3, .grid-4, .grid-5 { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 600px) {
+  .grid-2, .grid-3, .grid-4, .grid-5 { grid-template-columns: 1fr; }
+}
+
+/* Card 변형 — light 모드: 페이퍼 위 흰 카드 + 부드러운 그림자 */
+.card-dark {
+  background: var(--surface-1);
+  border: 1px solid var(--border-1);
+  border-radius: 14px;
+  padding: 28px;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.05);
+  transition: border-color 180ms, transform 180ms, box-shadow 180ms;
+}
+.card-dark:hover {
+  border-color: var(--border-2);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.04), 0 14px 30px rgba(0, 0, 0, 0.08);
+}
+.card-elev { background: var(--surface-2); }
+
+/* Status pill — 진행 단계 표시 */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.pill-strong   { background: rgba(77, 224, 166, 0.22); color: #0a7a4f; }
+.pill-progress { background: rgba(245, 189, 21, 0.22); color: #8a6a00; }
+.pill-soon     { background: rgba(0, 0, 0, 0.06); color: var(--fg-3); }
+
+/* Quote block — 인용 카드 (큰 따옴표 자동 삽입) */
+.quote-block {
+  position: relative;
+  padding: 64px 56px;
+  transform: rotate(-1deg);
+}
+.quote-block::before {
+  content: "\201C";
+  position: absolute;
+  top: -10px;
+  left: 32px;
+  font-size: 140px;
+  line-height: 1;
+  color: var(--text-hot);
+  font-family: 'Georgia', serif;
+}
+
+/* Comparison table — 가짜 vs 진짜 */
+.compare {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border: 1px solid var(--border-1);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.compare-col { padding: 32px; }
+.compare-fake {
+  background: rgba(255, 107, 71, 0.10);
+  border-right: 1px solid var(--border-1);
+}
+.compare-real { background: rgba(124, 245, 196, 0.18); }
+.compare-row {
+  display: flex;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px dashed var(--border-1);
+  align-items: flex-start;
+}
+.compare-row:last-child { border-bottom: 0; }
+@media (max-width: 760px) {
+  .compare { grid-template-columns: 1fr; }
+  .compare-fake {
+    border-right: 0;
+    border-bottom: 1px solid var(--border-1);
+  }
+}
+
+/* Timeline step — Join 섹션의 단계별 타임라인 */
+.timeline-step {
+  display: grid;
+  grid-template-columns: 64px 1fr auto;
+  gap: 20px;
+  padding: 24px 0;
+  border-bottom: 1px solid var(--border-1);
+  align-items: flex-start;
+}
+.timeline-step:last-child { border-bottom: 0; }
+.step-num {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-mint);
+  padding-top: 6px;
+}
+
+/* Fade-up 애니메이션 — IntersectionObserver와 함께 */
+.fade-up {
+  opacity: 0;
+  transform: translateY(12px);
+  transition:
+    opacity 600ms var(--ease-snap),
+    transform 600ms var(--ease-snap);
+}
+.fade-up.in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Framework grid — 모바일에서 화살표 90도 회전 */
+.framework-grid {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto 1fr;
+  gap: 24px;
+  align-items: stretch;
+}
+@media (max-width: 980px) {
+  .framework-grid { grid-template-columns: 1fr; }
+  .framework-grid .arrow-cell {
+    transform: rotate(90deg);
+    padding: 8px 0;
+  }
+}
+
+/* Build in Public 그리드 — 모바일 1열 */
+.bip-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 64px;
+  align-items: flex-start;
+}
+@media (max-width: 980px) {
+  .bip-grid { grid-template-columns: 1fr; gap: 32px; }
+}
+
+/* Hero 그리드 — 본문 1.25 / 카드 0.75 */
+.hero-grid {
+  display: grid;
+  grid-template-columns: 1.25fr 0.75fr;
+  gap: 64px;
+  align-items: center;
+}
+@media (max-width: 980px) {
+  .hero-grid { grid-template-columns: 1fr; }
+}
+
+/* ============================================================
+   Buttons (회사소개 페이지 전용 .btn 시리즈)
+   - .btn-primary : mint 채움 + ink 글자 (CTA)
+   - .btn-secondary : 투명 배경 + ink 보더
+   - .btn-lg : 큰 사이즈
+   shadcn의 <Button>과는 별도 시스템 — 회사소개 페이지의 anchor 버튼용
+   ============================================================ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 22px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 15px;
+  border: 0;
+  cursor: pointer;
+  transition: all 180ms var(--ease-snap);
+  font-family: inherit;
+  text-decoration: none;
+  /* 글로벌 a 스타일의 background-image(undeline) 차단 */
+  background-image: none;
+}
+.btn-primary {
+  background: var(--mint-400);
+  color: var(--ink-900);
+}
+.btn-primary:hover {
+  box-shadow: var(--shadow-mint);
+  transform: translateY(-1px);
+  /* a:hover의 underline background-size 차단 */
+  background-image: none;
+  background-size: auto;
+}
+.btn-primary:active {
+  transform: scale(0.98);
+  box-shadow: none;
+}
+.btn-secondary {
+  background: transparent;
+  color: var(--fg-1);
+  border: 1.5px solid var(--ink-900);
+}
+.btn-secondary:hover {
+  background: var(--ink-900);
+  color: var(--paper);
+  background-image: none;
+  background-size: auto;
+}
+.btn-lg {
+  padding: 16px 28px;
+  font-size: 17px;
 }
