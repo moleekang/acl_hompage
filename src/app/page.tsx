@@ -22,7 +22,7 @@ import {
   StickerCircle,
   StickerStamp,
 } from "@/components/aiconlab/sticker";
-import { posts, categories } from "./log/posts";
+import { fetchPosts, categories, type Post } from "./log/posts";
 
 // ──────────────────────────────────────────────────────────
 // 1. HERO — 새 비전 카피 (④번 확정안)
@@ -931,9 +931,7 @@ function AudienceSegments() {
 // ──────────────────────────────────────────────────────────
 // 4. LATEST BLOG — 팀 블로그 최신 3개 (posts.ts에서)
 // ──────────────────────────────────────────────────────────
-function LatestBlog() {
-  const latest = posts.slice(0, 3); // 최신 3개
-
+function LatestBlog({ latest }: { latest: Post[] }) {
   return (
     <section
       className="aicon-section"
@@ -1420,13 +1418,14 @@ function ClosingCTA() {
 // ──────────────────────────────────────────────────────────
 // PAGE — 7섹션 마스터 조합 (옵션 A · 가벼운 메인)
 // ──────────────────────────────────────────────────────────
-export default function Home() {
+export default async function Home() {
+  const latest = await fetchPosts(3);
   return (
     <>
       <Hero />
       <ProductsPreview />
       <AudienceSegments />
-      <LatestBlog />
+      <LatestBlog latest={latest} />
       <JoinChannels />
       <AboutPreview />
       <ClosingCTA />

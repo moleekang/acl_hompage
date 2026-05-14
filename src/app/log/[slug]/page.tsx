@@ -10,16 +10,22 @@ import { notFound } from "next/navigation";
 import { FadeUp } from "@/components/aiconlab/fade-up";
 import { Icon } from "@/components/aiconlab/icon";
 import {
-  posts,
+  fetchPost,
+  fetchRelatedPosts,
   categories,
-  getPost,
-  getRelatedPosts,
   type Post,
 } from "../posts";
+import { createAdminClient } from "@/lib/supabase/server";
 
-// 빌드 타임에 모든 글 slug 미리 생성 (SSG)
+// 빌드 타임에 모든 글 slug 미리 생성 (SSG) — generateStaticParams는 쿠키 기반 클라이언트를 쓸 수 없어
+// 서비스 롤 클라이언트로 직접 조회한다.
 export async function generateStaticParams() {
-  return posts.map((p) => ({ slug: p.slug }));
+  const supabase = createAdminClient();
+  const { data } = await supabase
+    .from("posts")
+    .select("slug")
+    .not("published_at", "is", null);
+  return (data ?? []).map((p) => ({ slug: p.slug }));
 }
 
 // ──────────────────────────────────────────────────────────
@@ -31,13 +37,13 @@ export default async function PostDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const post = getPost(slug);
+  const post = await fetchPost(slug);
 
   // 글이 없으면 404
   if (!post) notFound();
 
   const cat = categories[post.cat];
-  const related = getRelatedPosts(slug, 3);
+  const related = await fetchRelatedPosts(slug, 3);
 
   return (
     <>

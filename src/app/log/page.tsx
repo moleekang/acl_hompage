@@ -8,7 +8,7 @@
 import Link from "next/link";
 import { FadeUp } from "@/components/aiconlab/fade-up";
 import { Icon } from "@/components/aiconlab/icon";
-import { posts, categories, type Post } from "./posts";
+import { fetchPosts, categories, type Post } from "./posts";
 
 // ──────────────────────────────────────────────────────────
 // 1. INTRO — 페이지 헤더 (셀피시 팀 블로그 섹션 헤더 패턴)
@@ -310,7 +310,18 @@ function PostCard({ post }: { post: Post }) {
 // ──────────────────────────────────────────────────────────
 // 3. POST GRID — 카드 그리드 3열 × 3행 = 9개
 // ──────────────────────────────────────────────────────────
-function PostGrid() {
+function PostGrid({ posts }: { posts: Post[] }) {
+  if (posts.length === 0) {
+    return (
+      <section className="aicon-section" style={{ paddingTop: 16, paddingBottom: 48 }}>
+        <div className="aicon-container">
+          <p style={{ color: "var(--fg-3)", fontSize: 15 }}>
+            아직 발행된 글이 없습니다.
+          </p>
+        </div>
+      </section>
+    );
+  }
   return (
     <section
       className="aicon-section"
@@ -319,7 +330,7 @@ function PostGrid() {
       <div className="aicon-container">
         <div className="grid-3">
           {posts.map((p, i) => (
-            <FadeUp key={p.title} delay={80 + i * 50}>
+            <FadeUp key={p.slug} delay={80 + i * 50}>
               <PostCard post={p} />
             </FadeUp>
           ))}
@@ -463,11 +474,12 @@ function PaginationCTA() {
 // ──────────────────────────────────────────────────────────
 // PAGE — 팀 블로그 페이지 마스터 조합
 // ──────────────────────────────────────────────────────────
-export default function TeamBlogPage() {
+export default async function TeamBlogPage() {
+  const posts = await fetchPosts();
   return (
     <>
       <BlogIntro />
-      <PostGrid />
+      <PostGrid posts={posts} />
       <PaginationCTA />
     </>
   );

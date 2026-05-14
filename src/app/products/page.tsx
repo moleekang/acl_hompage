@@ -12,6 +12,48 @@
 import { FadeUp } from "@/components/aiconlab/fade-up";
 import { Icon } from "@/components/aiconlab/icon";
 import { StickerStamp } from "@/components/aiconlab/sticker";
+import { createClient } from "@/lib/supabase/server";
+
+// DB row 파싱 — body_mdx에 JSON으로 담긴 ui_status/desc/tags/price/cta를 꺼낸다.
+type ProductRow = {
+  slug: string;
+  name: string;
+  pitch: string;
+  status: string;
+  body_mdx: string | null;
+  release_at: string | null;
+  order_idx: number;
+  published: boolean;
+};
+
+type ProductMeta = {
+  ui_status?: "beta" | "live" | "soon";
+  desc?: string;
+  tags?: string[];
+  price?: string;
+  cta?: { label: string; href: string };
+  thumb?: "play" | string;
+};
+
+function parseMeta(body: string | null): ProductMeta {
+  if (!body) return {};
+  try {
+    return JSON.parse(body) as ProductMeta;
+  } catch {
+    return {};
+  }
+}
+
+async function fetchProducts(): Promise<ProductRow[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("products")
+    .select("slug,name,pitch,status,body_mdx,release_at,order_idx,published")
+    .eq("published", true)
+    .order("order_idx", { ascending: true });
+  if (error || !data) return [];
+  return data as ProductRow[];
+}
 
 // ──────────────────────────────────────────────────────────
 // 1. PRODUCTS HERO — 카테고리 소개
@@ -274,7 +316,13 @@ function ProductCard({
 // ──────────────────────────────────────────────────────────
 // 3. PRODUCT GRID — 상품 카드 그리드 (3열)
 // ──────────────────────────────────────────────────────────
-function ProductGrid() {
+function ProductGrid({ products }: { products: ProductRow[] }) {
+  const total = products.length;
+  const beta = products.filter((p) => p.status === "beta").length;
+  const soon = products.filter((p) => p.status === "coming").length;
+  const live = products.filter((p) => p.status === "live").length;
+  const liveCount = live + beta; // "지금 운영 중"
+
   return (
     <section
       className="aicon-section"
@@ -293,7 +341,7 @@ function ProductGrid() {
             }}
           >
             <h2 className="aicon-h1" style={{ fontSize: 28, fontWeight: 700 }}>
-              지금 운영 중 · 1개
+              지금 운영 중 · {liveCount}개
             </h2>
             <div
               className="mono"
@@ -303,23 +351,21 @@ function ProductGrid() {
                 letterSpacing: "0.12em",
               }}
             >
-              총 3 · BETA 1 · SOON 2
+              총 {total} · BETA {beta} · SOON {soon}
             </div>
           </div>
         </FadeUp>
 
         <div className="grid-3">
-          {/* ─── Card 1 — TubeGen Launcher (메인 카드, BETA) ─── */}
-          <FadeUp delay={120}>
-            <ProductCard
-              status="beta"
-              name="Congen"
-              pitch='"프롬프트로 유튜브 영상을 끝까지 만드는 AI 자동화 런처"'
-              desc="Fal.ai(이미지) + Gemini(대본) + FFmpeg(영상)를 6단계 파이프라인으로 묶은 데스크톱 런처. Electron UI · 로컬 서버 · 클라우드 서버 하이브리드 아키텍처로, 무거운 렌더링은 내 PC에서 핵심 로직은 클라우드에서."
-              tags={["영상 자동화", "Desktop App", "Electron", "FFmpeg"]}
-              price="오픈 베타 · 무료 배포 예정"
-              cta={{ label: "유튜브에서 보기", href: "https://www.youtube.com/@A-ConLab-b1m" }}
-              thumb={
+          {products.map((p, i) => {
+            const meta = parseMeta(p.body_mdx);
+            const uiStatus: Status =
+              meta.ui_status ??
+              (p.status === "coming"
+                ? "soon"
+                : (p.status as Status));
+            const thumbNode =
+              meta.thumb === "play" ? (
                 <div
                   style={{
                     position: "absolute",
@@ -331,7 +377,6 @@ function ProductGrid() {
                       "radial-gradient(ellipse at 30% 30%, rgba(124,245,196,0.22), transparent 60%), radial-gradient(ellipse at 70% 70%, rgba(90,124,255,0.18), transparent 60%)",
                   }}
                 >
-                  {/* 가운데 ▶ 재생 버튼 */}
                   <div
                     style={{
                       width: 64,
@@ -346,7 +391,6 @@ function ProductGrid() {
                   >
                     <Icon name="play" size={26} color="var(--ink-900)" />
                   </div>
-                  {/* 우하단 메타 라벨 */}
                   <div
                     style={{
                       position: "absolute",
@@ -364,33 +408,22 @@ function ProductGrid() {
                     DEMO · 6 STEPS
                   </div>
                 </div>
-              }
-            />
-          </FadeUp>
-
-          {/* ─── Card 2 — SaaS 버전 (Coming Soon 슬롯) ─── */}
-          <FadeUp delay={200}>
-            <ProductCard
-              status="soon"
-              name="(가칭) Congen Cloud"
-              pitch='"내 PC 없이도 브라우저에서 돌아가는 SaaS 버전"'
-              desc="데스크톱 런처를 클라우드로 옮긴 SaaS 버전. 설치 없이 브라우저에서 영상 파이프라인을 돌릴 수 있는 형태로 준비 중입니다. 가격 정책·출시 시점은 위키에 라이브로 공유 예정."
-              tags={["SaaS", "Web App", "Coming"]}
-              price="2026 Q3 · 출시 예정"
-            />
-          </FadeUp>
-
-          {/* ─── Card 3 — 클로드 스킬 (Coming Soon 슬롯) ─── */}
-          <FadeUp delay={280}>
-            <ProductCard
-              status="soon"
-              name="ACL Claude Skills"
-              pitch='"Claude Code에 바로 꽂는 AICONLAB 스킬 팩"'
-              desc="자동화 워크플로우·콘텐츠 파이프라인·위키 운영 노하우를 Claude Code 스킬(.md) 형태로 패키징. 코어 그룹에 먼저 공개 후 점진적 오픈 예정."
-              tags={["Claude Skill", "Workflow"]}
-              price="코어 우선 · 출시 미정"
-            />
-          </FadeUp>
+              ) : undefined;
+            return (
+              <FadeUp key={p.slug} delay={120 + i * 80}>
+                <ProductCard
+                  status={uiStatus}
+                  name={p.name}
+                  pitch={p.pitch}
+                  desc={meta.desc ?? ""}
+                  tags={meta.tags ?? []}
+                  price={meta.price ?? p.release_at ?? ""}
+                  cta={meta.cta}
+                  thumb={thumbNode}
+                />
+              </FadeUp>
+            );
+          })}
         </div>
       </div>
     </section>
@@ -480,11 +513,12 @@ function BuildInPublicCTA() {
 // ──────────────────────────────────────────────────────────
 // PAGE — 자동화앱 진열 페이지 마스터 조합
 // ──────────────────────────────────────────────────────────
-export default function ProductsPage() {
+export default async function ProductsPage() {
+  const products = await fetchProducts();
   return (
     <>
       <ProductsHero />
-      <ProductGrid />
+      <ProductGrid products={products} />
       <BuildInPublicCTA />
     </>
   );

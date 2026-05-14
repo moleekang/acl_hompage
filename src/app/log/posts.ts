@@ -1,6 +1,7 @@
-// 팀 블로그 목업 데이터
-// /log/page.tsx (리스트)와 /log/[slug]/page.tsx (상세)에서 공유
-// 추후 위키 log.md 자동 발행 또는 MDX 시스템으로 교체 예정
+// /log 카테고리 메타데이터 + DB → UI 어댑터.
+// 데이터(글 목록)는 Supabase posts 테이블에서 조회한다 — 이 모듈은 표현 토큰만 보관.
+
+import { createClient } from "@/lib/supabase/server";
 
 // 카테고리 정의 — label + 메인 색상 + 글로우 색상 (썸네일 배경용)
 export const categories = {
@@ -38,106 +39,87 @@ export const categories = {
 
 export type CatKey = keyof typeof categories;
 
+// UI가 소비하는 Post 형태 — DB row를 이 모양으로 정규화.
 export type Post = {
-  slug: string;       // URL용 영문 슬러그
-  cat: CatKey;        // 카테고리 키
-  title: string;      // 제목
-  sub: string;        // 한 줄 부제
-  date: string;       // 발행 날짜 (YYYY-MM-DD)
-  readTime: string;   // 예상 읽기 시간 (예: "8 min")
+  slug: string;
+  cat: CatKey;
+  title: string;
+  sub: string;
+  body_mdx: string;
+  date: string;     // YYYY-MM-DD
+  readTime: string;
 };
 
-// 더미 글 9개 — 카테고리·날짜 다양하게
-export const posts: Post[] = [
-  {
-    slug: "congen-v03-pipeline",
-    cat: "dev",
-    title: "Congen v0.3 출시 — 6단계 파이프라인 가다듬기",
-    sub: "베타 버전에서 가장 큰 변화는 로컬·클라우드 분리. 무거운 렌더링은 PC에서.",
-    date: "2026-05-12",
-    readTime: "8 min",
-  },
-  {
-    slug: "youtube-automation-hardest",
-    cat: "retro",
-    title: "유튜브 영상 자동화에서 가장 어려웠던 한 가지",
-    sub: "기술이 아니라 '컨텍스트'였습니다. 프롬프트 너머의 것.",
-    date: "2026-05-08",
-    readTime: "6 min",
-  },
-  {
-    slug: "selfishclub-learnings",
-    cat: "insight",
-    title: "셀피시클럽 분석하며 배운 5가지",
-    sub: "카탈로그형 페이지의 깔때기 설계 노트. AICONLAB과의 본질적 차이.",
-    date: "2026-05-04",
-    readTime: "12 min",
-  },
-  {
-    slug: "wiki-30-pages",
-    cat: "ops",
-    title: "위키 30페이지 돌파 — 이걸로 깨달은 것",
-    sub: "정보가 아닌 컨텍스트가 자산이 된다. 토큰 절약 원칙도 함께.",
-    date: "2026-04-28",
-    readTime: "5 min",
-  },
-  {
-    slug: "tts-comparison",
-    cat: "tool",
-    title: "ElevenLabs vs Gemini TTS, 직접 비교해봤습니다",
-    sub: "Congen에 어떤 TTS를 쓸지 결정하는 기준 — 비용·자연스러움·속도 3축.",
-    date: "2026-04-22",
-    readTime: "9 min",
-  },
-  {
-    slug: "claude-skills-packaging",
-    cat: "dev",
-    title: "Claude Code 스킬, 어떻게 패키징할 것인가",
-    sub: "ACL Skills 출시 전 고민 정리. 코어 우선 vs 전체 공개의 트레이드오프.",
-    date: "2026-04-16",
-    readTime: "7 min",
-  },
-  {
-    slug: "tagline-real-lab",
-    cat: "brand",
-    title: '"진짜의 실험실"이라는 태그라인, 이렇게 정해졌습니다',
-    sub: "8번의 폐기 끝에 나온 한 문장. 거절당한 후보 7개도 함께 공개.",
-    date: "2026-04-10",
-    readTime: "10 min",
-  },
-  {
-    slug: "build-in-public-fear",
-    cat: "retro",
-    title: "Build in Public, 처음 시작할 때 어려웠던 점",
-    sub: "실패까지 공개한다는 게 무서웠던 이유. 그리고 그걸 넘은 순간.",
-    date: "2026-04-02",
-    readTime: "8 min",
-  },
-  {
-    slug: "audience-9490",
-    cat: "insight",
-    title: "AICONLAB 시청자 9,490명 — 누가 보고 있나",
-    sub: "유튜브 애널리틱스로 본 페르소나 검증. 직장인 60% · 프리랜서 30%.",
-    date: "2026-03-28",
-    readTime: "11 min",
-  },
-];
-
-// 헬퍼 — slug로 글 찾기
-export function getPost(slug: string): Post | undefined {
-  return posts.find((p) => p.slug === slug);
+// DB cat 문자열을 알려진 CatKey로 폴백 (모르는 값이면 'dev'로).
+function normalizeCat(value: string | null | undefined): CatKey {
+  if (value && value in categories) return value as CatKey;
+  return "dev";
 }
 
-// 헬퍼 — 현재 글 제외 + 같은 카테고리 우선으로 관련 글 N개 반환
-export function getRelatedPosts(currentSlug: string, n = 3): Post[] {
-  const current = getPost(currentSlug);
-  if (!current) return posts.slice(0, n);
-  // 같은 카테고리 우선, 부족하면 다른 글로 채움
-  const sameCat = posts.filter(
-    (p) => p.slug !== currentSlug && p.cat === current.cat
+type PostRow = {
+  slug: string;
+  title: string;
+  sub: string | null;
+  body_mdx: string | null;
+  cat: string;
+  read_time: string | null;
+  published_at: string | null;
+};
+
+function toPost(row: PostRow): Post {
+  return {
+    slug: row.slug,
+    cat: normalizeCat(row.cat),
+    title: row.title,
+    sub: row.sub ?? "",
+    body_mdx: row.body_mdx ?? "",
+    date: (row.published_at ?? "").slice(0, 10),
+    readTime: row.read_time ?? "",
+  };
+}
+
+const POST_COLS = "slug,title,sub,body_mdx,cat,read_time,published_at";
+
+// 발행된 글 전체 — 최신순.
+export async function fetchPosts(limit?: number): Promise<Post[]> {
+  const supabase = await createClient();
+  let query = supabase
+    .from("posts")
+    .select(POST_COLS)
+    .not("published_at", "is", null)
+    .order("published_at", { ascending: false });
+  if (limit) query = query.limit(limit);
+  const { data, error } = await query;
+  if (error || !data) return [];
+  return (data as PostRow[]).map(toPost);
+}
+
+// 단일 글 by slug.
+export async function fetchPost(slug: string): Promise<Post | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("posts")
+    .select(POST_COLS)
+    .eq("slug", slug)
+    .not("published_at", "is", null)
+    .maybeSingle();
+  if (error || !data) return null;
+  return toPost(data as PostRow);
+}
+
+// 관련 글: 같은 카테고리 우선, 부족하면 다른 카테고리로 채움.
+export async function fetchRelatedPosts(
+  currentSlug: string,
+  n = 3,
+): Promise<Post[]> {
+  const all = await fetchPosts();
+  const current = all.find((p) => p.slug === currentSlug);
+  if (!current) return all.slice(0, n);
+  const sameCat = all.filter(
+    (p) => p.slug !== currentSlug && p.cat === current.cat,
   );
-  const others = posts.filter(
-    (p) => p.slug !== currentSlug && p.cat !== current.cat
+  const others = all.filter(
+    (p) => p.slug !== currentSlug && p.cat !== current.cat,
   );
   return [...sameCat, ...others].slice(0, n);
 }

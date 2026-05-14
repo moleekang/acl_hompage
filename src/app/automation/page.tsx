@@ -10,120 +10,53 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { createClient } from "@/lib/supabase/server";
 
-// 자동화 사례 데이터 — 실제 위키 automation-map과 연동 예정
-const automations = [
-  // 콘텐츠 제작
-  {
-    icon: "🎬",
-    category: "콘텐츠",
-    title: "Remotion 영상 자동화",
-    desc: "코드로 영상을 자동 생성. 한 번 셋업하면 계속 영상 찍어냄",
-    tools: ["Remotion", "Node.js"],
-    status: "완료",
-    impact: "영상 1편: 8시간 → 30분",
-  },
-  {
-    icon: "✦",
-    category: "콘텐츠",
-    title: "ConGen 콘텐츠 런처",
-    desc: "AI 컨텍스트로 콘텐츠 자동 생성하는 로컬 런처",
-    tools: ["Electron", "Claude API"],
-    status: "베타",
-    impact: "직접 작업 시간 1/10",
-  },
-  {
-    icon: "🖼️",
-    category: "콘텐츠",
-    title: "썸네일 자동 생성",
-    desc: "영상 메타데이터로 썸네일 자동 생성",
-    tools: ["DALL-E", "Figma API"],
-    status: "계획",
-    impact: "예정",
-  },
+// DB row 구조 — supabase automations 테이블타입한다.
+type AutomationRow = {
+  slug: string;
+  title: string;
+  description: string | null;
+  category: string;
+  status: string;
+  tools: string[] | null;
+  impact: string | null;
+  icon_emoji: string | null;
+};
 
-  // 운영
-  {
-    icon: "📚",
-    category: "운영",
-    title: "콘텐츠 자동 발행",
-    desc: "노트 작성 → 홈페이지 인사이트에 자동 노출",
-    tools: ["Next.js", "MDX"],
-    status: "진행",
-    impact: "수동 발행 0",
-  },
-  {
-    icon: "💬",
-    category: "운영",
-    title: "단톡방 운영 자동화",
-    desc: "자주 묻는 질문 자동 답변, 신규 가입 환영",
-    tools: ["KakaoTalk Bot", "Claude"],
-    status: "계획",
-    impact: "예정",
-  },
+// UI가 소비하는 모양으로 정규화.
+type Automation = {
+  slug: string;
+  icon: string;
+  category: string;
+  title: string;
+  desc: string;
+  tools: string[];
+  status: string;
+  impact: string;
+};
 
-  // 마케팅
-  {
-    icon: "📨",
-    category: "마케팅",
-    title: "뉴스레터 자동 발송",
-    desc: "새 인사이트 추가 시 멤버에게 자동 발송",
-    tools: ["Stibee API"],
-    status: "계획",
-    impact: "예정",
-  },
-  {
-    icon: "🤝",
-    category: "마케팅",
-    title: "시청자 후기 자동 수집",
-    desc: "유튜브 댓글 + 단톡방에서 좋은 후기 자동 정리",
-    tools: ["YouTube API", "Claude"],
-    status: "계획",
-    impact: "예정",
-  },
+async function fetchAutomations(): Promise<Automation[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("automations")
+    .select("slug,title,description,category,status,tools,impact,icon_emoji")
+    .not("published_at", "is", null)
+    .order("order_idx", { ascending: true });
+  if (error || !data) return [];
+  return (data as AutomationRow[]).map((r) => ({
+    slug: r.slug,
+    icon: r.icon_emoji ?? "✨",
+    category: r.category,
+    title: r.title,
+    desc: r.description ?? "",
+    tools: Array.isArray(r.tools) ? r.tools : [],
+    status: r.status,
+    impact: r.impact ?? "",
+  }));
+}
 
-  // 비즈니스
-  {
-    icon: "💰",
-    category: "비즈니스",
-    title: "매출 깔때기 자동화",
-    desc: "Awareness → Revenue 5단계 자동 트래킹",
-    tools: ["GA4", "Stripe"],
-    status: "계획",
-    impact: "예정",
-  },
-  {
-    icon: "💳",
-    category: "비즈니스",
-    title: "결제 + 멤버 자동 가입",
-    desc: "결제 → 자동 멤버 등급 부여 → 혜택 발급",
-    tools: ["토스페이먼츠", "Clerk"],
-    status: "계획",
-    impact: "예정",
-  },
-
-  // 개인 생산성
-  {
-    icon: "🧠",
-    category: "생산성",
-    title: "AI 어시스트 코딩",
-    desc: "Claude Code로 1인 개발 가속",
-    tools: ["Claude Code", "Cursor"],
-    status: "완료",
-    impact: "코딩 속도 3~5배",
-  },
-  {
-    icon: "📊",
-    category: "생산성",
-    title: "데이터 자동 분석",
-    desc: "유튜브 / 단톡방 데이터 주간 자동 리포트",
-    tools: ["Python", "Claude"],
-    status: "계획",
-    impact: "예정",
-  },
-];
-
-const categories = [
+const CATEGORY_FILTERS = [
   "전체",
   "콘텐츠",
   "운영",
@@ -132,7 +65,7 @@ const categories = [
   "생산성",
 ];
 
-// 상태별 컬러
+// 상태별 컴러
 const statusColors: Record<string, string> = {
   완료: "bg-[#5db872]/15 text-[#3a8048]",
   베타: "bg-[#e8a55a]/15 text-[#a06f30]",
@@ -140,7 +73,9 @@ const statusColors: Record<string, string> = {
   계획: "bg-muted text-muted-foreground",
 };
 
-export default function AutomationPage() {
+export default async function AutomationPage() {
+  const automations = await fetchAutomations();
+
   // 통계 계산
   const completed = automations.filter((a) => a.status === "완료").length;
   const inProgress = automations.filter(
@@ -198,7 +133,7 @@ export default function AutomationPage() {
       <section className="border-y border-border bg-secondary/40">
         <div className="container mx-auto max-w-6xl px-6 py-4">
           <div className="flex flex-wrap gap-2">
-            {categories.map((cat, i) => (
+            {CATEGORY_FILTERS.map((cat, i) => (
               <button
                 key={cat}
                 className={`rounded-md px-4 py-2 text-sm font-medium transition-colors ${
