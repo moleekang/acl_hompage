@@ -2,6 +2,7 @@
 // DB가 비어있는 초기에도 mock으로 대체하지 않고 빈 상태 화면을 보여준다 (현실 동작 확인).
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { formatDateKrShort } from "@/lib/format-date";
 
 export const dynamic = "force-dynamic";
 
@@ -79,7 +80,7 @@ export default async function WikiIndexPage() {
                     /{p.slug}
                   </code>
                   <span className="mono" style={{ fontSize: 11, color: "var(--fg-3)" }}>
-                    {new Date(p.updated_at).toLocaleDateString("ko-KR")}
+                    {formatDateKrShort(p.updated_at)}
                   </span>
                 </Link>
               </li>

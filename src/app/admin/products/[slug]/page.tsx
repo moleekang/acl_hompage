@@ -23,6 +23,7 @@ export default async function EditProductPage({ params }: { params: Params }) {
           status: p.status as ProductStatus,
           release_at: p.release_at, body_mdx: p.body_mdx,
           order_idx: p.order_idx, published: p.published,
+          hero_image: p.hero_image ?? null,
         }}
       />
     </>

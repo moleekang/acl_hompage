@@ -7,6 +7,7 @@ import { Avatar } from "@/components/admin/avatar";
 import { Icon } from "@/components/admin/icons";
 import { RowMenu } from "@/components/admin/row-menu";
 import { softDeleteWikiPage, restoreWikiPage, purgeWikiPage } from "../_actions/wiki";
+import { formatDateKr } from "@/lib/format-date";
 
 export type WikiTableRow = {
   id: string;
@@ -50,7 +51,7 @@ export function WikiTable({ rows }: { rows: WikiTableRow[] }) {
           </button>
         </div>
         <div className="grow" />
-        <Link href="/llm-wiki/new/edit" className="btn btn-primary">
+        <Link href="/admin/wiki/edit/new" className="btn btn-primary">
           <Icon name="plus" size={14} /> 새 페이지
         </Link>
       </div>
@@ -94,7 +95,7 @@ export function WikiTable({ rows }: { rows: WikiTableRow[] }) {
                       <span style={{ fontSize: 13 }}>{w.editorName}</span>
                     </div>
                   </td>
-                  <td className="num">{w.updated_at ? new Date(w.updated_at).toLocaleString("ko-KR") : "—"}</td>
+                  <td className="num">{formatDateKr(w.updated_at)}</td>
                   <td className="num">{w.revs}회</td>
                   <td className="actions" onClick={(e) => e.stopPropagation()}>
                     <RowMenu

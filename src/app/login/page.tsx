@@ -1,16 +1,47 @@
-// 로그인 페이지 — Google OAuth 1버튼.
+// 로그인 페이지 — Google OAuth + 이메일/비밀번호 탭 전환.
 // 디자인은 메인 사이트와 동일한 paper 톤. 정식 디자인 시안이 도착하면 교체.
 
 "use client";
 
 import { Suspense, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+
+type Tab = "google" | "email";
+type EmailMode = "login" | "signup";
+
+/** Open-redirect 방지: 같은 오리진의 경로만 허용한다. */
+function safeNext(raw: string | null): string {
+  if (raw && raw.startsWith("/") && !raw.startsWith("//")) {
+    return raw;
+  }
+  return "/";
+}
+
+const OAUTH_ERROR_MESSAGES: Record<string, string> = {
+  missing_code: "OAuth 코드가 전달되지 않았습니다. 다시 시도해주세요.",
+};
+
+function oauthErrorMessage(code: string | null): string | null {
+  if (!code) return null;
+  return OAUTH_ERROR_MESSAGES[code] ?? "알 수 없는 오류가 발생했습니다.";
+}
 
 function LoginInner() {
   const params = useSearchParams();
-  const error = params.get("error");
+  const router = useRouter();
+  const oauthError = oauthErrorMessage(params.get("error"));
+
+  const [tab, setTab] = useState<Tab>("google");
+  const [emailMode, setEmailMode] = useState<EmailMode>("login");
   const [busy, setBusy] = useState(false);
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+
+  const [formError, setFormError] = useState<string | null>(null);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   async function signInWithGoogle() {
     setBusy(true);
@@ -25,8 +56,91 @@ function LoginInner() {
       console.error(authError);
       setBusy(false);
     }
-    // 성공 시 Google로 리다이렉트되므로 setBusy(false) 호출 안 필요.
+    // 성공 시 Google로 리다이렉트되므로 setBusy(false) 불필요.
   }
+
+  async function handleEmailSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setFormError(null);
+    setSuccessMsg(null);
+
+    if (emailMode === "signup" && password !== confirm) {
+      setFormError("비밀번호가 일치하지 않습니다.");
+      return;
+    }
+
+    setBusy(true);
+    const supabase = createClient();
+
+    if (emailMode === "signup") {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+      });
+      setBusy(false);
+      if (error) {
+        setFormError(error.message);
+        return;
+      }
+      // 이메일 확인이 비활성화돼 있으면 세션이 바로 생성됨.
+      if (data.session) {
+        router.replace("/");
+      } else {
+        setSuccessMsg(
+          "확인 메일을 보냈습니다. 메일의 링크를 클릭하면 가입이 완료됩니다.",
+        );
+      }
+    } else {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      setBusy(false);
+      if (error) {
+        setFormError(error.message);
+        return;
+      }
+      router.replace(safeNext(params.get("next")));
+    }
+  }
+
+  const tabBtn = (id: Tab, label: string) => (
+    <button
+      type="button"
+      onClick={() => {
+        setTab(id);
+        setFormError(null);
+        setSuccessMsg(null);
+      }}
+      style={{
+        flex: 1,
+        padding: "8px 0",
+        background: tab === id ? "var(--ink-900)" : "transparent",
+        color: tab === id ? "#FFFFFF" : "var(--fg-2)",
+        border: "1px solid var(--border-1)",
+        borderRadius: 6,
+        fontSize: 14,
+        fontWeight: 600,
+        cursor: "pointer",
+        transition: "background .12s ease, color .12s ease",
+      }}
+    >
+      {label}
+    </button>
+  );
+
+  const inputStyle: React.CSSProperties = {
+    width: "100%",
+    padding: "11px 14px",
+    background: "var(--bg-canvas)",
+    border: "1px solid var(--border-1)",
+    borderRadius: 8,
+    fontSize: 14,
+    color: "var(--paper-ink)",
+    outline: "none",
+    boxSizing: "border-box",
+  };
 
   return (
     <main
@@ -66,41 +180,159 @@ function LoginInner() {
             color: "var(--fg-2)",
             fontSize: 15,
             lineHeight: 1.6,
-            marginBottom: 28,
+            marginBottom: 24,
           }}
         >
-          Google 계정으로 한 번 클릭이면 끝이에요.
-          <br />
           가입 후 위키 접근은 운영자가 별도로 승급해드립니다.
         </p>
 
-        <button
-          type="button"
-          onClick={signInWithGoogle}
-          disabled={busy}
-          style={{
-            width: "100%",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 10,
-            padding: "14px 18px",
-            background: "var(--ink-900)",
-            color: "#FFFFFF",
-            border: "2px solid var(--ink-900)",
-            borderRadius: 8,
-            fontSize: 15,
-            fontWeight: 700,
-            cursor: busy ? "wait" : "pointer",
-            opacity: busy ? 0.7 : 1,
-            transition: "transform .12s ease, background .12s ease",
-          }}
-        >
-          <GoogleMark />
-          {busy ? "Google로 이동 중..." : "Google로 시작하기"}
-        </button>
+        {/* 탭 전환 */}
+        <div style={{ display: "flex", gap: 6, marginBottom: 24 }}>
+          {tabBtn("google", "Google로 시작하기")}
+          {tabBtn("email", "이메일로 시작하기")}
+        </div>
 
-        {error && (
+        {/* Google 탭 */}
+        {tab === "google" && (
+          <button
+            type="button"
+            onClick={signInWithGoogle}
+            disabled={busy}
+            style={{
+              width: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 10,
+              padding: "14px 18px",
+              background: "var(--ink-900)",
+              color: "#FFFFFF",
+              border: "2px solid var(--ink-900)",
+              borderRadius: 8,
+              fontSize: 15,
+              fontWeight: 700,
+              cursor: busy ? "wait" : "pointer",
+              opacity: busy ? 0.7 : 1,
+              transition: "transform .12s ease, background .12s ease",
+            }}
+          >
+            <GoogleMark />
+            {busy ? "Google로 이동 중..." : "Google로 시작하기"}
+          </button>
+        )}
+
+        {/* 이메일 탭 */}
+        {tab === "email" && (
+          <form onSubmit={handleEmailSubmit} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <input
+              type="email"
+              placeholder="이메일"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              style={inputStyle}
+              disabled={busy}
+            />
+            <input
+              type="password"
+              placeholder="비밀번호"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              style={inputStyle}
+              disabled={busy}
+            />
+            {emailMode === "signup" && (
+              <input
+                type="password"
+                placeholder="비밀번호 확인"
+                required
+                value={confirm}
+                onChange={(e) => setConfirm(e.target.value)}
+                style={inputStyle}
+                disabled={busy}
+              />
+            )}
+
+            <button
+              type="submit"
+              disabled={busy}
+              style={{
+                width: "100%",
+                padding: "13px 18px",
+                background: "var(--ink-900)",
+                color: "#FFFFFF",
+                border: "none",
+                borderRadius: 8,
+                fontSize: 15,
+                fontWeight: 700,
+                cursor: busy ? "wait" : "pointer",
+                opacity: busy ? 0.7 : 1,
+                transition: "opacity .12s ease",
+              }}
+            >
+              {busy
+                ? "처리 중..."
+                : emailMode === "login"
+                  ? "이메일 로그인"
+                  : "가입하기"}
+            </button>
+
+            {/* 로그인 ↔ 회원가입 전환 */}
+            <div style={{ textAlign: "center", fontSize: 13, color: "var(--fg-2)" }}>
+              {emailMode === "login" ? (
+                <>
+                  계정이 없으신가요?{" "}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEmailMode("signup");
+                      setFormError(null);
+                      setSuccessMsg(null);
+                    }}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      color: "var(--paper-ink)",
+                      fontWeight: 700,
+                      cursor: "pointer",
+                      textDecoration: "underline",
+                      fontSize: 13,
+                    }}
+                  >
+                    회원가입
+                  </button>
+                </>
+              ) : (
+                <>
+                  이미 계정이 있으신가요?{" "}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEmailMode("login");
+                      setFormError(null);
+                      setSuccessMsg(null);
+                    }}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      color: "var(--paper-ink)",
+                      fontWeight: 700,
+                      cursor: "pointer",
+                      textDecoration: "underline",
+                      fontSize: 13,
+                    }}
+                  >
+                    로그인
+                  </button>
+                </>
+              )}
+            </div>
+          </form>
+        )}
+
+        {/* OAuth 에러 (쿼리 파라미터) */}
+        {oauthError && (
           <div
             style={{
               marginTop: 16,
@@ -112,7 +344,41 @@ function LoginInner() {
               fontSize: 13,
             }}
           >
-            로그인 실패: {error}
+            {oauthError}
+          </div>
+        )}
+
+        {/* 폼 에러 */}
+        {formError && (
+          <div
+            style={{
+              marginTop: 16,
+              padding: "10px 14px",
+              background: "rgba(255,107,71,0.10)",
+              border: "1px dashed var(--text-hot)",
+              borderRadius: 4,
+              color: "var(--text-hot)",
+              fontSize: 13,
+            }}
+          >
+            {formError}
+          </div>
+        )}
+
+        {/* 성공 메시지 (이메일 확인 발송) */}
+        {successMsg && (
+          <div
+            style={{
+              marginTop: 16,
+              padding: "10px 14px",
+              background: "rgba(60,180,80,0.10)",
+              border: "1px dashed #3cb450",
+              borderRadius: 4,
+              color: "#2a7a30",
+              fontSize: 13,
+            }}
+          >
+            {successMsg}
           </div>
         )}
 

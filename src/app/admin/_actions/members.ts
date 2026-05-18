@@ -6,6 +6,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { requireAdmin } from "./_auth";
 
 type Role = "guest" | "member" | "admin";
 type Status = "active" | "suspended";
@@ -17,6 +18,7 @@ async function actorId(): Promise<string | null> {
 }
 
 export async function updateMemberRole(userId: string, role: Role) {
+  await requireAdmin();
   const by = await actorId();
   const admin = createAdminClient();
   const { error } = await admin
@@ -33,6 +35,7 @@ export async function updateMemberRole(userId: string, role: Role) {
 }
 
 export async function updateMemberStatus(userId: string, status: Status) {
+  await requireAdmin();
   const by = await actorId();
   const admin = createAdminClient();
   const { error } = await admin

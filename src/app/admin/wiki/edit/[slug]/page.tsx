@@ -10,8 +10,8 @@ export default function Page({ params }: { params: Params }) {
   return (
     <WikiEditor
       slug={slug}
-      backHref={slug === "new" ? "/llm-wiki" : `/llm-wiki/${slug}`}
-      afterSaveHref={(s) => `/llm-wiki/${s}`}
+      backHref="/admin/wiki"
+      afterSaveHref={() => "/admin/wiki"}
     />
   );
 }

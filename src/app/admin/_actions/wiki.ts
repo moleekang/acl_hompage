@@ -5,6 +5,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { requireAdmin } from "./_auth";
 
 async function actorId(): Promise<string | null> {
   const supabase = await createClient();
@@ -13,6 +14,7 @@ async function actorId(): Promise<string | null> {
 }
 
 export async function softDeleteWikiPage(id: string) {
+  await requireAdmin();
   const admin = createAdminClient();
   const { error } = await admin
     .from("wiki_pages")
@@ -23,6 +25,7 @@ export async function softDeleteWikiPage(id: string) {
 }
 
 export async function restoreWikiPage(id: string) {
+  await requireAdmin();
   const admin = createAdminClient();
   const { error } = await admin
     .from("wiki_pages")
@@ -33,6 +36,7 @@ export async function restoreWikiPage(id: string) {
 }
 
 export async function purgeWikiPage(id: string) {
+  await requireAdmin();
   const admin = createAdminClient();
   const { error } = await admin.from("wiki_pages").delete().eq("id", id);
   if (error) throw new Error(error.message);
@@ -40,6 +44,7 @@ export async function purgeWikiPage(id: string) {
 }
 
 export async function restoreWikiRevision(pageId: string, revisionId: string) {
+  await requireAdmin();
   const admin = createAdminClient();
   const { data: rev, error: revErr } = await admin
     .from("wiki_revisions")

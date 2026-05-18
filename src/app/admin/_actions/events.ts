@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { requireAdmin } from "./_auth";
 
 async function actorId(): Promise<string | null> {
   const supabase = await createClient();
@@ -19,6 +20,7 @@ export async function createEvent(input: {
   location?: string;
   capacity?: number;
 }) {
+  await requireAdmin();
   const admin = createAdminClient();
   const { error } = await admin.from("events").insert({
     slug: input.slug,
@@ -34,6 +36,7 @@ export async function createEvent(input: {
 }
 
 export async function updateEventStatus(id: string, status: EventStatus) {
+  await requireAdmin();
   const admin = createAdminClient();
   const { error } = await admin.from("events").update({ status }).eq("id", id);
   if (error) throw new Error(error.message);
@@ -42,6 +45,7 @@ export async function updateEventStatus(id: string, status: EventStatus) {
 }
 
 export async function deleteEvent(id: string) {
+  await requireAdmin();
   const admin = createAdminClient();
   const { error } = await admin.from("events").delete().eq("id", id);
   if (error) throw new Error(error.message);
@@ -49,6 +53,7 @@ export async function deleteEvent(id: string) {
 }
 
 export async function inviteMembers(eventId: string, userIds: string[]) {
+  await requireAdmin();
   if (userIds.length === 0) return;
   const by = await actorId();
   const admin = createAdminClient();
@@ -67,6 +72,7 @@ export async function inviteMembers(eventId: string, userIds: string[]) {
 }
 
 export async function removeInvite(eventId: string, userId: string) {
+  await requireAdmin();
   const admin = createAdminClient();
   const { error } = await admin
     .from("event_invitations")
