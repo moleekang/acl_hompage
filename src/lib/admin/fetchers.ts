@@ -170,3 +170,41 @@ export async function fetchProducts() {
   const { data } = await admin.from("products").select("*").order("order_idx", { ascending: true });
   return data ?? [];
 }
+
+// ---- Content tables (0009) ----
+export async function fetchTestimonials() {
+  const admin = createAdminClient();
+  const { data } = await admin
+    .from("testimonials")
+    .select("*")
+    .order("order_idx", { ascending: true });
+  return data ?? [];
+}
+
+export async function fetchJournalEntries() {
+  const admin = createAdminClient();
+  const { data } = await admin
+    .from("journal_entries")
+    .select("*")
+    .order("entry_date", { ascending: false })
+    .order("order_idx", { ascending: true });
+  return data ?? [];
+}
+
+export async function fetchSiteTools() {
+  const admin = createAdminClient();
+  const { data } = await admin
+    .from("site_tools")
+    .select("*")
+    .order("order_idx", { ascending: true });
+  return data ?? [];
+}
+
+export async function fetchSiteResources() {
+  const admin = createAdminClient();
+  const { data } = await admin
+    .from("site_resources")
+    .select("*")
+    .order("order_idx", { ascending: true });
+  return data ?? [];
+}

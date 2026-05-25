@@ -20,7 +20,11 @@ const NAV: NavItem[] = [
   { href: "/admin/wiki", label: "위키 운영", icon: "wiki" },
   { href: "/admin/events", label: "공유회 관리", icon: "calendar" },
   { href: "/admin/posts", label: "블로그", icon: "edit" },
+  { href: "/admin/journal", label: "작업 일지", icon: "edit" },
   { href: "/admin/products", label: "자동화앱", icon: "box" },
+  { href: "/admin/tools", label: "추천 도구", icon: "box" },
+  { href: "/admin/resources", label: "자료/다운로드", icon: "box" },
+  { href: "/admin/testimonials", label: "후기", icon: "users" },
 ];
 const NAV_FOOT: NavItem[] = [
   { href: "/admin/settings", label: "설정", icon: "settings" },
