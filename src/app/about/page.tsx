@@ -18,6 +18,7 @@ import Link from "next/link";
 import { Fragment } from "react";
 import { FadeUp } from "@/components/aiconlab/fade-up";
 import { Icon } from "@/components/aiconlab/icon";
+import { SITE_STATS } from "@/lib/site-stats";
 import {
   StickerCallout,
   StickerCircle,
@@ -942,7 +943,7 @@ function Positioning() {
 // ──────────────────────────────────────────────────────────
 function NorthStar() {
   const before = [
-    "유튜브 채널 (구독자 9,490명)",
+    `유튜브 채널 (구독자 ${SITE_STATS.youtubeSubscribers}명)`,
     "자동화 프로그램 무료 배포",
     "위키에 정체성 박힘",
     "운영자 1인 + 시청자",
