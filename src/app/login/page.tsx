@@ -39,8 +39,9 @@ function LoginInner() {
   const params = useSearchParams();
   const router = useRouter();
   const oauthError = oauthErrorMessage(params.get("error"));
+  const isAdminLogin = (params.get("next") ?? "").startsWith("/admin");
 
-  const [tab, setTab] = useState<Tab>("google");
+  const [tab, setTab] = useState<Tab>(isAdminLogin ? "email" : "google");
   const [emailMode, setEmailMode] = useState<EmailMode>("login");
   const [busy, setBusy] = useState(false);
 
@@ -181,7 +182,7 @@ function LoginInner() {
             marginBottom: 8,
           }}
         >
-          AICONLAB 시작하기
+          {isAdminLogin ? "운영자 로그인" : "AICONLAB 시작하기"}
         </div>
         <p
           style={{
@@ -191,7 +192,9 @@ function LoginInner() {
             marginBottom: 24,
           }}
         >
-          가입 후 위키 접근은 운영자가 별도로 승급해드립니다.
+          {isAdminLogin
+            ? "AICONLAB 어드민 콘솔. 운영자 계정으로 로그인하세요."
+            : "가입 후 위키 접근은 운영자가 별도로 승급해드립니다."}
         </p>
 
         {/* 탭 전환 */}

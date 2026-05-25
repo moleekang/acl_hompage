@@ -1,6 +1,5 @@
 // /tools — 추천 도구 페이지 (셀피쉬 AI 툴 패턴)
 // UI 컨셉: 카테고리 탭 + 카드 그리드 4-up + 멤버 혜택 호버
-// v0: placeholder 도구 12개
 
 import {
   Card,
@@ -10,26 +9,42 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { createAdminClient } from "@/lib/supabase/server";
 
-// 사용자가 실제 쓰는 (또는 추천하는) AI 도구들 — placeholder
-const tools = [
-  { name: "Claude", category: "AI 모델", icon: "✦", desc: "긴 컨텍스트, 글쓰기 최강", deal: "20% 할인" },
-  { name: "Cursor", category: "코딩", icon: "⌘", desc: "AI 코딩 에디터 표준", deal: "1개월 Pro" },
-  { name: "Remotion", category: "영상", icon: "🎬", desc: "코드로 영상 자동 생성", deal: "-" },
-  { name: "Gamma", category: "디자인", icon: "✨", desc: "AI 슬라이드 자동 생성", deal: "Pro 50% 할인" },
-  { name: "Notion AI", category: "문서", icon: "🗂️", desc: "노트 + AI 작성 통합", deal: "-" },
-  { name: "ElevenLabs", category: "음성", icon: "🎙️", desc: "사람 같은 음성 생성", deal: "1개월 Starter" },
-  { name: "Vercel", category: "배포", icon: "▲", desc: "Next.js 호스팅 표준", deal: "$50 크레딧" },
-  { name: "Figma", category: "디자인", icon: "🎨", desc: "UI 디자인의 표준", deal: "-" },
-  { name: "Obsidian", category: "위키", icon: "🔮", desc: "로컬 마크다운 위키", deal: "-" },
-  { name: "Stibee", category: "이메일", icon: "📨", desc: "한국형 뉴스레터", deal: "1개월 무료" },
-  { name: "Toss Payments", category: "결제", icon: "💳", desc: "한국 1위 결제 PG", deal: "-" },
-  { name: "GitHub", category: "협업", icon: "🐙", desc: "코드 저장 + 버전 관리", deal: "-" },
-];
+type Tool = {
+  id: string;
+  name: string;
+  category: string;
+  desc: string;
+  icon: string;
+  deal: string;
+};
 
-const categories = ["전체", "AI 모델", "코딩", "영상", "디자인", "문서", "음성", "배포", "위키"];
+async function fetchTools(): Promise<Tool[]> {
+  const admin = createAdminClient();
+  const { data, error } = await admin
+    .from("site_tools")
+    .select("id, name, category, description, icon_emoji, deal")
+    .eq("published", true)
+    .order("order_idx", { ascending: true });
+  if (error) {
+    console.error("[tools] fetchTools:", error.message);
+    return [];
+  }
+  return (data ?? []).map((row) => ({
+    id: row.id,
+    name: row.name,
+    category: row.category,
+    desc: row.description,
+    icon: row.icon_emoji ?? "✦",
+    deal: row.deal ?? "-",
+  }));
+}
 
-export default function ToolsPage() {
+export default async function ToolsPage() {
+  const tools = await fetchTools();
+  // 카테고리는 도구에서 동적 추출 + "전체" 앞에 둠.
+  const categories = ["전체", ...Array.from(new Set(tools.map((t) => t.category)))];
   return (
     <div className="bg-background">
       {/* ===== Hero ===== */}
@@ -71,7 +86,7 @@ export default function ToolsPage() {
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {tools.map((tool) => (
             <Card
-              key={tool.name}
+              key={tool.id}
               className="group relative overflow-hidden rounded-xl border-0 bg-card shadow-none transition-all hover:-translate-y-1 hover:shadow-md"
             >
               <CardHeader className="p-5">
