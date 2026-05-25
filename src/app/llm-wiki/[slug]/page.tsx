@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { MdRender } from "@/components/wiki/md-render";
+import { formatDateKr } from "@/lib/format-date";
 
 export const dynamic = "force-dynamic";
 
@@ -74,7 +75,7 @@ export default async function WikiViewPage({ params }: { params: Params }) {
         </div>
 
         <div className="mono" style={{ fontSize: 11, color: "var(--fg-3)", marginTop: 14, textAlign: "right" }}>
-          마지막 수정: {new Date(page.updated_at).toLocaleString("ko-KR")}
+          마지막 수정: {formatDateKr(page.updated_at)}
         </div>
       </article>
     </main>

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { requireAdmin } from "./_auth";
 
 async function actorId(): Promise<string | null> {
   const supabase = await createClient();
@@ -19,6 +20,7 @@ type PostInput = {
 };
 
 export async function createPost(input: PostInput) {
+  await requireAdmin();
   const by = await actorId();
   const admin = createAdminClient();
   const { error } = await admin.from("posts").insert({
@@ -36,6 +38,7 @@ export async function createPost(input: PostInput) {
 }
 
 export async function updatePost(slug: string, patch: Partial<PostInput>) {
+  await requireAdmin();
   const admin = createAdminClient();
   const { error } = await admin.from("posts").update(patch).eq("slug", slug);
   if (error) throw new Error(error.message);
@@ -44,6 +47,7 @@ export async function updatePost(slug: string, patch: Partial<PostInput>) {
 }
 
 export async function publishPost(slug: string, publish: boolean) {
+  await requireAdmin();
   const admin = createAdminClient();
   const { error } = await admin
     .from("posts")
@@ -56,6 +60,7 @@ export async function publishPost(slug: string, publish: boolean) {
 }
 
 export async function deletePost(slug: string) {
+  await requireAdmin();
   const admin = createAdminClient();
   const { error } = await admin.from("posts").delete().eq("slug", slug);
   if (error) throw new Error(error.message);

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { formatDateKr } from "@/lib/format-date";
 
 export const dynamic = "force-dynamic";
 
@@ -82,7 +83,7 @@ export default async function WikiHistoryPage({ params }: { params: Params }) {
                   )}
                 </div>
                 <div className="mono" style={{ fontSize: 11, color: "var(--fg-3)", whiteSpace: "nowrap" }}>
-                  {new Date(r.edited_at).toLocaleString("ko-KR")}
+                  {formatDateKr(r.edited_at)}
                 </div>
               </li>
             ))}

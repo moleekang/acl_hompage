@@ -46,3 +46,6 @@ next-env.d.ts
 .omc/
 .playwright-mcp/
 
+# 일회성 적용 스크립트 (저장소에 올리지 않음)
+apply-*.mjs
+

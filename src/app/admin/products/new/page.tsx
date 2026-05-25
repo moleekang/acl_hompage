@@ -7,7 +7,7 @@ export default function NewProductPage() {
       <PageTopbar title="새 제품" crumb="/admin/products/new" sub="자동화앱 카드 추가" />
       <ProductForm
         mode="new"
-        initial={{ slug: "", name: "", pitch: "", status: "beta", release_at: "", body_mdx: "", order_idx: 99, published: false }}
+        initial={{ slug: "", name: "", pitch: "", status: "beta", release_at: "", body_mdx: "", order_idx: 99, published: false, hero_image: null }}
       />
     </>
   );

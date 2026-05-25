@@ -24,6 +24,7 @@ type ProductRow = {
   release_at: string | null;
   order_idx: number;
   published: boolean;
+  hero_image: string | null;
 };
 
 type ProductMeta = {
@@ -48,7 +49,7 @@ async function fetchProducts(): Promise<ProductRow[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("products")
-    .select("slug,name,pitch,status,body_mdx,release_at,order_idx,published")
+    .select("slug,name,pitch,status,body_mdx,release_at,order_idx,published,hero_image")
     .eq("published", true)
     .order("order_idx", { ascending: true });
   if (error || !data) return [];
@@ -364,6 +365,21 @@ function ProductGrid({ products }: { products: ProductRow[] }) {
               (p.status === "coming"
                 ? "soon"
                 : (p.status as Status));
+            // 우선순위: meta.thumb === "play" (커스텀 데모) > hero_image (어드민 업로드) > 기본 PREVIEW
+            const heroThumb = p.hero_image ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={p.hero_image}
+                alt={`${p.name} 썸네일`}
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                }}
+              />
+            ) : undefined;
             const thumbNode =
               meta.thumb === "play" ? (
                 <div
@@ -419,7 +435,7 @@ function ProductGrid({ products }: { products: ProductRow[] }) {
                   tags={meta.tags ?? []}
                   price={meta.price ?? p.release_at ?? ""}
                   cta={meta.cta}
-                  thumb={thumbNode}
+                  thumb={thumbNode ?? heroThumb}
                 />
               </FadeUp>
             );
