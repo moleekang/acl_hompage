@@ -1,13 +1,14 @@
 // AICONLAB 헤더 — 셀피쉬 스타일 (사용자 결정 🅰️)
-// 메뉴: 자동화앱 · 공유회 · 팀 블로그 · 단톡방 + 멤버십 CTA
+// 메뉴: 자동화앱 · 공유회 · 팀 블로그 · 단톡방 + 로그인 CTA
 // Sticky 상단 고정 + 모바일 햄버거 메뉴
 
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { createClient } from "@/lib/supabase/client";
 
 // 헤더 메뉴 정의 — 4개 메뉴 + 멤버십 CTA = 5개
 // 자동화앱 = AICONLAB이 만든 자동화 앱 진열 (현재 Congen) · 향후 SaaS·클로드 스킬 확장
@@ -23,7 +24,24 @@ const navItems = [
 export function Header() {
   // 모바일 메뉴 토글 상태
   const [isOpen, setIsOpen] = useState(false);
+  const [email, setEmail] = useState<string | null>(null);
   const pathname = usePathname();
+  const router = useRouter();
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data }) => setEmail(data.user?.email ?? null));
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      setEmail(session?.user?.email ?? null);
+    });
+    return () => sub.subscription.unsubscribe();
+  }, []);
+
+  async function signOut() {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.refresh();
+  }
 
   // /admin 영역에서는 메인 헤더 숨김 (admin 자체 사이드바를 사용)
   if (pathname?.startsWith("/admin")) return null;
@@ -63,16 +81,31 @@ export function Header() {
           ))}
         </ul>
 
-        {/* ===== 우측: 멤버십 CTA + 모바일 햄버거 ===== */}
+        {/* ===== 우측: 로그인/로그아웃 + 모바일 햄버거 ===== */}
         <div className="flex items-center gap-2">
-          {/* 멤버십 — 데스크톱에서만 노출 (모바일은 드로어 안에서 표시) */}
-          <Button
-            asChild
-            size="sm"
-            className="hidden md:inline-flex rounded-md bg-primary px-4 text-primary-foreground hover:bg-[var(--ink-700)]"
-          >
-            <Link href="/membership">멤버십</Link>
-          </Button>
+          {email ? (
+            <>
+              <span className="hidden md:inline-block max-w-[180px] truncate text-sm text-muted-foreground">
+                {email}
+              </span>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={signOut}
+                className="hidden md:inline-flex rounded-md"
+              >
+                로그아웃
+              </Button>
+            </>
+          ) : (
+            <Button
+              asChild
+              size="sm"
+              className="hidden md:inline-flex rounded-md bg-primary px-4 text-primary-foreground hover:bg-[var(--ink-700)]"
+            >
+              <Link href="/login">로그인</Link>
+            </Button>
+          )}
 
           {/* 햄버거 버튼 — 모바일에서만 노출 */}
           <button
@@ -133,13 +166,26 @@ export function Header() {
               </li>
             ))}
             <li className="mt-2">
-              <Button
-                asChild
-                className="w-full rounded-md bg-primary text-primary-foreground hover:bg-[var(--ink-700)]"
-                onClick={() => setIsOpen(false)}
-              >
-                <Link href="/membership">멤버십 무료 가입</Link>
-              </Button>
+              {email ? (
+                <Button
+                  variant="outline"
+                  className="w-full rounded-md"
+                  onClick={() => {
+                    setIsOpen(false);
+                    signOut();
+                  }}
+                >
+                  로그아웃 ({email})
+                </Button>
+              ) : (
+                <Button
+                  asChild
+                  className="w-full rounded-md bg-primary text-primary-foreground hover:bg-[var(--ink-700)]"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <Link href="/login">로그인</Link>
+                </Button>
+              )}
             </li>
           </ul>
         </div>

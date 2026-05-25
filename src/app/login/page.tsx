@@ -1,31 +1,67 @@
-// 로그인 페이지 — Google OAuth 1버튼.
-// 디자인은 메인 사이트와 동일한 paper 톤. 정식 디자인 시안이 도착하면 교체.
+// 로그인 페이지 — Google OAuth + ID/비번 폼.
+// ID 입력은 @가 없으면 자동으로 @aiconlab.local 을 붙여 Supabase에 보낸다.
 
 "use client";
 
 import { Suspense, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
+const INTERNAL_EMAIL_DOMAIN = "aiconlab.local";
+
 function LoginInner() {
+  const router = useRouter();
   const params = useSearchParams();
-  const error = params.get("error");
-  const [busy, setBusy] = useState(false);
+  const queryError = params.get("error");
+  const next = params.get("next") ?? "/";
+
+  const [busy, setBusy] = useState<"google" | "password" | null>(null);
+  const [id, setId] = useState("");
+  const [pw, setPw] = useState("");
+  const [formError, setFormError] = useState<string | null>(null);
 
   async function signInWithGoogle() {
-    setBusy(true);
+    setBusy("google");
     const supabase = createClient();
     const { error: authError } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
       },
     });
     if (authError) {
       console.error(authError);
-      setBusy(false);
+      setBusy(null);
     }
-    // 성공 시 Google로 리다이렉트되므로 setBusy(false) 호출 안 필요.
+    // 성공 시 Google로 리다이렉트되므로 busy 해제 불필요.
+  }
+
+  async function signInWithPassword(e: React.FormEvent) {
+    e.preventDefault();
+    setFormError(null);
+
+    if (!id.trim() || !pw) {
+      setFormError("ID와 비밀번호를 입력해주세요.");
+      return;
+    }
+
+    const email = id.includes("@") ? id.trim() : `${id.trim()}@${INTERNAL_EMAIL_DOMAIN}`;
+
+    setBusy("password");
+    const supabase = createClient();
+    const { error: authError } = await supabase.auth.signInWithPassword({
+      email,
+      password: pw,
+    });
+    setBusy(null);
+
+    if (authError) {
+      setFormError("로그인 실패: ID 또는 비밀번호를 확인해주세요.");
+      return;
+    }
+
+    router.replace(next);
+    router.refresh();
   }
 
   return (
@@ -77,7 +113,7 @@ function LoginInner() {
         <button
           type="button"
           onClick={signInWithGoogle}
-          disabled={busy}
+          disabled={busy !== null}
           style={{
             width: "100%",
             display: "flex",
@@ -92,15 +128,71 @@ function LoginInner() {
             fontSize: 15,
             fontWeight: 700,
             cursor: busy ? "wait" : "pointer",
-            opacity: busy ? 0.7 : 1,
+            opacity: busy === "google" ? 0.7 : 1,
             transition: "transform .12s ease, background .12s ease",
           }}
         >
           <GoogleMark />
-          {busy ? "Google로 이동 중..." : "Google로 시작하기"}
+          {busy === "google" ? "Google로 이동 중..." : "Google로 시작하기"}
         </button>
 
-        {error && (
+        {/* 구분선 */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+            margin: "24px 0 20px",
+            color: "var(--fg-3)",
+            fontSize: 12,
+            letterSpacing: "0.08em",
+          }}
+        >
+          <div style={{ flex: 1, height: 1, background: "var(--border-1)" }} />
+          <span>또는 ID로 로그인</span>
+          <div style={{ flex: 1, height: 1, background: "var(--border-1)" }} />
+        </div>
+
+        {/* ID/비번 폼 (관리자 전용) */}
+        <form onSubmit={signInWithPassword} style={{ display: "grid", gap: 10 }}>
+          <input
+            type="text"
+            placeholder="ID (예: admin)"
+            value={id}
+            onChange={(e) => setId(e.target.value)}
+            autoComplete="username"
+            disabled={busy !== null}
+            style={inputStyle}
+          />
+          <input
+            type="password"
+            placeholder="비밀번호"
+            value={pw}
+            onChange={(e) => setPw(e.target.value)}
+            autoComplete="current-password"
+            disabled={busy !== null}
+            style={inputStyle}
+          />
+          <button
+            type="submit"
+            disabled={busy !== null}
+            style={{
+              padding: "12px 16px",
+              background: "var(--surface-1)",
+              color: "var(--paper-ink)",
+              border: "2px solid var(--ink-900)",
+              borderRadius: 8,
+              fontSize: 14,
+              fontWeight: 700,
+              cursor: busy ? "wait" : "pointer",
+              opacity: busy === "password" ? 0.7 : 1,
+            }}
+          >
+            {busy === "password" ? "로그인 중..." : "로그인"}
+          </button>
+        </form>
+
+        {(formError || queryError) && (
           <div
             style={{
               marginTop: 16,
@@ -112,7 +204,7 @@ function LoginInner() {
               fontSize: 13,
             }}
           >
-            로그인 실패: {error}
+            {formError ?? `로그인 실패: ${queryError}`}
           </div>
         )}
 
@@ -133,6 +225,17 @@ function LoginInner() {
     </main>
   );
 }
+
+const inputStyle: React.CSSProperties = {
+  padding: "12px 14px",
+  background: "var(--bg-canvas)",
+  color: "var(--paper-ink)",
+  border: "1px solid var(--border-1)",
+  borderRadius: 8,
+  fontSize: 14,
+  fontFamily: "inherit",
+  outline: "none",
+};
 
 function GoogleMark() {
   return (

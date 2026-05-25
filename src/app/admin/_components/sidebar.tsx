@@ -2,8 +2,10 @@
 
 // admin 좌측 사이드바. usePathname()으로 active 표시.
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { Icon, type IconName } from "@/components/admin/icons";
+import { createClient } from "@/lib/supabase/client";
 
 type NavItem = {
   href: string;
@@ -48,6 +50,29 @@ function SidebarLink({ item }: { item: NavItem }) {
 }
 
 export function AdminSidebar() {
+  const router = useRouter();
+  const [email, setEmail] = useState<string | null>(null);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data }) => setEmail(data.user?.email ?? null));
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      setEmail(session?.user?.email ?? null);
+    });
+    return () => sub.subscription.unsubscribe();
+  }, []);
+
+  async function signOut() {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.replace("/login");
+    router.refresh();
+  }
+
+  // 표시용: 이메일의 @ 앞부분 또는 이니셜
+  const displayName = email ? email.split("@")[0] : "—";
+  const initial = displayName.charAt(0).toUpperCase() || "?";
+
   return (
     <nav className="sb">
       <div className="sb-brand">
@@ -68,13 +93,15 @@ export function AdminSidebar() {
 
       <div className="sb-footer">
         <div className="row">
-          <div className="avatar">C</div>
+          <div className="avatar">{initial}</div>
           <div className="who">
             <div className="lbl">운영자</div>
-            <div style={{ fontWeight: 700 }}>caden</div>
+            <div style={{ fontWeight: 700 }} title={email ?? ""}>{displayName}</div>
           </div>
         </div>
-        <button type="button" className="out">로그아웃</button>
+        <button type="button" className="out" onClick={signOut}>
+          로그아웃
+        </button>
       </div>
     </nav>
   );

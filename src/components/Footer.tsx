@@ -124,10 +124,10 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  href="/membership"
+                  href="/login"
                   className="transition-colors hover:text-[var(--paper)]"
                 >
-                  멤버십
+                  로그인
                 </Link>
               </li>
             </ul>
