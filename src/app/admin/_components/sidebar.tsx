@@ -1,7 +1,7 @@
 "use client";
 
 // admin 좌측 사이드바. usePathname()으로 active 표시.
-import Link from "next/link";
+import Link, { useLinkStatus } from "next/link";
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Icon, type IconName } from "@/components/admin/icons";
@@ -32,19 +32,34 @@ function useIsActive(href: string) {
   return path === href || path?.startsWith(href + "/") || false;
 }
 
-function SidebarLink({ item }: { item: NavItem }) {
-  const active = useIsActive(item.href);
+// useLinkStatus()는 Link의 자손에서만 호출 가능 — pending 클래스로 스피너 노출.
+function SidebarLinkInner({ item, active }: { item: NavItem; active: boolean }) {
+  const { pending } = useLinkStatus();
   return (
-    <Link
-      href={item.href}
-      className={"sb-item" + (active ? " active" : "")}
-      style={{ textDecoration: "none" }}
+    <span
+      className={
+        "sb-item" +
+        (active ? " active" : "") +
+        (pending ? " pending" : "")
+      }
     >
       <Icon name={item.icon} size={18} style={{ flexShrink: 0 }} />
       <span>{item.label}</span>
       {item.count != null && item.count > 0 && (
         <span className="count mono">{item.count}</span>
       )}
+    </span>
+  );
+}
+
+function SidebarLink({ item }: { item: NavItem }) {
+  const active = useIsActive(item.href);
+  return (
+    <Link
+      href={item.href}
+      style={{ textDecoration: "none", display: "contents" }}
+    >
+      <SidebarLinkInner item={item} active={active} />
     </Link>
   );
 }

@@ -531,3 +531,72 @@
 .admin-shell .rowmenu button.primary { color: var(--text-mint); font-weight: 700; }
 .admin-shell .rowmenu button.danger  { color: var(--text-hot); }
 .admin-shell .rowmenu .rm-div { height: 1px; background: var(--border-1); margin: 4px 6px; }
+
+/* ============================================================
+   LOADING — route-level skeleton + nav pending indicator
+   ============================================================ */
+@keyframes admin-skel-pulse {
+  0%   { opacity: 0.55; }
+  50%  { opacity: 1; }
+  100% { opacity: 0.55; }
+}
+.admin-shell .admin-skel,
+.admin-shell .admin-skel-bar,
+.admin-shell .admin-skel-card {
+  animation: admin-skel-pulse 1.4s ease-in-out infinite;
+}
+.admin-shell .admin-skel.topbar-skel {
+  display: block;
+  padding: 22px 32px;
+  border-bottom: 1px solid var(--border-1);
+  animation: none;
+}
+.admin-shell .admin-skel-bar {
+  display: block;
+  background: var(--paper-dim);
+  border-radius: 4px;
+}
+.admin-shell .admin-skel-bar.w-28 { width: 112px; }
+.admin-shell .admin-skel-bar.w-48 { width: 200px; }
+.admin-shell .admin-skel-bar.h-3  { height: 12px; }
+.admin-shell .admin-skel-bar.h-7  { height: 28px; }
+.admin-shell .admin-skel-bar.mt-2 { margin-top: 12px; }
+.admin-shell .admin-skel-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  padding: 24px 32px;
+}
+.admin-shell .admin-skel-card {
+  background: var(--surface-1);
+  border: 1px solid var(--border-1);
+  border-radius: var(--r-card);
+  height: 120px;
+}
+.admin-shell .admin-skel-card.admin-skel-card-wide {
+  grid-column: span 3;
+  height: 200px;
+}
+
+/* nav 클릭 직후 ~ 새 페이지 streaming 시작 사이의 짧은 갭을 표시.
+   useLinkStatus()가 pending=true 일 때 .pending 클래스를 붙인다. */
+.admin-shell .sb-item.pending {
+  position: relative;
+  opacity: 0.7;
+}
+.admin-shell .sb-item.pending::after {
+  content: "";
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  margin-top: -5px;
+  border: 2px solid var(--mint-400);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: admin-spin 0.7s linear infinite;
+}
+@keyframes admin-spin {
+  to { transform: rotate(360deg); }
+}
