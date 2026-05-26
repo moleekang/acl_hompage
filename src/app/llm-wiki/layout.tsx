@@ -10,8 +10,7 @@ export const metadata = {
 };
 
 export default async function WikiLayout({ children }: { children: ReactNode }) {
-  const isProd = process.env.NODE_ENV === "production";
-  const preview = !isProd && process.env.NEXT_PUBLIC_ADMIN_PREVIEW_MODE !== "0";
+  const preview = process.env.ADMIN_PREVIEW_MODE === "1";
 
   if (preview) return <>{children}</>;
 

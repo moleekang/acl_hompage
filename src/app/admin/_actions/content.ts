@@ -21,6 +21,16 @@ const REVALIDATE_PATHS: Record<ContentTable, string[]> = {
   site_resources: ["/resources", "/admin/resources"],
 };
 
+// Server Action은 HTTP endpoint라 TypeScript 타입만으로는 임의 테이블명 주입을 막을 수 없다.
+// 모든 진입점에서 이 allowlist로 런타임 검증.
+const ALLOWED_TABLES = Object.keys(REVALIDATE_PATHS) as ContentTable[];
+
+function assertAllowedTable(table: unknown): asserts table is ContentTable {
+  if (typeof table !== "string" || !ALLOWED_TABLES.includes(table as ContentTable)) {
+    throw new Error("Invalid table");
+  }
+}
+
 function revalidate(table: ContentTable) {
   for (const p of REVALIDATE_PATHS[table]) revalidatePath(p);
 }
@@ -29,6 +39,7 @@ export async function createContentRow(
   table: ContentTable,
   row: Record<string, unknown>,
 ) {
+  assertAllowedTable(table);
   await requireAdmin();
   const admin = createAdminClient();
   const { error } = await admin.from(table).insert(row);
@@ -41,6 +52,7 @@ export async function updateContentRow(
   id: string,
   patch: Record<string, unknown>,
 ) {
+  assertAllowedTable(table);
   await requireAdmin();
   const admin = createAdminClient();
   const { error } = await admin.from(table).update(patch).eq("id", id);
@@ -53,6 +65,7 @@ export async function togglePublishContent(
   id: string,
   publish: boolean,
 ) {
+  assertAllowedTable(table);
   await requireAdmin();
   const admin = createAdminClient();
   const { error } = await admin
@@ -64,6 +77,7 @@ export async function togglePublishContent(
 }
 
 export async function deleteContentRow(table: ContentTable, id: string) {
+  assertAllowedTable(table);
   await requireAdmin();
   const admin = createAdminClient();
   const { error } = await admin.from(table).delete().eq("id", id);

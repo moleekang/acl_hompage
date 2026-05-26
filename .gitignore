@@ -49,3 +49,10 @@ next-env.d.ts
 # 일회성 적용 스크립트 (저장소에 올리지 않음)
 apply-*.mjs
 
+# Supabase 마이그레이션 — 개인 운영, git에 올리지 않음
+supabase/migrations/
+
+# Playwright 산출물
+/playwright-report/
+/test-results/
+
