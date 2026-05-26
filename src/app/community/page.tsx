@@ -4,30 +4,33 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { SITE_STATS } from "@/lib/site-stats";
+import { createAdminClient } from "@/lib/supabase/server";
 
-// 시청자 후기 placeholder
-const testimonials = [
-  {
-    name: "김OO",
-    role: "1인 콘텐츠 크리에이터",
-    text: "ConGen 베타 써봤는데 진짜 영상 만드는 시간이 1/10로 줄었어요. 단톡방에서 빠른 피드백도 좋고요.",
-    contribution: "베타 테스터 + 사용 후기",
-  },
-  {
-    name: "이OO",
-    role: "AI 자동화 학습자",
-    text: "위키 인사이트 따라하면서 1인 기업 자동화 시작했어요. 매번 새 글 올라올 때마다 뭐 배울지 기대됨.",
-    contribution: "독자 + 적용 후기",
-  },
-  {
-    name: "박OO",
-    role: "유튜브 크리에이터",
-    text: "단톡방에서 자동화 흐름 같이 고민해주시는 게 진짜 도움돼요. 혼자 할 때랑 완전 다름.",
-    contribution: "단톡방 활약",
-  },
-];
+type Testimonial = {
+  id: string;
+  name: string;
+  role: string | null;
+  body: string;
+  contribution: string | null;
+};
 
-export default function CommunityPage() {
+async function fetchTestimonials(): Promise<Testimonial[]> {
+  const admin = createAdminClient();
+  const { data, error } = await admin
+    .from("testimonials")
+    .select("id, name, role, body, contribution")
+    .eq("published", true)
+    .order("order_idx", { ascending: true });
+  if (error) {
+    console.error("[community] fetchTestimonials:", error.message);
+    return [];
+  }
+  return data ?? [];
+}
+
+export default async function CommunityPage() {
+  const testimonials = await fetchTestimonials();
   return (
     <div className="bg-background">
       {/* ===== Hero — 큰 단톡방 CTA ===== */}
@@ -68,19 +71,19 @@ export default function CommunityPage() {
           <div className="grid gap-8 md:grid-cols-4">
             <div>
               <p className="font-serif text-4xl text-primary md:text-5xl">
-                1,000+
+                {SITE_STATS.communityMembers}
               </p>
               <p className="mt-2 text-sm text-[#a09d96]">단톡방 멤버</p>
             </div>
             <div>
               <p className="font-serif text-4xl text-primary md:text-5xl">
-                9,490
+                {SITE_STATS.youtubeSubscribers}
               </p>
               <p className="mt-2 text-sm text-[#a09d96]">유튜브 구독자</p>
             </div>
             <div>
               <p className="font-serif text-4xl text-primary md:text-5xl">
-                30+
+                {SITE_STATS.betaTesters}
               </p>
               <p className="mt-2 text-sm text-[#a09d96]">베타 테스터</p>
             </div>
@@ -108,7 +111,7 @@ export default function CommunityPage() {
 
           <div className="grid gap-4 md:grid-cols-4">
             {[
-              { step: "1", icon: "📺", title: "유튜브 시청", desc: "9,490명 구독자" },
+              { step: "1", icon: "📺", title: "유튜브 시청", desc: `${SITE_STATS.youtubeSubscribers}명 구독자` },
               { step: "2", icon: "💬", title: "단톡방 합류", desc: "마을 회관에 머물기" },
               { step: "3", icon: "🤝", title: "능동적 활동", desc: "질문 · 공유 · 기여" },
               { step: "4", icon: "✦", title: "코어 자연 형성", desc: "공동 프로젝트 동료" },
@@ -147,24 +150,28 @@ export default function CommunityPage() {
         <div className="grid gap-6 md:grid-cols-3">
           {testimonials.map((t) => (
             <Card
-              key={t.name}
+              key={t.id}
               className="rounded-xl border-0 bg-card shadow-none"
             >
               <CardHeader className="p-6">
                 <p className="text-sm leading-relaxed text-[#3d3d3a]">
-                  &ldquo;{t.text}&rdquo;
+                  &ldquo;{t.body}&rdquo;
                 </p>
               </CardHeader>
               <CardContent className="px-6 pb-6">
                 <div className="border-t border-border pt-4">
                   <p className="font-serif text-base">{t.name}</p>
-                  <p className="text-xs text-muted-foreground">{t.role}</p>
-                  <Badge
-                    variant="secondary"
-                    className="mt-2 rounded-full bg-background text-xs"
-                  >
-                    {t.contribution}
-                  </Badge>
+                  {t.role && (
+                    <p className="text-xs text-muted-foreground">{t.role}</p>
+                  )}
+                  {t.contribution && (
+                    <Badge
+                      variant="secondary"
+                      className="mt-2 rounded-full bg-background text-xs"
+                    >
+                      {t.contribution}
+                    </Badge>
+                  )}
                 </div>
               </CardContent>
             </Card>

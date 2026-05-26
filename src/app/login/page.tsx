@@ -1,5 +1,5 @@
 // 로그인 페이지 — Google OAuth + 이메일/비밀번호 탭 전환.
-// 디자인은 메인 사이트와 동일한 paper 톤. 정식 디자인 시안이 도착하면 교체.
+// 이메일 입력은 @가 없으면 자동으로 @aiconlab.local을 붙여 Supabase에 보낸다 (관리자 약식 로그인용).
 
 "use client";
 
@@ -10,12 +10,20 @@ import { createClient } from "@/lib/supabase/client";
 type Tab = "google" | "email";
 type EmailMode = "login" | "signup";
 
+const INTERNAL_EMAIL_DOMAIN = "aiconlab.local";
+
 /** Open-redirect 방지: 같은 오리진의 경로만 허용한다. */
 function safeNext(raw: string | null): string {
   if (raw && raw.startsWith("/") && !raw.startsWith("//")) {
     return raw;
   }
   return "/";
+}
+
+/** "admin" 같은 약식 입력에 @aiconlab.local을 자동으로 붙여준다. */
+function toEmail(input: string): string {
+  const v = input.trim();
+  return v.includes("@") ? v : `${v}@${INTERNAL_EMAIL_DOMAIN}`;
 }
 
 const OAUTH_ERROR_MESSAGES: Record<string, string> = {
@@ -31,8 +39,9 @@ function LoginInner() {
   const params = useSearchParams();
   const router = useRouter();
   const oauthError = oauthErrorMessage(params.get("error"));
+  const isAdminLogin = (params.get("next") ?? "").startsWith("/admin");
 
-  const [tab, setTab] = useState<Tab>("google");
+  const [tab, setTab] = useState<Tab>(isAdminLogin ? "email" : "google");
   const [emailMode, setEmailMode] = useState<EmailMode>("login");
   const [busy, setBusy] = useState(false);
 
@@ -71,10 +80,11 @@ function LoginInner() {
 
     setBusy(true);
     const supabase = createClient();
+    const finalEmail = toEmail(email);
 
     if (emailMode === "signup") {
       const { data, error } = await supabase.auth.signUp({
-        email,
+        email: finalEmail,
         password,
         options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
       });
@@ -83,7 +93,6 @@ function LoginInner() {
         setFormError(error.message);
         return;
       }
-      // 이메일 확인이 비활성화돼 있으면 세션이 바로 생성됨.
       if (data.session) {
         router.replace("/");
       } else {
@@ -93,7 +102,7 @@ function LoginInner() {
       }
     } else {
       const { error } = await supabase.auth.signInWithPassword({
-        email,
+        email: finalEmail,
         password,
       });
       setBusy(false);
@@ -173,7 +182,7 @@ function LoginInner() {
             marginBottom: 8,
           }}
         >
-          AICONLAB 시작하기
+          {isAdminLogin ? "운영자 로그인" : "AICONLAB 시작하기"}
         </div>
         <p
           style={{
@@ -183,7 +192,9 @@ function LoginInner() {
             marginBottom: 24,
           }}
         >
-          가입 후 위키 접근은 운영자가 별도로 승급해드립니다.
+          {isAdminLogin
+            ? "AICONLAB 어드민 콘솔. 운영자 계정으로 로그인하세요."
+            : "가입 후 위키 접근은 운영자가 별도로 승급해드립니다."}
         </p>
 
         {/* 탭 전환 */}
@@ -225,11 +236,12 @@ function LoginInner() {
         {tab === "email" && (
           <form onSubmit={handleEmailSubmit} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             <input
-              type="email"
-              placeholder="이메일"
+              type={emailMode === "signup" ? "email" : "text"}
+              placeholder={emailMode === "signup" ? "이메일" : "이메일 또는 ID (예: admin)"}
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              autoComplete={emailMode === "signup" ? "email" : "username"}
               style={inputStyle}
               disabled={busy}
             />
@@ -239,6 +251,7 @@ function LoginInner() {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              autoComplete={emailMode === "signup" ? "new-password" : "current-password"}
               style={inputStyle}
               disabled={busy}
             />
@@ -249,6 +262,7 @@ function LoginInner() {
                 required
                 value={confirm}
                 onChange={(e) => setConfirm(e.target.value)}
+                autoComplete="new-password"
                 style={inputStyle}
                 disabled={busy}
               />

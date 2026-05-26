@@ -23,6 +23,7 @@ import {
   StickerStamp,
 } from "@/components/aiconlab/sticker";
 import { fetchPosts, categories, type Post } from "./log/posts";
+import { SITE_STATS } from "@/lib/site-stats";
 
 // ──────────────────────────────────────────────────────────
 // 1. HERO — 새 비전 카피 (④번 확정안)
@@ -122,11 +123,11 @@ function Hero() {
                   flexWrap: "wrap",
                 }}
               >
-                <Stat n="9,490" label="함께하는 시청자" />
+                <Stat n={SITE_STATS.youtubeSubscribers} label="함께하는 시청자" />
                 <Divider />
-                <Stat n="57K" label="인기 영상 뷰" />
+                <Stat n={SITE_STATS.topVideoViews} label="인기 영상 뷰" />
                 <Divider />
-                <Stat n="30+" label="공유 위키" />
+                <Stat n={SITE_STATS.wikiPages} label="공유 위키" />
               </div>
             </FadeUp>
           </div>
@@ -224,7 +225,7 @@ function Hero() {
                       fontFamily: "var(--font-mono)",
                     }}
                   >
-                    57K
+                    {SITE_STATS.topVideoViews}
                   </div>
                 </div>
                 <div
@@ -336,13 +337,13 @@ function Hero() {
                 <ActivityRow
                   emoji="✏️"
                   label="Writing"
-                  content="위키 30+ 페이지"
+                  content={`위키 ${SITE_STATS.wikiPages} 페이지`}
                   color="var(--text-electric)"
                 />
                 <ActivityRow
                   emoji="📺"
                   label="Streaming"
-                  content="유튜브 AiConLab · 9,490명"
+                  content={`유튜브 AiConLab · ${SITE_STATS.youtubeSubscribers}명`}
                   color="var(--text-hot)"
                 />
                 <ActivityRow

@@ -8,7 +8,7 @@ import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 
-// 헤더 메뉴 정의 — 4개 메뉴 + 멤버십 CTA = 5개
+// 헤더 메뉴 정의 — 4개 메뉴 + 로그인 CTA
 const navItems = [
   { label: "자동화앱", href: "/products" },
   { label: "공유회", href: "/insights" },
@@ -63,7 +63,7 @@ export function HeaderClient({ userDisplay }: Props) {
           ))}
         </ul>
 
-        {/* ===== 우측: 유저 상태 + 멤버십 CTA + 모바일 햄버거 ===== */}
+        {/* ===== 우측: 유저 상태 + 모바일 햄버거 ===== */}
         <div className="flex items-center gap-2">
           {userDisplay ? (
             // 로그인 상태: 닉네임/이메일 표시 + 로그아웃 버튼
@@ -100,15 +100,6 @@ export function HeaderClient({ userDisplay }: Props) {
               <Link href="/login">로그인</Link>
             </Button>
           )}
-
-          {/* 멤버십 — 데스크톱에서만 노출 (모바일은 드로어 안에서 표시) */}
-          <Button
-            asChild
-            size="sm"
-            className="hidden md:inline-flex rounded-md bg-primary px-4 text-primary-foreground hover:bg-[var(--ink-700)]"
-          >
-            <Link href="/membership">멤버십</Link>
-          </Button>
 
           {/* 햄버거 버튼 — 모바일에서만 노출 */}
           <button
@@ -168,17 +159,8 @@ export function HeaderClient({ userDisplay }: Props) {
                 </a>
               </li>
             ))}
-            <li className="mt-2">
-              <Button
-                asChild
-                className="w-full rounded-md bg-primary text-primary-foreground hover:bg-[var(--ink-700)]"
-                onClick={() => setIsOpen(false)}
-              >
-                <Link href="/membership">멤버십 무료 가입</Link>
-              </Button>
-            </li>
             {/* 모바일 드로어: 로그인/로그아웃 */}
-            <li className="mt-1">
+            <li className="mt-2">
               {userDisplay ? (
                 <form action="/auth/signout" method="POST">
                   <button

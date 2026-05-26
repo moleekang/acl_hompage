@@ -3,77 +3,44 @@
 // 셀피쉬 /blog의 미니멀 패턴을 1인 일기 톤으로 변형
 
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
+import { createAdminClient } from "@/lib/supabase/server";
 
-// 일기 데이터 — placeholder
-// 각 항목: 날짜 + 카테고리 + 제목 + 미리보기 + (옵션) 결과물 링크
-const journalEntries = [
-  {
-    date: "2026-05-04",
-    category: "결과물",
-    title: "AICONLAB 홈페이지 v0 풀 적용 완료",
-    preview:
-      "Claude Design System으로 모든 페이지 톤 통일. Footer 컴포넌트 분리해서 모든 페이지 자동 노출하게 만들었다. v0의 첫 형태가 드디어 보인다.",
-    output: { label: "결과물 → 홈페이지 v0", href: "/" },
-  },
-  {
-    date: "2026-05-04",
-    category: "사색",
-    title: "왜 셀피쉬 톤보다 Claude 톤이 AICONLAB에 맞을까",
-    preview:
-      "처음엔 흰 배경 + 검정 텍스트가 깔끔하다 느꼈다. 그런데 '한 사람의 라이브 실험실'이라는 정의문에 대입해보니, 차가운 미니멀보다 따뜻한 editorial이 정체성에 더 맞았다.",
-    output: { label: "참고 → claude-design-system.md", href: "#" },
-  },
-  {
-    date: "2026-05-04",
-    category: "회고",
-    title: "브랜드 정체성 한 줄로 압축까지 3일",
-    preview:
-      "2026-05-02에 시작한 AICONLAB이 사실 'AI Context Lab' 이었다는 걸 깨달은 게 5월 4일. 'Content'가 아니라 'Context'. 한 글자 차이가 모든 메시지를 바꿔놨다.",
-    output: { label: "결과물 → brand-vision.md", href: "#" },
-  },
-  {
-    date: "2026-05-04",
-    category: "의문",
-    title: "ConGen 출시를 미루기로 한 결정의 진짜 이유",
-    preview:
-      "'매출이 안 나올 것 같다'는 직감. 도대체 무엇을 가리켰을까. 제품 자체? 시청자? 내 어색함? 명확히 짚지 못한 채 일단 다음 단계로 넘어왔다. 다시 와서 봐야 할 질문.",
-    output: null,
-  },
-  {
-    date: "2026-05-04",
-    category: "관찰",
-    title: "Pieter Levels의 Just Ship It 정신을 직접 적용해본 후",
-    preview:
-      "v0를 못생겨도 24시간 안에 출시한다. 도메인은 안 사고 Vercel 임시 URL로 시작. 사용자가 제안한 '도메인은 나중에' 가 정확히 levels.io 정신이었다.",
-    output: { label: "참고 → pieter-levels-levels-io.md", href: "#" },
-  },
-  {
-    date: "2026-05-04",
-    category: "결과물",
-    title: "헤더 + 6개 페이지 신규 + Footer 분리",
-    preview:
-      "각 페이지마다 다른 UI 패턴 — 디지털 가든(/insights), 제품 쇼케이스(/resources), 셀피쉬 AI 툴(/tools), Build in Public 타임라인(/log), 단톡방 허브(/community), 3단 가격표(/membership).",
-    output: { label: "결과물 → 7개 페이지 v0", href: "/" },
-  },
-  {
-    date: "2026-05-03",
-    category: "사색",
-    title: "셀피쉬클럽이 사용자 직접 모티브였던 이유",
-    preview:
-      "사용자가 처음에 '내 모티브가 된 거는 이거야'라며 selfishclub.xyz를 보여줬을 때, 그제서야 모든 결정이 한 곳으로 모였다. 1인 정체성 + 한국형 커뮤니티 구조의 정확한 합.",
-    output: { label: "참고 → selfishclub-xyz.md", href: "#" },
-  },
-  {
-    date: "2026-05-02",
-    category: "회고",
-    title: "ABN 모델 그대로 안 가져오고 새로 짠 이유",
-    preview:
-      "ABN의 5명 코어 모델은 너무 강력했다. 그런데 AICONLAB은 1인 + N명 시청자 → 코어 자연 형성이라는 다른 결. 자매 프로젝트지만 진짜 다른 길이라는 걸 받아들이는 데 시간이 걸렸다.",
-    output: { label: "결과물 → community-model.md", href: "#" },
-  },
-];
+// DB에서 가져오는 행을 화면 쓰던 모양으로 변환.
+type JournalEntry = {
+  id: string;
+  date: string;
+  category: string;
+  title: string;
+  preview: string;
+  output: { label: string; href: string } | null;
+};
+
+async function fetchJournalEntries(): Promise<JournalEntry[]> {
+  const admin = createAdminClient();
+  const { data, error } = await admin
+    .from("journal_entries")
+    .select("id, entry_date, category, title, preview, output_label, output_href")
+    .eq("published", true)
+    .order("entry_date", { ascending: false })
+    .order("order_idx", { ascending: true });
+  if (error) {
+    console.error("[journal] fetchJournalEntries:", error.message);
+    return [];
+  }
+  return (data ?? []).map((row) => ({
+    id: row.id,
+    date: row.entry_date,
+    category: row.category,
+    title: row.title,
+    preview: row.preview,
+    output:
+      row.output_label && row.output_href
+        ? { label: row.output_label, href: row.output_href }
+        : null,
+  }));
+}
+
 
 const categories = ["전체", "사색", "회고", "의문", "결과물", "관찰"];
 
@@ -87,8 +54,8 @@ const categoryColors: Record<string, string> = {
 };
 
 // 일기를 날짜별로 그룹화 (시간순 흐름 강조)
-function groupByDate(entries: typeof journalEntries) {
-  const grouped: Record<string, typeof journalEntries> = {};
+function groupByDate(entries: JournalEntry[]) {
+  const grouped: Record<string, JournalEntry[]> = {};
   entries.forEach((entry) => {
     if (!grouped[entry.date]) grouped[entry.date] = [];
     grouped[entry.date].push(entry);
@@ -96,7 +63,8 @@ function groupByDate(entries: typeof journalEntries) {
   return grouped;
 }
 
-export default function JournalPage() {
+export default async function JournalPage() {
+  const journalEntries = await fetchJournalEntries();
   const grouped = groupByDate(journalEntries);
   const dates = Object.keys(grouped).sort().reverse(); // 최신 먼저
 
@@ -160,9 +128,9 @@ export default function JournalPage() {
 
               {/* 그날의 일기들 */}
               <div className="space-y-6">
-                {grouped[date].map((entry, idx) => (
+                {grouped[date].map((entry) => (
                   <Card
-                    key={idx}
+                    key={entry.id}
                     className="rounded-xl border-0 bg-card shadow-none transition-all hover:-translate-y-0.5 hover:shadow-md"
                   >
                     <CardContent className="p-8">

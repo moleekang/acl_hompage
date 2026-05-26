@@ -1,9 +1,11 @@
 "use client";
 
 // admin 좌측 사이드바. usePathname()으로 active 표시.
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import Link, { useLinkStatus } from "next/link";
+import { useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { Icon, type IconName } from "@/components/admin/icons";
+import { createClient } from "@/lib/supabase/client";
 
 type NavItem = {
   href: string;
@@ -18,7 +20,11 @@ const NAV: NavItem[] = [
   { href: "/admin/wiki", label: "위키 운영", icon: "wiki" },
   { href: "/admin/events", label: "공유회 관리", icon: "calendar" },
   { href: "/admin/posts", label: "블로그", icon: "edit" },
+  { href: "/admin/journal", label: "작업 일지", icon: "edit" },
   { href: "/admin/products", label: "자동화앱", icon: "box" },
+  { href: "/admin/tools", label: "추천 도구", icon: "box" },
+  { href: "/admin/resources", label: "자료/다운로드", icon: "box" },
+  { href: "/admin/testimonials", label: "후기", icon: "users" },
 ];
 const NAV_FOOT: NavItem[] = [
   { href: "/admin/settings", label: "설정", icon: "settings" },
@@ -30,24 +36,62 @@ function useIsActive(href: string) {
   return path === href || path?.startsWith(href + "/") || false;
 }
 
-function SidebarLink({ item }: { item: NavItem }) {
-  const active = useIsActive(item.href);
+// useLinkStatus()는 Link의 자손에서만 호출 가능 — pending 클래스로 스피너 노출.
+function SidebarLinkInner({ item, active }: { item: NavItem; active: boolean }) {
+  const { pending } = useLinkStatus();
   return (
-    <Link
-      href={item.href}
-      className={"sb-item" + (active ? " active" : "")}
-      style={{ textDecoration: "none" }}
+    <span
+      className={
+        "sb-item" +
+        (active ? " active" : "") +
+        (pending ? " pending" : "")
+      }
     >
       <Icon name={item.icon} size={18} style={{ flexShrink: 0 }} />
       <span>{item.label}</span>
       {item.count != null && item.count > 0 && (
         <span className="count mono">{item.count}</span>
       )}
+    </span>
+  );
+}
+
+function SidebarLink({ item }: { item: NavItem }) {
+  const active = useIsActive(item.href);
+  return (
+    <Link
+      href={item.href}
+      style={{ textDecoration: "none", display: "contents" }}
+    >
+      <SidebarLinkInner item={item} active={active} />
     </Link>
   );
 }
 
 export function AdminSidebar() {
+  const router = useRouter();
+  const [email, setEmail] = useState<string | null>(null);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data }) => setEmail(data.user?.email ?? null));
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      setEmail(session?.user?.email ?? null);
+    });
+    return () => sub.subscription.unsubscribe();
+  }, []);
+
+  async function signOut() {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.replace("/login");
+    router.refresh();
+  }
+
+  // 표시용: 이메일의 @ 앞부분 또는 이니셜
+  const displayName = email ? email.split("@")[0] : "—";
+  const initial = displayName.charAt(0).toUpperCase() || "?";
+
   return (
     <nav className="sb">
       <div className="sb-brand">
@@ -68,13 +112,15 @@ export function AdminSidebar() {
 
       <div className="sb-footer">
         <div className="row">
-          <div className="avatar">C</div>
+          <div className="avatar">{initial}</div>
           <div className="who">
             <div className="lbl">운영자</div>
-            <div style={{ fontWeight: 700 }}>caden</div>
+            <div style={{ fontWeight: 700 }} title={email ?? ""}>{displayName}</div>
           </div>
         </div>
-        <button type="button" className="out">로그아웃</button>
+        <button type="button" className="out" onClick={signOut}>
+          로그아웃
+        </button>
       </div>
     </nav>
   );

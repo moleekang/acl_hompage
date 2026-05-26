@@ -1,6 +1,5 @@
 // /resources — 자료·앱 페이지 (제품 쇼케이스 톤)
-// UI 컨셉: 큰 메인 제품(ConGen) + 작은 자료 그리드
-// v0: ConGen 외 자료는 placeholder
+// UI 컨셉: 큰 메인 제품(ConGen, 하드코딩) + 작은 자료 그리드(DB)
 
 import {
   Card,
@@ -11,48 +10,38 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { createAdminClient } from "@/lib/supabase/server";
 
-// 작은 자료/템플릿 placeholder
-const resources = [
-  {
-    icon: "📄",
-    title: "1인 기업 자동화 체크리스트",
-    desc: "10대 카테고리 50+ 작업 PDF",
-    tier: "free",
-  },
-  {
-    icon: "🎬",
-    title: "Remotion 영상 자동화 템플릿",
-    desc: "직접 쓰는 영상 생성 코드 모음",
-    tier: "members",
-  },
-  {
-    icon: "📊",
-    title: "매출 깔때기 설계 시트",
-    desc: "AARRR × 3레인 워크북",
-    tier: "members",
-  },
-  {
-    icon: "🤖",
-    title: "Claude API 프롬프트 모음",
-    desc: "콘텐츠 생성 검증 프롬프트 30개",
-    tier: "members",
-  },
-  {
-    icon: "📝",
-    title: "위키 출발 키트",
-    desc: "Obsidian + 디지털 가든 시작 가이드",
-    tier: "free",
-  },
-  {
-    icon: "🚀",
-    title: "출시 키트 템플릿",
-    desc: "단톡방·유튜브·랜딩 동시 출시 패키지",
-    tier: "members",
-  },
-];
+type Resource = {
+  id: string;
+  title: string;
+  desc: string;
+  icon: string;
+  tier: "free" | "members";
+};
 
-export default function ResourcesPage() {
+async function fetchResources(): Promise<Resource[]> {
+  const admin = createAdminClient();
+  const { data, error } = await admin
+    .from("site_resources")
+    .select("id, name, description, icon_emoji, tier")
+    .eq("published", true)
+    .order("order_idx", { ascending: true });
+  if (error) {
+    console.error("[resources] fetchResources:", error.message);
+    return [];
+  }
+  return (data ?? []).map((row) => ({
+    id: row.id,
+    title: row.name,
+    desc: row.description,
+    icon: row.icon_emoji ?? "📦",
+    tier: (row.tier as "free" | "members") ?? "free",
+  }));
+}
+
+export default async function ResourcesPage() {
+  const resources = await fetchResources();
   return (
     <div className="bg-background">
       {/* ===== Hero ===== */}
@@ -156,7 +145,7 @@ export default function ResourcesPage() {
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {resources.map((res) => (
               <Card
-                key={res.title}
+                key={res.id}
                 className="rounded-xl border-0 bg-card shadow-none transition-shadow hover:shadow-md"
               >
                 <CardHeader className="p-6">
