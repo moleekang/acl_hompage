@@ -5,10 +5,15 @@ export const TEST_PREFIX = `[E2E-TEST-${Date.now()}]`;
 
 /** 로그인 페이지로 가서 admin 약식 로그인 (`@aiconlab.local` 자동 부착) 후 /admin 진입. */
 export async function loginAsAdmin(page: Page) {
+  const user = process.env.E2E_ADMIN_USER ?? "admin";
+  const password = process.env.E2E_ADMIN_PASSWORD;
+  if (!password) {
+    throw new Error("E2E_ADMIN_PASSWORD 환경변수가 필요합니다 (.env.local에 설정).");
+  }
   // ?next=/admin이면 이메일 탭이 default라 input이 바로 노출됨.
   await page.goto("/login?next=/admin");
-  await page.getByPlaceholder(/이메일 또는 ID/).fill("admin");
-  await page.getByPlaceholder("비밀번호").first().fill("qkddlehd1234");
+  await page.getByPlaceholder(/이메일 또는 ID/).fill(user);
+  await page.getByPlaceholder("비밀번호").first().fill(password);
   await page.getByRole("button", { name: "이메일 로그인" }).click();
   // pathname이 /admin*로 바뀌어야 진짜 로그인 성공. /login?next=/admin은 제외.
   await page.waitForURL((u) => u.pathname.startsWith("/admin"), { timeout: 15_000 }).catch(async () => {
@@ -26,6 +31,15 @@ export async function fillField(page: Page, name: string, value: string) {
   } else {
     await locator.fill(value);
   }
+}
+
+/** label 텍스트로 인접 input/textarea/select를 찾아 값 입력 — controlled inputs(name 없음)용. */
+export async function fillByLabel(page: Page, labelText: string, value: string) {
+  const xpath = `xpath=//label[normalize-space()=${JSON.stringify(labelText)}]/following::*[self::input or self::textarea or self::select][1]`;
+  const loc = page.locator(xpath).first();
+  const tag = await loc.evaluate((el) => el.tagName.toLowerCase());
+  if (tag === "select") await loc.selectOption(value);
+  else await loc.fill(value);
 }
 
 /** confirm() 다이얼로그 자동 수락 — 삭제 버튼 같은 곳에서 사용. */
