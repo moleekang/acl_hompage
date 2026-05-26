@@ -164,6 +164,16 @@ export async function fetchPosts() {
   return data ?? [];
 }
 
+// ---- Notes ----
+export async function fetchNotesAdmin() {
+  const admin = createAdminClient();
+  const { data } = await admin
+    .from("notes")
+    .select("slug,title,sub,cat,read_time,published_at,author_id,author:profiles(id,nickname,avatar_url)")
+    .order("published_at", { ascending: false, nullsFirst: false });
+  return data ?? [];
+}
+
 // ---- Products ----
 export async function fetchProducts() {
   const admin = createAdminClient();

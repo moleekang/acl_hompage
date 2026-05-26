@@ -13,6 +13,7 @@ const navItems = [
   { label: "자동화앱", href: "/products" },
   { label: "공유회", href: "/insights" },
   { label: "팀 블로그", href: "/log" },
+  { label: "인사이트", href: "/notes" },
   { label: "단톡방", href: "/community" },
 ];
 
