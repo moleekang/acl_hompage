@@ -24,6 +24,8 @@ type Initial = {
   read_time: string | null;
   body_mdx: string | null;
   published_at?: string | null;
+  render_mode?: "embed" | "newtab";
+  content_type?: "html" | "markdown";
 };
 
 export function NoteForm({ mode, initial }: { mode: Mode; initial: Initial }) {
@@ -35,6 +37,8 @@ export function NoteForm({ mode, initial }: { mode: Mode; initial: Initial }) {
   const [cat, setCat] = useState(initial.cat);
   const [read, setRead] = useState(initial.read_time ?? "");
   const [body, setBody] = useState(initial.body_mdx ?? "");
+  const [renderMode, setRenderMode] = useState<"embed" | "newtab">(initial.render_mode ?? "embed");
+  const [contentType, setContentType] = useState<"html" | "markdown">(initial.content_type ?? "html");
   const [publishedAt, setPublishedAt] = useState<string | null>(initial.published_at ?? null);
   const isPublished = !!publishedAt;
 
@@ -65,9 +69,9 @@ export function NoteForm({ mode, initial }: { mode: Mode; initial: Initial }) {
     start(async () => {
       try {
         if (mode === "new") {
-          await createNote({ slug, title, sub, cat, read_time: read, body_mdx: body });
+          await createNote({ slug, title, sub, cat, read_time: read, body_mdx: body, render_mode: renderMode, content_type: contentType });
         } else {
-          await updateNote(initial.slug, { title, sub, cat, read_time: read, body_mdx: body });
+          await updateNote(initial.slug, { title, sub, cat, read_time: read, body_mdx: body, render_mode: renderMode, content_type: contentType });
         }
         router.push("/admin/notes");
       } catch (e) {
@@ -160,21 +164,71 @@ export function NoteForm({ mode, initial }: { mode: Mode; initial: Initial }) {
         </div>
       </div>
 
+      {/* 렌더 위치 + 본문 포맷 라디오 그룹 */}
+      <div className="card elevated" style={{ padding: "14px 18px" }}>
+        <div className="row" style={{ gap: 32, flexWrap: "wrap" }}>
+          <div>
+            <div className="field-label" style={{ marginBottom: 8 }}>렌더 위치</div>
+            <div className="row" style={{ gap: 16 }}>
+              {(["embed", "newtab"] as const).map((v) => (
+                <label key={v} style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer", fontSize: 13 }}>
+                  <input
+                    type="radio"
+                    name="render_mode"
+                    value={v}
+                    checked={renderMode === v}
+                    onChange={() => setRenderMode(v)}
+                  />
+                  {v === "embed" ? "상세 페이지에 임베드" : "새 탭에서 열기"}
+                </label>
+              ))}
+            </div>
+          </div>
+          <div>
+            <div className="field-label" style={{ marginBottom: 8 }}>본문 포맷</div>
+            <div className="row" style={{ gap: 16 }}>
+              {(["html", "markdown"] as const).map((v) => (
+                <label key={v} style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer", fontSize: 13 }}>
+                  <input
+                    type="radio"
+                    name="content_type"
+                    value={v}
+                    checked={contentType === v}
+                    onChange={() => setContentType(v)}
+                  />
+                  {v === "html" ? "HTML" : "Markdown"}
+                </label>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div>
         <div className="row" style={{ alignItems: "center", gap: 10, marginBottom: 8, flexWrap: "wrap" }}>
           <div className="micro" style={{ flex: 1, minWidth: 240 }}>
-            본문 (HTML) — AI가 만든 페이지를 통째로 붙여넣거나 .html 파일을 업로드하세요. sandbox iframe에서 격리 실행되며 script도 동작합니다 (iframe 밖 페이지엔 영향 없음)
+            본문 — AI가 만든 페이지를 통째로 붙여넣거나 파일을 업로드하세요.{" "}
+            {contentType === "html"
+              ? "sandbox iframe에서 격리 실행되며 script도 동작합니다 (iframe 밖 페이지엔 영향 없음)"
+              : "Markdown으로 작성 시 서버에서 HTML로 변환됩니다."}
           </div>
           <label className="btn btn-secondary btn-sm" style={{ cursor: "pointer", whiteSpace: "nowrap" }}>
-            📎 .html 파일 업로드
+            📎 파일 업로드
             <input
               type="file"
-              accept=".html,.htm,text/html"
+              accept=".html,.htm,.md,.markdown,text/html,text/markdown"
               onChange={async (e) => {
                 const file = e.target.files?.[0];
                 if (!file) return;
                 const text = await file.text();
                 setBody(text);
+                // 확장자로 content_type 자동 설정
+                const name = file.name.toLowerCase();
+                if (name.endsWith(".md") || name.endsWith(".markdown")) {
+                  setContentType("markdown");
+                } else {
+                  setContentType("html");
+                }
                 // 같은 파일을 다시 골랐을 때도 onChange 발화시키기 위해 reset
                 e.target.value = "";
               }}
@@ -186,7 +240,9 @@ export function NoteForm({ mode, initial }: { mode: Mode; initial: Initial }) {
           className="input textarea mdx"
           value={body}
           onChange={(e) => setBody(e.target.value)}
-          placeholder={'<!DOCTYPE html>\n<html>\n  <head><style>...</style></head>\n  <body>...</body>\n</html>'}
+          placeholder={contentType === "html"
+            ? '<!DOCTYPE html>\n<html>\n  <head><style>...</style></head>\n  <body>...</body>\n</html>'
+            : '# 제목\n\n본문을 Markdown으로 작성하세요.\n\n## 소제목\n\n내용...'}
         />
       </div>
     </div>

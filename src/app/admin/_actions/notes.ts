@@ -17,6 +17,8 @@ type NoteInput = {
   body_mdx?: string;
   cat: string;
   read_time?: string;
+  render_mode?: "embed" | "newtab";
+  content_type?: "html" | "markdown";
 };
 
 export async function createNote(input: NoteInput) {
@@ -30,6 +32,8 @@ export async function createNote(input: NoteInput) {
     body_mdx: input.body_mdx ?? "",
     cat: input.cat,
     read_time: input.read_time,
+    render_mode: input.render_mode,
+    content_type: input.content_type,
     author_id: by,
     published_at: null,
   });

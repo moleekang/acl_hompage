@@ -21,6 +21,8 @@ export default async function EditNotePage({ params }: { params: Params }) {
           slug: n.slug, title: n.title, sub: n.sub,
           cat: n.cat, read_time: n.read_time, body_mdx: n.body_mdx,
           published_at: n.published_at,
+          render_mode: n.render_mode ?? "embed",
+          content_type: n.content_type ?? "html",
         }}
       />
     </>

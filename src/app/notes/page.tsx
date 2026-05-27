@@ -124,9 +124,14 @@ function NoteCard({ note }: { note: Note }) {
   const authorName = note.author?.nickname ?? "작성자";
   const authorInitial = authorName.charAt(0).toUpperCase();
 
+  // newtab 모드: raw 경로로 새 탭 열기, embed 모드: 상세 페이지로 이동
+  const isNewTab = note.renderMode === "newtab";
+
   return (
     <Link
-      href={`/notes/${note.slug}`}
+      href={isNewTab ? `/notes/${note.slug}/raw` : `/notes/${note.slug}`}
+      target={isNewTab ? "_blank" : undefined}
+      rel={isNewTab ? "noopener noreferrer" : undefined}
       style={{
         textDecoration: "none",
         color: "inherit",
@@ -333,6 +338,7 @@ function NoteCard({ note }: { note: Note }) {
               }}
             >
               읽기 <span aria-hidden>→</span>
+              {isNewTab && <span aria-label="새 탭에서 열림" style={{ fontSize: 12, opacity: 0.7 }}>🪟</span>}
             </span>
           </div>
         </div>

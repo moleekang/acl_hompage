@@ -29,6 +29,11 @@ export const categories = {
 
 export type CatKey = keyof typeof categories;
 
+// 렌더 위치 — embed: 상세 페이지 iframe, newtab: 새 탭 전체 렌더
+export type RenderMode = "embed" | "newtab";
+// 본문 포맷 — html: 그대로 렌더, markdown: 서버에서 HTML 변환 후 렌더
+export type ContentType = "html" | "markdown";
+
 // 작성자 정보 (profiles join)
 export type NoteAuthor = {
   id: string;
@@ -46,12 +51,26 @@ export type Note = {
   date: string;     // YYYY-MM-DD
   readTime: string;
   author: NoteAuthor | null;
+  renderMode: RenderMode;
+  contentType: ContentType;
 };
 
 // DB cat 문자열을 알려진 CatKey로 폴백 (모르는 값이면 'record'로).
 function normalizeCat(value: string | null | undefined): CatKey {
   if (value && value in categories) return value as CatKey;
   return "record";
+}
+
+// DB render_mode 문자열 정규화 — 모르는 값이면 'embed' 폴백.
+function normalizeRenderMode(value: string | null | undefined): RenderMode {
+  if (value === "embed" || value === "newtab") return value;
+  return "embed";
+}
+
+// DB content_type 문자열 정규화 — 모르는 값이면 'html' 폴백.
+function normalizeContentType(value: string | null | undefined): ContentType {
+  if (value === "html" || value === "markdown") return value;
+  return "html";
 }
 
 type AuthorShape = { id: string; nickname: string | null; avatar_url: string | null };
@@ -72,6 +91,8 @@ type RawNoteRow = {
   read_time: string | null;
   published_at: string | null;
   author: unknown;
+  render_mode: string | null;
+  content_type: string | null;
 };
 
 function toNote(row: RawNoteRow): Note {
@@ -84,10 +105,12 @@ function toNote(row: RawNoteRow): Note {
     date: (row.published_at ?? "").slice(0, 10),
     readTime: row.read_time ?? "",
     author: extractAuthor(row.author),
+    renderMode: normalizeRenderMode(row.render_mode),
+    contentType: normalizeContentType(row.content_type),
   };
 }
 
-const NOTE_COLS = "slug,title,sub,body_mdx,cat,read_time,published_at,author:profiles(id,nickname,avatar_url)";
+const NOTE_COLS = "slug,title,sub,body_mdx,cat,read_time,published_at,render_mode,content_type,author:profiles(id,nickname,avatar_url)";
 
 // 발행된 글 전체 — 최신순.
 export async function fetchNotes(limit?: number): Promise<Note[]> {

@@ -14,6 +14,7 @@ import {
   categories,
   type Note,
 } from "../notes";
+import { renderNoteBody } from "@/lib/notes/render";
 import { createAdminClient } from "@/lib/supabase/server";
 
 // 빌드 타임에 모든 글 slug 미리 생성 (SSG)
@@ -215,17 +216,61 @@ function NoteHero({
 }
 
 // ──────────────────────────────────────────────────────────
-// 2. BODY — 본문 (HTML 그대로 sandbox iframe에 렌더)
+// 2. BODY — 본문 렌더 (renderMode/contentType에 따라 분기)
 // ──────────────────────────────────────────────────────────
 function NoteBody({ note }: { note: Note }) {
+  // newtab 모드: 버튼 + 안내 텍스트만 표시
+  if (note.renderMode === "newtab") {
+    return (
+      <section
+        className="aicon-section"
+        style={{ paddingTop: 24, paddingBottom: 64 }}
+      >
+        <div className="aicon-container" style={{ maxWidth: 720 }}>
+          <div
+            style={{
+              padding: "40px 36px",
+              borderRadius: 14,
+              background: "var(--surface-2)",
+              border: "1px solid var(--border-1)",
+              textAlign: "center",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 16,
+            }}
+          >
+            <span style={{ fontSize: 40 }} aria-hidden>🪟</span>
+            <p style={{ fontSize: 15, color: "var(--fg-2)", margin: 0, lineHeight: 1.6 }}>
+              이 글은 별도 페이지에서 통째로 표시됩니다.
+            </p>
+            <a
+              href={`/notes/${note.slug}/raw`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-primary"
+            >
+              전체 화면으로 열기
+            </a>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // embed 모드: markdown이면 서버에서 변환 후 HtmlBody에 전달
+  const renderedHtml = note.body_mdx
+    ? renderNoteBody(note.body_mdx, note.contentType)
+    : null;
+
   return (
     <section
       className="aicon-section"
       style={{ paddingTop: 24, paddingBottom: 64 }}
     >
       <div className="aicon-container" style={{ maxWidth: 1080 }}>
-        {note.body_mdx ? (
-          <HtmlBody html={note.body_mdx} />
+        {renderedHtml ? (
+          <HtmlBody html={renderedHtml} />
         ) : (
           <div
             style={{
@@ -247,7 +292,7 @@ function NoteBody({ note }: { note: Note }) {
             </span>
             <span>
               <b style={{ color: "var(--fg-1)" }}>아직 본문이 없습니다.</b>{" "}
-              admin에서 HTML 본문을 작성해 주세요.
+              admin에서 본문을 작성해 주세요.
             </span>
           </div>
         )}
