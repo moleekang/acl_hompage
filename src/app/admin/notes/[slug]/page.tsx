@@ -20,6 +20,7 @@ export default async function EditNotePage({ params }: { params: Params }) {
         initial={{
           slug: n.slug, title: n.title, sub: n.sub,
           cat: n.cat, read_time: n.read_time, body_mdx: n.body_mdx,
+          published_at: n.published_at,
         }}
       />
     </>

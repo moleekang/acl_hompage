@@ -4,8 +4,6 @@ import { useState, useTransition } from "react";
 import Link from "next/link";
 import { Avatar } from "@/components/admin/avatar";
 import { Icon } from "@/components/admin/icons";
-import { RowMenu } from "@/components/admin/row-menu";
-import { Status } from "@/components/admin/badges";
 import { publishNote, deleteNote } from "../_actions/notes";
 
 // categories는 notes.ts에서 가져올 수 없음 (server-only 모듈) — 여기서 직접 정의
@@ -80,7 +78,7 @@ export function NotesTable({ notes }: { notes: NoteRow[] }) {
               <th style={{ width: 80 }}>읽기</th>
               <th style={{ width: 150 }}>작성자</th>
               <th style={{ width: 110 }}>상태</th>
-              <th style={{ width: 60 }} className="actions">액션</th>
+              <th style={{ width: 80 }} className="actions">삭제</th>
             </tr>
           </thead>
           <tbody>
@@ -108,23 +106,43 @@ export function NotesTable({ notes }: { notes: NoteRow[] }) {
                     </div>
                   </td>
                   <td>
-                    {published ? <Status kind="live" label="발행됨" /> : <Status kind="draft" label="초안" />}
+                    <button
+                      type="button"
+                      disabled={pending}
+                      onClick={() => handle(published ? "unpublish" : "publish", n.slug, n.title)}
+                      title={published ? "클릭해서 대기로 전환" : "클릭해서 발행"}
+                      style={{
+                        padding: "4px 10px",
+                        borderRadius: 999,
+                        fontSize: 12,
+                        fontWeight: 700,
+                        cursor: pending ? "wait" : "pointer",
+                        border: published ? "1px solid #b6e4cd" : "1px solid var(--border-1)",
+                        background: published ? "#e7fbf1" : "var(--surface-2)",
+                        color: published ? "#2a7a4a" : "var(--fg-3)",
+                        letterSpacing: 0.2,
+                      }}
+                    >
+                      {published ? "● 발행" : "○ 대기"}
+                    </button>
                   </td>
                   <td className="actions">
-                    <RowMenu
-                      items={[
-                        { id: "edit", label: "편집", primary: true },
-                        { id: published ? "unpublish" : "publish", label: published ? "비공개로" : "발행" },
-                        { divider: true },
-                        { id: "del", label: "삭제", danger: true },
-                      ]}
-                      onSelect={(id) => {
-                        if (id === "edit") window.location.href = `/admin/notes/${n.slug}`;
-                        else if (id === "publish") handle("publish", n.slug, n.title);
-                        else if (id === "unpublish") handle("unpublish", n.slug, n.title);
-                        else if (id === "del") handle("delete", n.slug, n.title);
+                    <button
+                      type="button"
+                      disabled={pending}
+                      onClick={() => handle("delete", n.slug, n.title)}
+                      style={{
+                        background: "transparent",
+                        border: 0,
+                        cursor: pending ? "wait" : "pointer",
+                        color: "var(--text-hot, #ff6b47)",
+                        fontSize: 13,
+                        fontWeight: 600,
+                        padding: 0,
                       }}
-                    />
+                    >
+                      삭제
+                    </button>
                   </td>
                 </tr>
               );

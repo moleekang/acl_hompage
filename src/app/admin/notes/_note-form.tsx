@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Icon } from "@/components/admin/icons";
-import { createNote, updateNote } from "../_actions/notes";
+import { createNote, updateNote, publishNote, deleteNote } from "../_actions/notes";
 
 // categories는 notes.ts에서 가져올 수 없음 (server-only 모듈) — 여기서 직접 정의
 const NOTE_CATEGORIES: Array<{ key: string; label: string }> = [
@@ -23,6 +23,7 @@ type Initial = {
   cat: string;
   read_time: string | null;
   body_mdx: string | null;
+  published_at?: string | null;
 };
 
 export function NoteForm({ mode, initial }: { mode: Mode; initial: Initial }) {
@@ -34,6 +35,31 @@ export function NoteForm({ mode, initial }: { mode: Mode; initial: Initial }) {
   const [cat, setCat] = useState(initial.cat);
   const [read, setRead] = useState(initial.read_time ?? "");
   const [body, setBody] = useState(initial.body_mdx ?? "");
+  const [publishedAt, setPublishedAt] = useState<string | null>(initial.published_at ?? null);
+  const isPublished = !!publishedAt;
+
+  function togglePublish() {
+    start(async () => {
+      try {
+        await publishNote(initial.slug, !isPublished);
+        setPublishedAt(isPublished ? null : new Date().toISOString());
+      } catch (e) {
+        alert("발행 토글 실패: " + (e instanceof Error ? e.message : String(e)));
+      }
+    });
+  }
+
+  function remove() {
+    if (!confirm(`"${initial.title}"을(를) 삭제할까요?`)) return;
+    start(async () => {
+      try {
+        await deleteNote(initial.slug);
+        router.push("/admin/notes");
+      } catch (e) {
+        alert("삭제 실패: " + (e instanceof Error ? e.message : String(e)));
+      }
+    });
+  }
 
   function save() {
     start(async () => {
@@ -52,9 +78,48 @@ export function NoteForm({ mode, initial }: { mode: Mode; initial: Initial }) {
 
   return (
     <div className="stack" style={{ gap: 18, opacity: busy ? 0.7 : 1 }}>
-      <div className="row" style={{ gap: 10 }}>
+      <div className="row" style={{ gap: 10, alignItems: "center" }}>
         <Link href="/admin/notes" className="btn btn-secondary btn-sm"><Icon name="chevron-left" size={14} /> 글 목록</Link>
         <div className="grow" />
+        {mode === "edit" && (
+          <>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={togglePublish}
+              title={isPublished ? "클릭해서 대기로 전환" : "클릭해서 발행"}
+              style={{
+                padding: "6px 12px",
+                borderRadius: 999,
+                fontSize: 12,
+                fontWeight: 700,
+                cursor: busy ? "wait" : "pointer",
+                border: isPublished ? "1px solid #b6e4cd" : "1px solid var(--border-1)",
+                background: isPublished ? "#e7fbf1" : "var(--surface-2)",
+                color: isPublished ? "#2a7a4a" : "var(--fg-3)",
+              }}
+            >
+              {isPublished ? "● 발행됨" : "○ 대기 (초안)"}
+            </button>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={remove}
+              style={{
+                background: "transparent",
+                border: "1px solid var(--border-1)",
+                cursor: busy ? "wait" : "pointer",
+                color: "var(--text-hot, #ff6b47)",
+                fontSize: 13,
+                fontWeight: 600,
+                padding: "6px 12px",
+                borderRadius: 6,
+              }}
+            >
+              삭제
+            </button>
+          </>
+        )}
         <button type="button" className="btn btn-primary" onClick={save} disabled={busy || !title || !slug}>
           {busy ? "저장 중..." : mode === "new" ? "★ 발행 준비 (초안 저장)" : "저장"}
         </button>
