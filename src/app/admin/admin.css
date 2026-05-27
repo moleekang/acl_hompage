@@ -305,7 +305,8 @@
   background: var(--surface-1);
   border: 1px solid var(--border-1);
   border-radius: var(--r-card);
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 .admin-shell .tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
 .admin-shell .tbl thead th {
