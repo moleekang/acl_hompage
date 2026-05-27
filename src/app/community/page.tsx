@@ -70,25 +70,25 @@ export default async function CommunityPage() {
         <div className="rounded-2xl bg-[#181715] p-12 text-center text-[#faf9f5] md:p-16">
           <div className="grid gap-8 md:grid-cols-4">
             <div>
-              <p className="font-serif text-4xl text-primary md:text-5xl">
+              <p className="font-serif text-4xl text-[var(--text-mint)] md:text-5xl">
                 {SITE_STATS.communityMembers}
               </p>
               <p className="mt-2 text-sm text-[#a09d96]">단톡방 멤버</p>
             </div>
             <div>
-              <p className="font-serif text-4xl text-primary md:text-5xl">
+              <p className="font-serif text-4xl text-[var(--text-mint)] md:text-5xl">
                 {SITE_STATS.youtubeSubscribers}
               </p>
               <p className="mt-2 text-sm text-[#a09d96]">유튜브 구독자</p>
             </div>
             <div>
-              <p className="font-serif text-4xl text-primary md:text-5xl">
+              <p className="font-serif text-4xl text-[var(--text-mint)] md:text-5xl">
                 {SITE_STATS.betaTesters}
               </p>
               <p className="mt-2 text-sm text-[#a09d96]">베타 테스터</p>
             </div>
             <div>
-              <p className="font-serif text-4xl text-primary md:text-5xl">
+              <p className="font-serif text-4xl text-[var(--text-mint)] md:text-5xl">
                 Daily
               </p>
               <p className="mt-2 text-sm text-[#a09d96]">활성 대화</p>
