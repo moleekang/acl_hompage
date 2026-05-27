@@ -14,7 +14,11 @@ function safeFilename(original: string): string {
   return original.replace(/[^a-zA-Z0-9.\-]/g, "-").toLowerCase();
 }
 
-export async function uploadProductImage(formData: FormData): Promise<{ url: string }> {
+// 공통 이미지 업로드 — prefix로 스토리지 폴더 분기 (products | posts | notes)
+export async function uploadAdminImage(
+  formData: FormData,
+  prefix: "products" | "posts" | "notes",
+): Promise<{ url: string }> {
   await requireAdmin();
   const file = formData.get("file");
 
@@ -29,7 +33,7 @@ export async function uploadProductImage(formData: FormData): Promise<{ url: str
   }
 
   const ext = safeFilename(file.name);
-  const path = `products/${randomUUID()}-${ext}`;
+  const path = `${prefix}/${randomUUID()}-${ext}`;
 
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
@@ -46,4 +50,9 @@ export async function uploadProductImage(formData: FormData): Promise<{ url: str
 
   const { data } = admin.storage.from(BUCKET).getPublicUrl(path);
   return { url: data.publicUrl };
+}
+
+// products 전용 래퍼 — 기존 호출처 호환
+export async function uploadProductImage(formData: FormData): Promise<{ url: string }> {
+  return uploadAdminImage(formData, "products");
 }

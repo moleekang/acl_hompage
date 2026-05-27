@@ -151,7 +151,7 @@ function NoteCard({ note }: { note: Note }) {
           transition: "transform .15s ease",
         }}
       >
-        {/* ─── 썸네일 영역 (16:9 그라데이션 + 카테고리 큰 라벨) ─── */}
+        {/* ─── 썸네일 영역 (16:9) ─── */}
         <div
           style={{
             aspectRatio: "16/9",
@@ -161,15 +161,48 @@ function NoteCard({ note }: { note: Note }) {
             borderBottom: "1px solid var(--border-1)",
           }}
         >
-          {/* 다층 글로우 (카테고리 색) */}
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              background: `radial-gradient(ellipse at 30% 30%, ${meta.glow}, transparent 60%), radial-gradient(ellipse at 70% 70%, rgba(255,255,255,0.04), transparent 60%)`,
-            }}
-          />
-          {/* 좌상단 — 카테고리 배지 */}
+          {note.thumbnailUrl ? (
+            // 썸네일 이미지가 있으면 커버 표시
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={note.thumbnailUrl}
+              alt={note.title}
+              style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
+            />
+          ) : (
+            // 없으면 기존 그라데이션 + 카테고리 큰 텍스트 fallback
+            <>
+              {/* 다층 글로우 (카테고리 색) */}
+              <div
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  background: `radial-gradient(ellipse at 30% 30%, ${meta.glow}, transparent 60%), radial-gradient(ellipse at 70% 70%, rgba(255,255,255,0.04), transparent 60%)`,
+                }}
+              />
+              {/* 가운데 — 카테고리 큰 텍스트 (시각 액센트) */}
+              <div
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontFamily: "var(--font-mono)",
+                  fontSize: 36,
+                  fontWeight: 800,
+                  color: meta.color,
+                  opacity: 0.18,
+                  letterSpacing: "-0.02em",
+                  textTransform: "uppercase",
+                  pointerEvents: "none",
+                }}
+              >
+                {meta.label}
+              </div>
+            </>
+          )}
+          {/* 좌상단 — 카테고리 배지 (항상 오버레이) */}
           <div
             style={{
               position: "absolute",
@@ -188,7 +221,7 @@ function NoteCard({ note }: { note: Note }) {
           >
             ● {meta.label}
           </div>
-          {/* 우하단 — 읽기 시간 (mono) */}
+          {/* 우하단 — 읽기 시간 (항상 오버레이) */}
           <div
             style={{
               position: "absolute",
@@ -201,29 +234,10 @@ function NoteCard({ note }: { note: Note }) {
               color: "#fff",
               fontFamily: "var(--font-mono)",
               letterSpacing: "0.06em",
+              zIndex: 2,
             }}
           >
             {note.readTime}
-          </div>
-          {/* 가운데 — 카테고리 큰 텍스트 (시각 액센트) */}
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontFamily: "var(--font-mono)",
-              fontSize: 36,
-              fontWeight: 800,
-              color: meta.color,
-              opacity: 0.18,
-              letterSpacing: "-0.02em",
-              textTransform: "uppercase",
-              pointerEvents: "none",
-            }}
-          >
-            {meta.label}
           </div>
         </div>
 

@@ -53,6 +53,7 @@ export type Note = {
   author: NoteAuthor | null;
   renderMode: RenderMode;
   contentType: ContentType;
+  thumbnailUrl: string | null;
 };
 
 // DB cat 문자열을 알려진 CatKey로 폴백 (모르는 값이면 'record'로).
@@ -93,6 +94,7 @@ type RawNoteRow = {
   author: unknown;
   render_mode: string | null;
   content_type: string | null;
+  thumbnail_url: string | null;
 };
 
 function toNote(row: RawNoteRow): Note {
@@ -107,10 +109,11 @@ function toNote(row: RawNoteRow): Note {
     author: extractAuthor(row.author),
     renderMode: normalizeRenderMode(row.render_mode),
     contentType: normalizeContentType(row.content_type),
+    thumbnailUrl: row.thumbnail_url ?? null,
   };
 }
 
-const NOTE_COLS = "slug,title,sub,body_mdx,cat,read_time,published_at,render_mode,content_type,author:profiles(id,nickname,avatar_url)";
+const NOTE_COLS = "slug,title,sub,body_mdx,cat,read_time,published_at,render_mode,content_type,thumbnail_url,author:profiles(id,nickname,avatar_url)";
 
 // 발행된 글 전체 — 최신순.
 export async function fetchNotes(limit?: number): Promise<Note[]> {

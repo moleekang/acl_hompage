@@ -17,6 +17,7 @@ type PostInput = {
   body_mdx?: string;
   cat: string;
   read_time?: string;
+  thumbnail_url?: string | null;
 };
 
 export async function createPost(input: PostInput) {
@@ -30,6 +31,7 @@ export async function createPost(input: PostInput) {
     body_mdx: input.body_mdx ?? "",
     cat: input.cat,
     read_time: input.read_time,
+    thumbnail_url: input.thumbnail_url ?? null,
     author_id: by,
     published_at: null,
   });

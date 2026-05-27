@@ -19,6 +19,7 @@ type NoteInput = {
   read_time?: string;
   render_mode?: "embed" | "newtab";
   content_type?: "html" | "markdown";
+  thumbnail_url?: string | null;
 };
 
 export async function createNote(input: NoteInput) {
@@ -34,6 +35,7 @@ export async function createNote(input: NoteInput) {
     read_time: input.read_time,
     render_mode: input.render_mode,
     content_type: input.content_type,
+    thumbnail_url: input.thumbnail_url ?? null,
     author_id: by,
     published_at: null,
   });

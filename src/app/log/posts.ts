@@ -48,6 +48,7 @@ export type Post = {
   body_mdx: string;
   date: string;     // YYYY-MM-DD
   readTime: string;
+  thumbnailUrl: string | null;
 };
 
 // DB cat 문자열을 알려진 CatKey로 폴백 (모르는 값이면 'dev'로).
@@ -64,6 +65,7 @@ type PostRow = {
   cat: string;
   read_time: string | null;
   published_at: string | null;
+  thumbnail_url: string | null;
 };
 
 function toPost(row: PostRow): Post {
@@ -75,10 +77,11 @@ function toPost(row: PostRow): Post {
     body_mdx: row.body_mdx ?? "",
     date: (row.published_at ?? "").slice(0, 10),
     readTime: row.read_time ?? "",
+    thumbnailUrl: row.thumbnail_url ?? null,
   };
 }
 
-const POST_COLS = "slug,title,sub,body_mdx,cat,read_time,published_at";
+const POST_COLS = "slug,title,sub,body_mdx,cat,read_time,published_at,thumbnail_url";
 
 // 발행된 글 전체 — 최신순.
 export async function fetchPosts(limit?: number): Promise<Post[]> {

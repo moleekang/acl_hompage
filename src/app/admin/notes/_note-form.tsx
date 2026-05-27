@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Icon } from "@/components/admin/icons";
 import { createNote, updateNote, publishNote, deleteNote } from "../_actions/notes";
+import { uploadAdminImage } from "../_actions/uploads";
 
 // categories는 notes.ts에서 가져올 수 없음 (server-only 모듈) — 여기서 직접 정의
 const NOTE_CATEGORIES: Array<{ key: string; label: string }> = [
@@ -26,11 +27,13 @@ type Initial = {
   published_at?: string | null;
   render_mode?: "embed" | "newtab";
   content_type?: "html" | "markdown";
+  thumbnail_url?: string | null;
 };
 
 export function NoteForm({ mode, initial }: { mode: Mode; initial: Initial }) {
   const router = useRouter();
   const [busy, start] = useTransition();
+  const [uploading, startUpload] = useTransition();
   const [slug, setSlug] = useState(initial.slug);
   const [title, setTitle] = useState(initial.title);
   const [sub, setSub] = useState(initial.sub ?? "");
@@ -40,7 +43,25 @@ export function NoteForm({ mode, initial }: { mode: Mode; initial: Initial }) {
   const [renderMode, setRenderMode] = useState<"embed" | "newtab">(initial.render_mode ?? "embed");
   const [contentType, setContentType] = useState<"html" | "markdown">(initial.content_type ?? "html");
   const [publishedAt, setPublishedAt] = useState<string | null>(initial.published_at ?? null);
+  const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(initial.thumbnail_url ?? null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const isPublished = !!publishedAt;
+
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    startUpload(async () => {
+      try {
+        const fd = new FormData();
+        fd.append("file", file);
+        const { url } = await uploadAdminImage(fd, "notes");
+        setThumbnailUrl(url);
+      } catch (err) {
+        alert("이미지 업로드 실패: " + (err instanceof Error ? err.message : String(err)));
+      }
+    });
+  }
 
   function togglePublish() {
     start(async () => {
@@ -69,9 +90,9 @@ export function NoteForm({ mode, initial }: { mode: Mode; initial: Initial }) {
     start(async () => {
       try {
         if (mode === "new") {
-          await createNote({ slug, title, sub, cat, read_time: read, body_mdx: body, render_mode: renderMode, content_type: contentType });
+          await createNote({ slug, title, sub, cat, read_time: read, body_mdx: body, render_mode: renderMode, content_type: contentType, thumbnail_url: thumbnailUrl });
         } else {
-          await updateNote(initial.slug, { title, sub, cat, read_time: read, body_mdx: body, render_mode: renderMode, content_type: contentType });
+          await updateNote(initial.slug, { title, sub, cat, read_time: read, body_mdx: body, render_mode: renderMode, content_type: contentType, thumbnail_url: thumbnailUrl });
         }
         router.push("/admin/notes");
       } catch (e) {
@@ -124,7 +145,7 @@ export function NoteForm({ mode, initial }: { mode: Mode; initial: Initial }) {
             </button>
           </>
         )}
-        <button type="button" className="btn btn-primary" onClick={save} disabled={busy || !title || !slug}>
+        <button type="button" className="btn btn-primary" onClick={save} disabled={busy || uploading || !title || !slug}>
           {busy ? "저장 중..." : mode === "new" ? "★ 발행 준비 (초안 저장)" : "저장"}
         </button>
       </div>
@@ -160,6 +181,83 @@ export function NoteForm({ mode, initial }: { mode: Mode; initial: Initial }) {
           <div style={{ gridColumn: "span 2" }}>
             <label className="field-label">부제</label>
             <input className="input" value={sub} onChange={(e) => setSub(e.target.value)} />
+          </div>
+
+          {/* 카드 썸네일 이미지 */}
+          <div style={{ gridColumn: "span 4" }}>
+            <label className="field-label">카드 썸네일 이미지 (없으면 그라데이션 자동 적용)</label>
+            <div style={{ display: "flex", alignItems: "flex-start", gap: 14 }}>
+              {/* 미리보기 */}
+              {thumbnailUrl ? (
+                <div style={{ position: "relative", flexShrink: 0 }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={thumbnailUrl}
+                    alt="썸네일 미리보기"
+                    style={{
+                      width: 120,
+                      height: 68,
+                      objectFit: "cover",
+                      borderRadius: "var(--r-input)",
+                      border: "1px solid var(--border-2)",
+                      display: "block",
+                    }}
+                  />
+                </div>
+              ) : (
+                <div
+                  style={{
+                    width: 120,
+                    height: 68,
+                    borderRadius: "var(--r-input)",
+                    border: "1px dashed var(--border-2)",
+                    display: "grid",
+                    placeItems: "center",
+                    color: "var(--fg-3)",
+                    fontSize: 11,
+                    flexShrink: 0,
+                  }}
+                >
+                  없음
+                </div>
+              )}
+
+              {/* 업로드 버튼 영역 */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  style={{ display: "none" }}
+                  onChange={handleFileChange}
+                />
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading || busy}
+                >
+                  {uploading ? "업로드 중..." : thumbnailUrl ? "교체" : "이미지 업로드"}
+                </button>
+                {thumbnailUrl && (
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-sm"
+                    style={{ color: "var(--text-hot)", fontSize: 11 }}
+                    onClick={() => {
+                      setThumbnailUrl(null);
+                      if (fileInputRef.current) fileInputRef.current.value = "";
+                    }}
+                    disabled={uploading || busy}
+                  >
+                    제거
+                  </button>
+                )}
+                <span style={{ fontSize: 11, color: "var(--fg-3)" }}>
+                  JPG · PNG · WEBP · GIF, 최대 5MB
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
