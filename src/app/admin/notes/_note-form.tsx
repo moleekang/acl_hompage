@@ -96,8 +96,13 @@ export function NoteForm({ mode, initial }: { mode: Mode; initial: Initial }) {
       </div>
 
       <div>
-        <div className="micro" style={{ marginBottom: 8 }}>본문 (MDX)</div>
-        <textarea className="input textarea mdx" value={body} onChange={(e) => setBody(e.target.value)} />
+        <div className="micro" style={{ marginBottom: 8 }}>본문 (HTML) — AI가 만든 페이지를 통째로 붙여넣으세요. sandbox iframe에서 격리 실행되며 script도 동작합니다 (iframe 밖 페이지엔 영향 없음)</div>
+        <textarea
+          className="input textarea mdx"
+          value={body}
+          onChange={(e) => setBody(e.target.value)}
+          placeholder={'<!DOCTYPE html>\n<html>\n  <head><style>...</style></head>\n  <body>...</body>\n</html>'}
+        />
       </div>
     </div>
   );

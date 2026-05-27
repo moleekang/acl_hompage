@@ -7,6 +7,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { FadeUp } from "@/components/aiconlab/fade-up";
 import { Icon } from "@/components/aiconlab/icon";
+import { HtmlBody } from "@/components/notes/html-body";
 import {
   fetchNote,
   fetchRelatedNotes,
@@ -214,7 +215,7 @@ function NoteHero({
 }
 
 // ──────────────────────────────────────────────────────────
-// 2. BODY — 본문 (MDX 렌더 자리)
+// 2. BODY — 본문 (HTML 그대로 sandbox iframe에 렌더)
 // ──────────────────────────────────────────────────────────
 function NoteBody({ note }: { note: Note }) {
   return (
@@ -222,63 +223,38 @@ function NoteBody({ note }: { note: Note }) {
       className="aicon-section"
       style={{ paddingTop: 24, paddingBottom: 64 }}
     >
-      <div className="aicon-container" style={{ maxWidth: 720 }}>
+      <div className="aicon-container" style={{ maxWidth: 1080 }}>
         {note.body_mdx ? (
-          <FadeUp>
-            <div
-              style={{
-                fontSize: 17,
-                color: "var(--fg-1)",
-                lineHeight: 1.85,
-                whiteSpace: "pre-wrap",
-              }}
-            >
-              {note.body_mdx}
-            </div>
-          </FadeUp>
+          <HtmlBody html={note.body_mdx} />
         ) : (
-          <FadeUp>
-            <div
-              style={{
-                padding: "14px 18px",
-                borderRadius: 10,
-                background: "rgba(90,124,255,0.06)",
-                border: "1px dashed rgba(90,124,255,0.35)",
-                marginBottom: 48,
-                fontSize: 14,
-                color: "var(--fg-2)",
-                display: "flex",
-                alignItems: "flex-start",
-                gap: 10,
-                lineHeight: 1.55,
-              }}
-            >
-              <span style={{ fontSize: 18 }} aria-hidden>
-                ✏️
-              </span>
-              <span>
-                <b style={{ color: "var(--fg-1)" }}>아직 본문이 없습니다.</b>{" "}
-                admin에서 MDX 본문을 작성해 주세요.
-              </span>
-            </div>
-          </FadeUp>
+          <div
+            style={{
+              padding: "14px 18px",
+              borderRadius: 10,
+              background: "rgba(90,124,255,0.06)",
+              border: "1px dashed rgba(90,124,255,0.35)",
+              marginBottom: 48,
+              fontSize: 14,
+              color: "var(--fg-2)",
+              display: "flex",
+              alignItems: "flex-start",
+              gap: 10,
+              lineHeight: 1.55,
+            }}
+          >
+            <span style={{ fontSize: 18 }} aria-hidden>
+              ✏️
+            </span>
+            <span>
+              <b style={{ color: "var(--fg-1)" }}>아직 본문이 없습니다.</b>{" "}
+              admin에서 HTML 본문을 작성해 주세요.
+            </span>
+          </div>
         )}
       </div>
     </section>
   );
 }
-
-// 본문 스타일 토큰
-const bodyH2Style: React.CSSProperties = {
-  fontSize: 26,
-  fontWeight: 700,
-  letterSpacing: "-0.01em",
-  marginTop: 40,
-  marginBottom: 16,
-  color: "var(--fg-1)",
-};
-// bodyH2Style은 향후 MDX 렌더러 연동 시 사용
-void bodyH2Style;
 
 // ──────────────────────────────────────────────────────────
 // 3. RELATED — 관련 글 3개 (간소 카드)
