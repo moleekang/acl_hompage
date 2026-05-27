@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Launch Prep v1 — AICONLAB</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Gowun+Dodum&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #F5F1E8;
+    --paper-deep: #ECE5D3;
+    --ink: #2a2520;
+    --ink-soft: #5a5048;
+    --ink-faint: #968b7e;
+    --mint: #7DD3C0;
+    --electric: #5B7FFF;
+    --sun: #F4B942;
+    --hot: #E85A4F;
+    --line: rgba(42, 37, 32, 0.12);
+    --line-strong: rgba(42, 37, 32, 0.25);
+    --stamp: 2px 3px 0 rgba(42, 37, 32, 0.08);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--paper);
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(42, 37, 32, 0.025) 1px, transparent 1px),
+      radial-gradient(circle at 70% 70%, rgba(42, 37, 32, 0.02) 1px, transparent 1px);
+    background-size: 32px 32px, 48px 48px;
+    color: var(--ink);
+    font-family: 'Gowun Dodum', sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    min-height: 100vh;
+    padding: 48px 24px 96px;
+  }
+  .container { max-width: 920px; margin: 0 auto; }
+
+  /* Header */
+  header { margin-bottom: 56px; position: relative; }
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  h1 {
+    font-family: 'Gaegu', cursive;
+    font-size: 56px;
+    line-height: 1.1;
+    margin: 0 0 12px;
+    color: var(--ink);
+    transform: rotate(-0.5deg);
+  }
+  .lede {
+    font-size: 17px;
+    color: var(--ink-soft);
+    max-width: 640px;
+    margin: 0 0 24px;
+  }
+  .meta {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--ink-faint);
+  }
+  .meta span { display: inline-flex; align-items: center; gap: 6px; }
+  .meta span::before { content: '·'; }
+  .meta span:first-child::before { display: none; }
+
+  /* Priority strip */
+  .priority {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin: 32px 0 48px;
+  }
+  .priority-card {
+    background: var(--paper);
+    border: 1.5px solid var(--line-strong);
+    border-radius: 4px;
+    padding: 14px 16px;
+    box-shadow: var(--stamp);
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.15s;
+  }
+  .priority-card:hover { transform: translateY(-2px); }
+  .priority-card .rank {
+    font-family: 'Gaegu', cursive;
+    font-size: 32px;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .priority-card .num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--ink-faint);
+    margin-bottom: 4px;
+  }
+  .priority-card .name { font-size: 14px; font-weight: 600; }
+  .priority-card[data-color="mint"]    { border-top: 4px solid var(--mint); }
+  .priority-card[data-color="electric"]{ border-top: 4px solid var(--electric); }
+  .priority-card[data-color="sun"]     { border-top: 4px solid var(--sun); }
+  .priority-card[data-color="hot"]     { border-top: 4px solid var(--hot); }
+
+  /* Progress bar (global) */
+  .progress-strip {
+    background: var(--paper-deep);
+    border-radius: 8px;
+    padding: 14px 20px;
+    margin-bottom: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: var(--stamp);
+  }
+  .progress-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--ink-soft);
+  }
+  .progress-stats {
+    font-family: 'Gaegu', cursive;
+    font-size: 22px;
+    color: var(--ink);
+  }
+  .progress-bar {
+    flex: 1;
+    height: 6px;
+    background: rgba(42, 37, 32, 0.1);
+    margin: 0 16px;
+    border-radius: 3px;
+    overflow: hidden;
+    position: relative;
+  }
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--mint), var(--electric), var(--sun), var(--hot));
+    transition: width 0.3s;
+  }
+
+  /* Task card */
+  .task {
+    background: var(--paper);
+    border: 1.5px solid var(--line-strong);
+    border-radius: 6px;
+    padding: 28px 32px;
+    margin-bottom: 32px;
+    box-shadow: var(--stamp);
+    position: relative;
+  }
+  .task[data-color="mint"]     { border-left: 6px solid var(--mint); }
+  .task[data-color="electric"] { border-left: 6px solid var(--electric); }
+  .task[data-color="sun"]      { border-left: 6px solid var(--sun); }
+  .task[data-color="hot"]      { border-left: 6px solid var(--hot); }
+
+  .task-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    cursor: pointer;
+  }
+  .task-number {
+    font-family: 'Gaegu', cursive;
+    font-size: 38px;
+    line-height: 1;
+    color: var(--ink-faint);
+    margin-right: 16px;
+    transform: rotate(-2deg);
+    display: inline-block;
+  }
+  .task-title {
+    font-family: 'Gaegu', cursive;
+    font-size: 28px;
+    line-height: 1.2;
+    color: var(--ink);
+    margin: 0;
+    flex: 1;
+  }
+  .task-progress {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--ink-soft);
+    padding: 4px 10px;
+    background: var(--paper-deep);
+    border-radius: 12px;
+    white-space: nowrap;
+  }
+  .task-toggle {
+    margin-left: 12px;
+    color: var(--ink-faint);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 18px;
+    transition: transform 0.2s;
+  }
+  .task.collapsed .task-toggle { transform: rotate(-90deg); }
+  .task.collapsed .task-body { display: none; }
+
+  .rationale {
+    background: var(--paper-deep);
+    border-left: 3px solid var(--line-strong);
+    padding: 14px 18px;
+    margin: 0 0 24px;
+    border-radius: 0 4px 4px 0;
+    color: var(--ink-soft);
+    font-size: 14px;
+  }
+  .rationale-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    margin-right: 8px;
+  }
+
+  /* Section heading inside task */
+  h3 {
+    font-family: 'Gaegu', cursive;
+    font-size: 20px;
+    color: var(--ink);
+    margin: 28px 0 12px;
+    padding-bottom: 4px;
+    border-bottom: 1px dashed var(--line);
+  }
+
+  /* Checkboxes */
+  .checklist {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .checklist li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px dotted var(--line);
+    cursor: pointer;
+    user-select: none;
+  }
+  .checklist li:last-child { border-bottom: none; }
+  .checklist input[type="checkbox"] {
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--ink-soft);
+    border-radius: 3px;
+    margin: 2px 0 0;
+    cursor: pointer;
+    background: var(--paper);
+    position: relative;
+    flex-shrink: 0;
+    transition: all 0.15s;
+  }
+  .checklist input[type="checkbox"]:hover { border-color: var(--ink); }
+  .checklist input[type="checkbox"]:checked {
+    background: var(--ink);
+    border-color: var(--ink);
+  }
+  .checklist input[type="checkbox"]:checked::after {
+    content: '✓';
+    position: absolute;
+    color: var(--paper);
+    font-size: 14px;
+    font-weight: bold;
+    top: -3px;
+    left: 2px;
+  }
+  .checklist li.done .label-text {
+    color: var(--ink-faint);
+    text-decoration: line-through;
+  }
+  .label-text { flex: 1; line-height: 1.5; }
+
+  /* Subgroup labels */
+  .sublabel {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    margin: 20px 0 8px;
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+  }
+  .sublabel:first-child { padding-top: 0; border-top: none; }
+
+  /* Code block */
+  details.code {
+    margin: 16px 0;
+    background: var(--paper-deep);
+    border-radius: 4px;
+    padding: 12px 16px;
+    border: 1px solid var(--line);
+  }
+  details.code summary {
+    cursor: pointer;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    outline: none;
+    user-select: none;
+  }
+  details.code summary:hover { color: var(--ink); }
+  pre {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--ink);
+    margin: 12px 0 0;
+    padding: 0;
+    overflow-x: auto;
+    line-height: 1.6;
+    background: transparent;
+  }
+
+  /* Table */
+  .table-wrap { overflow-x: auto; margin: 12px 0; }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 13px;
+  }
+  th, td {
+    text-align: left;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+  }
+  th {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    font-weight: normal;
+    border-bottom: 2px solid var(--line-strong);
+  }
+  tr:hover td { background: rgba(42, 37, 32, 0.02); }
+  code.inline {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    background: var(--paper-deep);
+    padding: 1px 5px;
+    border-radius: 3px;
+    color: var(--ink);
+  }
+
+  /* Form options preview */
+  .form-q {
+    margin: 16px 0;
+    padding: 14px 16px;
+    background: var(--paper-deep);
+    border-radius: 4px;
+  }
+  .form-q .q-letter {
+    font-family: 'Gaegu', cursive;
+    font-size: 22px;
+    color: var(--mint);
+    margin-right: 8px;
+  }
+  .form-q .q-text { font-weight: 600; }
+  .form-q .q-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+  }
+  .opt {
+    display: inline-block;
+    padding: 4px 10px;
+    border: 1px solid var(--line-strong);
+    border-radius: 14px;
+    font-size: 12px;
+    background: var(--paper);
+    color: var(--ink-soft);
+  }
+
+  /* Out of scope footer */
+  .scope {
+    margin-top: 64px;
+    padding: 24px 28px;
+    background: var(--paper-deep);
+    border-radius: 6px;
+    border: 1px dashed var(--line-strong);
+  }
+  .scope h2 {
+    font-family: 'Gaegu', cursive;
+    font-size: 22px;
+    margin: 0 0 12px;
+    color: var(--ink-soft);
+  }
+  .scope ul {
+    margin: 0;
+    padding-left: 20px;
+    color: var(--ink-soft);
+    font-size: 14px;
+  }
+  .scope li { margin: 6px 0; }
+
+  .deps {
+    margin-top: 24px;
+    font-size: 12px;
+    color: var(--ink-faint);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .deps a {
+    color: var(--electric);
+    text-decoration: none;
+  }
+  .deps a:hover { text-decoration: underline; }
+
+  /* Stamp decoration */
+  .stamp {
+    position: absolute;
+    top: 20px;
+    right: 28px;
+    font-family: 'Gaegu', cursive;
+    font-size: 14px;
+    color: var(--hot);
+    border: 2px solid var(--hot);
+    padding: 4px 12px;
+    border-radius: 4px;
+    transform: rotate(8deg);
+    opacity: 0.85;
+    letter-spacing: 0.1em;
+  }
+
+  @media (max-width: 720px) {
+    body { padding: 32px 16px 64px; }
+    h1 { font-size: 40px; }
+    .priority { grid-template-columns: repeat(2, 1fr); }
+    .task { padding: 20px; }
+    .task-title { font-size: 22px; }
+    .stamp { font-size: 11px; padding: 3px 8px; top: 16px; right: 16px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="eyebrow">AICONLAB · ADR · 2026-05-19</div>
+    <h1>일반 공개 전,<br>4가지 선결 작업</h1>
+    <p class="lede">콘젠을 단톡방 closed beta에서 일반 공개로 넘기기 위해 먼저 정리해야 할 네 가지 작업의 상세 컬럼·체크리스트·근거.</p>
+    <div class="meta">
+      <span>Status: 실행 계획</span>
+      <span>총 작업 4개</span>
+      <span>의사결정: launch-prep v1</span>
+    </div>
+    <div class="stamp">v1 DRAFT</div>
+  </header>
+
+  <div class="priority">
+    <div class="priority-card" data-color="sun" onclick="document.getElementById('task-4').scrollIntoView({behavior:'smooth'});">
+      <div class="num">PRIORITY 1</div>
+      <div class="rank">#4</div>
+      <div class="name">도메인 (기반)</div>
+    </div>
+    <div class="priority-card" data-color="mint" onclick="document.getElementById('task-1').scrollIntoView({behavior:'smooth'});">
+      <div class="num">PRIORITY 2</div>
+      <div class="rank">#1</div>
+      <div class="name">가입 메타데이터</div>
+    </div>
+    <div class="priority-card" data-color="electric" onclick="document.getElementById('task-2').scrollIntoView({behavior:'smooth'});">
+      <div class="num">PRIORITY 3</div>
+      <div class="rank">#2</div>
+      <div class="name">사용자 로그</div>
+    </div>
+    <div class="priority-card" data-color="hot" onclick="document.getElementById('task-3').scrollIntoView({behavior:'smooth'});">
+      <div class="num">PRIORITY 4</div>
+      <div class="rank">#3</div>
+      <div class="name">Win 서명</div>
+    </div>
+  </div>
+
+  <div class="progress-strip">
+    <div class="progress-label">전체 진행률</div>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+    <div class="progress-stats" id="progress-stats">0 / 0</div>
+  </div>
+
+  <!-- ============ Task 1 ============ -->
+  <section class="task" data-color="mint" id="task-1">
+    <div class="task-header" onclick="toggleTask(this)">
+      <div style="display:flex;align-items:baseline;flex:1;">
+        <span class="task-number">01</span>
+        <h2 class="task-title">회원가입 추가 메타데이터</h2>
+      </div>
+      <span class="task-progress" data-task="1">0 / 0</span>
+      <span class="task-toggle">▾</span>
+    </div>
+    <div class="task-body">
+      <div class="rationale">
+        <span class="rationale-label">근거</span>
+        인구통계·유입 경로는 가입 시점에 안 받으면 영영 못 받는 데이터. closed beta 동안 흘려보내는 가입자 한 명이 곧 영구 정보 손실. ICP 정의·일반 공개 시 타겟팅·카테고리 깊이 결정의 직접 입력.
+      </div>
+
+      <h3>입력 원칙</h3>
+      <p style="margin:8px 0 16px;">라디오 only · 직접 입력 0 · 30초 안에 끝나야 함 · 필수 3문항 + 선택 2문항</p>
+
+      <h3>폼 항목 (라디오)</h3>
+      <div class="sublabel" style="margin-top:0;padding-top:0;border:none;">필수 — 가입 직후 1화면</div>
+
+      <div class="form-q">
+        <span class="q-letter">A</span><span class="q-text">연령대를 알려주세요</span>
+        <div class="q-options">
+          <span class="opt">10대</span><span class="opt">20대</span><span class="opt">30대</span><span class="opt">40대</span><span class="opt">50대 이상</span>
+        </div>
+      </div>
+      <div class="form-q">
+        <span class="q-letter">B</span><span class="q-text">현재 콘텐츠 활동 단계는?</span>
+        <div class="q-options">
+          <span class="opt">아직 시작 전</span><span class="opt">취미로 가끔</span><span class="opt">부업·사이드</span><span class="opt">본업·주 수입</span><span class="opt">전문·대행사</span>
+        </div>
+      </div>
+      <div class="form-q">
+        <span class="q-letter">C</span><span class="q-text">콘젠을 어디서 알게 되셨어요?</span>
+        <div class="q-options">
+          <span class="opt">AI Conlab 유튜브</span><span class="opt">카카오톡 단톡방</span><span class="opt">지인 추천</span><span class="opt">검색</span><span class="opt">커뮤니티·SNS</span><span class="opt">기타</span>
+        </div>
+      </div>
+
+      <div class="sublabel">선택 — 첫 사용 후 onboarding 2단계</div>
+
+      <div class="form-q">
+        <span class="q-letter">D</span><span class="q-text">주로 만들고 싶은 카테고리 (다중)</span>
+        <div class="q-options">
+          <span class="opt">경제·재테크</span><span class="opt">여행</span><span class="opt">심리학</span><span class="opt">역사</span><span class="opt">교육</span><span class="opt">+9 (콘젠 14 카테고리)</span>
+        </div>
+      </div>
+      <div class="form-q">
+        <span class="q-letter">E</span><span class="q-text">영상 만드는 목표 빈도</span>
+        <div class="q-options">
+          <span class="opt">주 1~2개</span><span class="opt">주 3~5개</span><span class="opt">매일 1개+</span><span class="opt">정해진 빈도 없음</span>
+        </div>
+      </div>
+
+      <details class="code">
+        <summary>▸ DB 마이그레이션 SQL</summary>
+<pre>ALTER TABLE users
+  ADD COLUMN age_group           TEXT,
+  ADD COLUMN content_stage       TEXT,
+  ADD COLUMN referral_source     TEXT,
+  ADD COLUMN content_categories  TEXT[],
+  ADD COLUMN target_frequency    TEXT,
+  ADD COLUMN onboarding_completed_at TIMESTAMPTZ;
+
+CREATE INDEX idx_users_age_group       ON users (age_group);
+CREATE INDEX idx_users_content_stage   ON users (content_stage);
+CREATE INDEX idx_users_referral_source ON users (referral_source);</pre>
+      </details>
+
+      <h3>작업 체크리스트</h3>
+      <ul class="checklist" data-task="1">
+        <li><input type="checkbox"><span class="label-text">콘젠 14 카테고리 정확한 식별자 확인 (<code class="inline">categories-and-styles.md</code>)</span></li>
+        <li><input type="checkbox"><span class="label-text">cloud-server <code class="inline">database.ts</code> 마이그레이션 추가</span></li>
+        <li><input type="checkbox"><span class="label-text"><code class="inline">routes/google-auth.ts</code> 응답에 <code class="inline">onboarding_required</code> 플래그 추가</span></li>
+        <li><input type="checkbox"><span class="label-text">electron-app onboarding 화면 1개 (5문항 라디오)</span></li>
+        <li><input type="checkbox"><span class="label-text">기존 사용자 모달 컴포넌트 (재로그인 시 1회 강제)</span></li>
+        <li><input type="checkbox"><span class="label-text">단톡방 베타 멤버 1명에게 테스트 빌드</span></li>
+        <li><input type="checkbox"><span class="label-text">일반 공개 직전 onboarding 완료율 ≥ 80% 확인</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ Task 2 ============ -->
+  <section class="task" data-color="electric" id="task-2">
+    <div class="task-header" onclick="toggleTask(this)">
+      <div style="display:flex;align-items:baseline;flex:1;">
+        <span class="task-number">02</span>
+        <h2 class="task-title">콘젠 런처 사용자 로그</h2>
+      </div>
+      <span class="task-progress" data-task="2">0 / 0</span>
+      <span class="task-toggle">▾</span>
+    </div>
+    <div class="task-body">
+      <div class="rationale">
+        <span class="rationale-label">근거</span>
+        영상 생성·카테고리·실패 통계가 local-server SQLite(사용자 PC)에만 있어서 cloud에 안 모임. closed beta에서 가장 중요한 데이터인데 안 모으면 "14×19 조합 중 진짜 쓰이는 게 뭔지" 영영 알 수 없음.
+      </div>
+
+      <h3>수집할 이벤트 7종</h3>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>event_type</th><th>발생 시점</th><th>핵심 필드</th></tr></thead>
+        <tbody>
+          <tr><td><code class="inline">app_launch</code></td><td>앱 실행 시</td><td>app_version, os</td></tr>
+          <tr><td><code class="inline">video_start</code></td><td>"영상 생성" 클릭</td><td>category, style, video_length_sec</td></tr>
+          <tr><td><code class="inline">video_complete</code></td><td>모든 단계 성공</td><td>duration_ms, output_size_bytes</td></tr>
+          <tr><td><code class="inline">video_fail</code></td><td>어느 단계든 실패</td><td>fail_stage, error_code, error_message</td></tr>
+          <tr><td><code class="inline">error</code></td><td>일반 에러</td><td>error_code, error_message, stack_trace</td></tr>
+          <tr><td><code class="inline">category_select</code></td><td>옵션 탐색 (선택)</td><td>category, style</td></tr>
+          <tr><td><code class="inline">export_done</code></td><td>결과물 저장 완료</td><td>output_format, output_size_bytes</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p style="font-size:13px;color:var(--ink-soft);margin:8px 0 0;"><code class="inline">fail_stage</code> 값: <code class="inline">script · scene_split · tts · image_gen · video_assembly · unknown</code></p>
+
+      <details class="code">
+        <summary>▸ usage_events 테이블 스키마</summary>
+<pre>CREATE TABLE usage_events (
+  id                BIGSERIAL PRIMARY KEY,
+  user_id           INTEGER REFERENCES users(id),
+  api_key           TEXT,
+  event_type        TEXT NOT NULL,
+  category          TEXT,
+  style             TEXT,
+  video_length_sec  INTEGER,
+  duration_ms       INTEGER,
+  output_size_bytes BIGINT,
+  output_format     TEXT,
+  fail_stage        TEXT,
+  error_code        TEXT,
+  error_message     TEXT,          -- max 1000자, redacted
+  stack_trace       TEXT,          -- max 2000자, redacted
+  app_version       TEXT NOT NULL,
+  os                TEXT NOT NULL,
+  os_version        TEXT,
+  occurred_at       TIMESTAMPTZ NOT NULL,
+  received_at       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  raw_payload       JSONB
+);
+
+CREATE INDEX idx_usage_events_user_id    ON usage_events (user_id);
+CREATE INDEX idx_usage_events_event_type ON usage_events (event_type);
+CREATE INDEX idx_usage_events_occurred_at ON usage_events (occurred_at);</pre>
+      </details>
+
+      <h3>전송 방식</h3>
+      <p style="margin:8px 0 16px;">closed beta = <strong>즉시 전송 + 오프라인 큐</strong> (real-time observability 우선). 일반 공개 후 트래픽 늘면 day-batch로 전환 (별도 ADR).</p>
+
+      <h3>PII·보안 정책</h3>
+      <p style="margin:8px 0 16px;">email은 user_id 식별 용도. error_message·stack_trace는 <strong>클라이언트에서 redaction</strong>: 절대 경로 → <code class="inline">&lt;USER_PATH&gt;</code>, API key·token → <code class="inline">&lt;REDACTED&gt;</code>, 이메일 → <code class="inline">&lt;REDACTED_EMAIL&gt;</code>. 90일 후 집계 후 raw 삭제 (v1.1 별도 cron).</p>
+
+      <h3>작업 체크리스트</h3>
+      <ul class="checklist" data-task="2">
+        <li><input type="checkbox"><span class="label-text"><strong>[local]</strong> <code class="inline">usage_event_queue</code> SQLite 테이블 추가</span></li>
+        <li><input type="checkbox"><span class="label-text"><strong>[local]</strong> event 발행 헬퍼 <code class="inline">logEvent(type, fields)</code></span></li>
+        <li><input type="checkbox"><span class="label-text"><strong>[local]</strong> 영상 파이프라인 각 단계에 logEvent 삽입 (start/complete/fail)</span></li>
+        <li><input type="checkbox"><span class="label-text"><strong>[local]</strong> 글로벌 error handler에서 <code class="inline">logEvent('error', ...)</code></span></li>
+        <li><input type="checkbox"><span class="label-text"><strong>[local]</strong> flush worker (1분 cron) + 오프라인 큐 재시도</span></li>
+        <li><input type="checkbox"><span class="label-text"><strong>[local]</strong> redaction 유틸 (path · token · email)</span></li>
+        <li><input type="checkbox"><span class="label-text"><strong>[cloud]</strong> <code class="inline">usage_events</code> 테이블 마이그레이션</span></li>
+        <li><input type="checkbox"><span class="label-text"><strong>[cloud]</strong> <code class="inline">routes/usage.ts</code> POST endpoint 2개 (단일·batch)</span></li>
+        <li><input type="checkbox"><span class="label-text"><strong>[cloud]</strong> 인증 미들웨어 적용 + rate limit (분당 60)</span></li>
+        <li><input type="checkbox"><span class="label-text"><strong>[검증]</strong> 단톡방 멤버 1명 테스트 빌드 → 영상 1개 → cloud 이벤트 도착 확인</span></li>
+        <li><input type="checkbox"><span class="label-text"><strong>[검증]</strong> 오프라인 시나리오 (Wi-Fi off → 영상 1개 → on → 큐 flush)</span></li>
+        <li><input type="checkbox"><span class="label-text"><strong>[검증]</strong> redaction 동작 확인 (사용자 경로·키 마스킹)</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ Task 3 ============ -->
+  <section class="task" data-color="hot" id="task-3">
+    <div class="task-header" onclick="toggleTask(this)">
+      <div style="display:flex;align-items:baseline;flex:1;">
+        <span class="task-number">03</span>
+        <h2 class="task-title">Windows 코드 서명 <span style="font-size:14px;color:var(--ink-faint);font-family:'JetBrains Mono',monospace;letter-spacing:0.05em;">— 결정 보류</span></h2>
+      </div>
+      <span class="task-progress" data-task="3">0 / 0</span>
+      <span class="task-toggle">▾</span>
+    </div>
+    <div class="task-body">
+      <div class="rationale">
+        <span class="rationale-label">근거</span>
+        현재 ad-hoc 서명 → SmartScreen "확인되지 않은 게시자" 경고. 베타 멤버는 운영자가 우회 안내 가능하지만 일반 공개 시 가입 funnel 첫 단계에서 80%+ 이탈 예상.
+      </div>
+
+      <h3>옵션 3개 비교</h3>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>옵션</th><th>비용</th><th>발급 기간</th><th>효과</th><th>추가 요건</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>Azure Trusted Signing</strong></td>
+            <td>월 ~$10<br>(연 ~$120)</td>
+            <td>2~3주<br>(Verified Publisher 검증)</td>
+            <td>EV 수준 즉시 신뢰</td>
+            <td>MS Partner Center, D-U-N-S, 사업자등록증</td>
+          </tr>
+          <tr>
+            <td><strong>OV</strong> (Sectigo/DigiCert)</td>
+            <td>연 ~$150~300</td>
+            <td>1~5일</td>
+            <td>SmartScreen 평판 누적식<br>(몇 주~몇 달)</td>
+            <td>사업자 신원확인, D-U-N-S 권장</td>
+          </tr>
+          <tr>
+            <td><strong>EV</strong> (Sectigo/SSL.com)</td>
+            <td>연 ~$300~600</td>
+            <td>1~2주</td>
+            <td>즉시 SmartScreen 통과</td>
+            <td>사업자 + USB 토큰/HSM 관리</td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+
+      <h3>공통 준비물 — 어느 옵션이든 필요</h3>
+      <ul class="checklist" data-task="3">
+        <li><input type="checkbox"><span class="label-text">D-U-N-S 번호 발급 (Dun & Bradstreet, 무료, 1~5영업일)</span></li>
+        <li><input type="checkbox"><span class="label-text">사업자등록증 스캔 (PDF)</span></li>
+        <li><input type="checkbox"><span class="label-text">대표자 신분증 스캔</span></li>
+        <li><input type="checkbox"><span class="label-text">도메인 이메일 준비 (작업 #4와 연계)</span></li>
+        <li><input type="checkbox"><span class="label-text">electron-builder 설정 검토 (<code class="inline">electron-app/package.json</code>의 <code class="inline">build.win</code>)</span></li>
+        <li><input type="checkbox"><span class="label-text">단톡방 베타 사용자 OS 분포 확인 (Win 비율 ≥ 50%면 EV 우선순위 ↑)</span></li>
+        <li><input type="checkbox"><span class="label-text">일반 공개 D-1개월 시점에 옵션 최종 선택</span></li>
+        <li><input type="checkbox"><span class="label-text">선택 후 별도 ADR (<code class="inline">windows-code-signing.md</code>)에 결정 박제</span></li>
+      </ul>
+
+      <h3>관련 (범위 밖, 후속 ADR)</h3>
+      <p style="font-size:14px;color:var(--ink-soft);margin:8px 0;">macOS 서명(Apple Developer + Developer ID + notarization) · 자동 업데이트(electron-updater + Squirrel)는 별도 ADR.</p>
+    </div>
+  </section>
+
+  <!-- ============ Task 4 ============ -->
+  <section class="task" data-color="sun" id="task-4">
+    <div class="task-header" onclick="toggleTask(this)">
+      <div style="display:flex;align-items:baseline;flex:1;">
+        <span class="task-number">04</span>
+        <h2 class="task-title">도메인 추가 연결 <span style="font-size:14px;color:var(--ink-faint);font-family:'JetBrains Mono',monospace;letter-spacing:0.05em;">— 기반 작업, 1순위</span></h2>
+      </div>
+      <span class="task-progress" data-task="4">0 / 0</span>
+      <span class="task-toggle">▾</span>
+    </div>
+    <div class="task-body">
+      <div class="rationale">
+        <span class="rationale-label">근거</span>
+        현재 콘젠 cloud-server는 Railway 기본 URL 추정. 일반 공개 시 신뢰·브랜드·이메일 일관성을 위해 자체 도메인 + 서브도메인 구조 필수. Win 서명(D-U-N-S 신청) 시 회사 이메일이 도메인 이메일이면 검증 매끄러움.
+      </div>
+
+      <h3>먼저 결정할 것</h3>
+      <p style="margin:8px 0;"><strong>AICONLAB 브랜드 ↔ 콘젠 제품을 한 도메인에 묶을지 분리할지.</strong> 일반 공개 후 콘젠 상업화 계획에 따라 결정. 둘 다 사는 것도 옵션 (<code class="inline">aiconlab.com</code> = 메인, <code class="inline">congen.app</code> = 제품 랜딩).</p>
+
+      <h3>등록 업체</h3>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>업체</th><th>장점</th><th>단점</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Cloudflare Registrar</strong></td><td>도메인 원가, 무료 SSL·DNS·DDoS</td><td>등록자 영문, .kr 미지원</td></tr>
+          <tr><td><strong>Gabia</strong></td><td>.kr·.co.kr 지원, 한국어</td><td>가격 비쌈, 부가 서비스 푸시</td></tr>
+          <tr><td><strong>Namecheap</strong></td><td>가격 합리, WhoisGuard 무료</td><td>.kr 미지원</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p style="font-size:13px;color:var(--ink-soft);margin:8px 0 0;">→ <strong>권장</strong>: .com은 Cloudflare(원가), .kr 필요 시 Gabia</p>
+
+      <h3>서브도메인 구조 (권장)</h3>
+      <details class="code" open>
+        <summary>▸ 서브도메인 맵</summary>
+<pre>aiconlab.com           메인 홈페이지 (Next.js on Vercel)
+www.aiconlab.com       메인으로 301 redirect
+admin.aiconlab.com     /admin 영역 분리 (선택)
+api.aiconlab.com       콘젠 cloud-server (Railway custom)
+download.aiconlab.com  콘젠 인스톨러 호스팅
+updates.aiconlab.com   electron-updater feed
+docs.aiconlab.com      사용 가이드 (선택, 추후)</pre>
+      </details>
+      <p style="font-size:13px;color:var(--ink-soft);">지금 당장 필요: <code class="inline">aiconlab.com</code> + <code class="inline">api.*</code> + <code class="inline">download.*</code> 3개. 나머지는 필요 시 DNS 레코드 추가.</p>
+
+      <h3>이메일</h3>
+      <p style="margin:8px 0;">도메인 이메일은 코드 서명 검증·고객 신뢰에 필수. 시작 단계엔 <strong>Cloudflare Email Routing 무료</strong>(forwarding) 충분. 발신 필요해지면 Google Workspace ($6/월~) 또는 Naver Works (6,000원/월~).</p>
+      <p style="margin:8px 0;">기본 계정: <code class="inline">contact@</code> · <code class="inline">noreply@</code> · <code class="inline">admin@</code></p>
+
+      <h3>작업 체크리스트</h3>
+      <ul class="checklist" data-task="4">
+        <li><input type="checkbox"><span class="label-text">AICONLAB ↔ 콘젠 브랜드 분리 여부 결정 (1개 vs 2개 도메인)</span></li>
+        <li><input type="checkbox"><span class="label-text">도메인명 후보 3~5개 + whois 조회</span></li>
+        <li><input type="checkbox"><span class="label-text">등록 업체 결정 (.com만이면 Cloudflare 권장)</span></li>
+        <li><input type="checkbox"><span class="label-text">도메인 구매 (연 $10~15)</span></li>
+        <li><input type="checkbox"><span class="label-text">DNS를 Cloudflare로 위임</span></li>
+        <li><input type="checkbox"><span class="label-text">Vercel에 메인 도메인 연결</span></li>
+        <li><input type="checkbox"><span class="label-text">Railway에 <code class="inline">api.*</code> · <code class="inline">download.*</code> · <code class="inline">updates.*</code> custom domain 연결</span></li>
+        <li><input type="checkbox"><span class="label-text">이메일 서비스 선택 + MX 레코드 추가</span></li>
+        <li><input type="checkbox"><span class="label-text">기본 이메일 3~5개 생성</span></li>
+        <li><input type="checkbox"><span class="label-text"><code class="inline">noreply@</code> 발신 테스트 (콘젠 인증 메일)</span></li>
+      </ul>
+
+      <h3>다른 작업과 묶이는 지점</h3>
+      <ul style="font-size:14px;color:var(--ink-soft);padding-left:20px;">
+        <li><strong>#3 Win 서명</strong>: D-U-N-S·Verified Publisher 시 도메인 이메일이 매끄러움</li>
+        <li><strong>자동 업데이트</strong>: <code class="inline">updates.aiconlab.com</code> feed URL이 electron-updater 설정에 박힘</li>
+        <li><strong>콘젠 cloud-server URL</strong>: <code class="inline">api.aiconlab.com</code>으로 옮기면 electron-app·local-server의 cloud-client URL 환경변수 일괄 수정 필요</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ Out of scope ============ -->
+  <div class="scope">
+    <h2>본 ADR 범위 밖 (후속)</h2>
+    <ul>
+      <li><strong>macOS 코드 서명</strong> — Apple Developer + Developer ID + notarization. 별도 ADR.</li>
+      <li><strong>자동 업데이트</strong> — electron-updater + Squirrel. Win 서명 결정 후 별도 ADR.</li>
+      <li><strong>결제 자동화</strong> — Toss·Stripe. 무통장 입금 폐기 시점에 별도 ADR.</li>
+      <li><strong>대시보드 코드 구현</strong> — 본 4개 작업 완료 후 dashboard-v1 Stage A 시작.</li>
+    </ul>
+  </div>
+
+  <div class="deps">
+    의존: <a href="../wiki/concepts/metadata-inventory.md">metadata-inventory.md</a> · <a href="../wiki/decisions/dashboard-v1.md">dashboard-v1.md</a> · <a href="../wiki/decisions/dashboard-conzen-integration.md">dashboard-conzen-integration.md</a> · <a href="../wiki/decisions/launch-prep-v1.md">launch-prep-v1.md</a>
+  </div>
+
+</div>
+
+<script>
+  // Toggle task body
+  function toggleTask(headerEl) {
+    headerEl.parentElement.classList.toggle('collapsed');
+  }
+
+  // Checkbox progress tracking
+  function updateProgress() {
+    const tasks = document.querySelectorAll('.task');
+    let totalAll = 0, doneAll = 0;
+    tasks.forEach(taskEl => {
+      const checks = taskEl.querySelectorAll('.checklist input[type="checkbox"]');
+      const done = taskEl.querySelectorAll('.checklist input[type="checkbox"]:checked').length;
+      const total = checks.length;
+      totalAll += total; doneAll += done;
+      const progEl = taskEl.querySelector('.task-progress');
+      if (progEl) progEl.textContent = `${done} / ${total}`;
+    });
+    document.getElementById('progress-stats').textContent = `${doneAll} / ${totalAll}`;
+    const pct = totalAll === 0 ? 0 : (doneAll / totalAll) * 100;
+    document.getElementById('progress-fill').style.width = pct + '%';
+  }
+
+  document.querySelectorAll('.checklist li').forEach(li => {
+    const cb = li.querySelector('input[type="checkbox"]');
+    li.addEventListener('click', (e) => {
+      if (e.target.tagName !== 'INPUT') {
+        cb.checked = !cb.checked;
+      }
+      li.classList.toggle('done', cb.checked);
+      updateProgress();
+    });
+  });
+
+  updateProgress();
+</script>
+</body>
+</html>

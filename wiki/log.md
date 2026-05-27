@@ -37,3 +37,44 @@
 - Header/Footer는 /admin 영역에서 자동 숨김 (usePathname guard)
 - /api/test-supabase 임시 연결 테스트 라우트 사용 후 삭제
 - 사용자 검증을 위한 NEXT_PUBLIC_ADMIN_PREVIEW_MODE 토글 (dev 기본 ON, prod 강제 OFF)
+
+## [2026-05-27] decision | security hardening + git history rewrite
+- Critical 3건 처리:
+  - C1: supabase/migrations 평문 비번 노출 → `git filter-repo`로 전 history에서 SQL + .env.local 제거 + force-push (origin/main: ba19f1f → def5c92). supabase/migrations 디렉토리는 .gitignore 추가 (개인 운영).
+  - C2: `NEXT_PUBLIC_ADMIN_PREVIEW_MODE !== "0"` (opt-out, 클라이언트 노출) → `process.env.ADMIN_PREVIEW_MODE === "1"` (opt-in, 서버 전용)으로 전환. admin/insights/llm-wiki 3개 layout 모두.
+  - C3: `content.ts` 4개 진입점에 `assertAllowedTable()` 런타임 allowlist 추가 (Server Action HTTP endpoint 임의 테이블명 주입 차단).
+- 잔여 처리(사용자 hands-on 필요): 운영 admin 비번 회전, Supabase service_role key 회전. rewrite로 노출 확산은 차단했으나 GitHub 캐시/포크엔 남음.
+- CLAUDE.md에 gh 계정 가드 추가: 매 push 전 `gh auth status` → moleekang active 확인 (다른 계정 활성 시 force-push 403).
+
+## [2026-05-27] update | E2E (Playwright) 인프라 도입
+- 9 시나리오 통과 (admin-content 4 + admin-full 5):
+  - 4 콘텐츠 테이블(testimonials/journal_entries/site_tools/site_resources): 생성 → 발행 → 공개 노출(/community,/journal,/tools,/resources) → 수정 → 삭제
+  - admin posts/products/wiki: 등록 → 목록 노출 / events·members: read-only 진입
+- 안전 가드: `[E2E-TEST-{ts}]` prefix + `published=false` 기본 + `afterAll` cleanup으로 운영 DB 영향 최소화
+- 자격증명: 비번은 `.env.local`의 `E2E_ADMIN_USER` / `E2E_ADMIN_PASSWORD`에서 로드 (helpers.ts 비번 평문 박지 않음)
+- playwright.config.ts에서 `.env.local` 직접 파싱 (Next dev 서버 의존 X, baseURL=3000, workers=1)
+
+## [2026-05-27] update | notes(인사이트) 영역 신규 추가
+- 메뉴 라벨 "인사이트", URL `/notes`, 테이블 `notes` (posts 스키마 미러 + author profile join)
+- 공개: `/notes` 목록 + `/notes/[slug]` 상세 — 카드/상세에 작성자 아바타+닉네임 표시
+- admin: `/admin/notes` CRUD (page/new/[slug]/_note-form/_notes-table) + `_actions/notes.ts` (create/update/publish/delete + requireAdmin)
+- nav(HeaderClient) + admin sidebar에 메뉴 추가
+- categories: posts와 별개 (사색/도구/운영/기록 정도 — 개인 인사이트 톤)
+- 마이그레이션: 0010_notes.sql (gitignored, 사용자가 Supabase 대시보드 SQL editor에서 적용 완료)
+- 의도: /log는 팀 공식 기록, /notes는 개인 사색 — 작성자는 동일 admin이나 분위기 분리
+
+## [2026-05-27] fix | 데이터 mojibake 복구 (인코딩 사고)
+- 손상 범위: testimonials 3행, site_tools 5행, journal_entries 1행 모두 깨짐 (site_resources/posts/products/wiki_pages/events는 정상)
+- 원인: 0009_content_tables.sql 적용 시 client_encoding 미스매치로 UTF-8 한글 바이트가 CP949로 잘못 해석된 뒤 다시 UTF-8로 저장. `�`(replacement char) 다수라 자동 복원 불가능.
+- 복구: 시드 sql의 정상 한글 값을 service_role REST API로 PATCH 덮어쓰기 (testimonials는 order_idx로, site_tools는 slug로 매핑)
+- 재발 방지: 향후 마이그레이션은 psql CLI보다 Supabase 대시보드 SQL editor에서 적용 (UTF-8 강제)
+
+## [2026-05-27] decision | aicon.lol 도메인 연결 (Vercel)
+- 도메인 등록처: name.com (Railway에서 구매했지만 backend는 name.com nameserver)
+- Vercel 프로젝트 `acl_hompage`에 apex + www 둘 다 등록 (vercel domains add)
+- name.com DNS에 A 레코드 2개 추가: `@ → 76.76.21.21`, `www → 76.76.21.21` (둘 다 A로 통일, CNAME 대신)
+- nameserver는 name.com에 유지 (Vercel로 옮기지 않음)
+- SSL 인증서: `vercel certs issue aicon.lol www.aicon.lol` 수동 트리거로 6초 만에 발급
+- 검증: https://aicon.lol + https://www.aicon.lol 둘 다 HTTP/2 200 OK
+- 추가 작업 가능: www → apex 자동 redirect (Vercel 대시보드에서 한 줄로 설정)
+
