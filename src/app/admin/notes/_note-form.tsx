@@ -96,7 +96,27 @@ export function NoteForm({ mode, initial }: { mode: Mode; initial: Initial }) {
       </div>
 
       <div>
-        <div className="micro" style={{ marginBottom: 8 }}>본문 (HTML) — AI가 만든 페이지를 통째로 붙여넣으세요. sandbox iframe에서 격리 실행되며 script도 동작합니다 (iframe 밖 페이지엔 영향 없음)</div>
+        <div className="row" style={{ alignItems: "center", gap: 10, marginBottom: 8, flexWrap: "wrap" }}>
+          <div className="micro" style={{ flex: 1, minWidth: 240 }}>
+            본문 (HTML) — AI가 만든 페이지를 통째로 붙여넣거나 .html 파일을 업로드하세요. sandbox iframe에서 격리 실행되며 script도 동작합니다 (iframe 밖 페이지엔 영향 없음)
+          </div>
+          <label className="btn btn-secondary btn-sm" style={{ cursor: "pointer", whiteSpace: "nowrap" }}>
+            📎 .html 파일 업로드
+            <input
+              type="file"
+              accept=".html,.htm,text/html"
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                const text = await file.text();
+                setBody(text);
+                // 같은 파일을 다시 골랐을 때도 onChange 발화시키기 위해 reset
+                e.target.value = "";
+              }}
+              style={{ display: "none" }}
+            />
+          </label>
+        </div>
         <textarea
           className="input textarea mdx"
           value={body}
