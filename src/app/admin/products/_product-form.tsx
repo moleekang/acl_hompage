@@ -37,7 +37,6 @@ export function ProductForm({ mode, initial }: { mode: Mode; initial: Initial })
   const router = useRouter();
   const [busy, start] = useTransition();
   const [uploading, startUpload] = useTransition();
-  const [slug, setSlug] = useState(initial.slug);
   const [name, setName] = useState(initial.name);
   const [pitch, setPitch] = useState(initial.pitch);
   const [status, setStatus] = useState<ProductStatus>(initial.status);
@@ -117,7 +116,6 @@ export function ProductForm({ mode, initial }: { mode: Mode; initial: Initial })
         const body_mdx = buildBodyMdx();
         if (mode === "new") {
           await createProduct({
-            slug,
             name,
             pitch,
             status,
@@ -151,7 +149,7 @@ export function ProductForm({ mode, initial }: { mode: Mode; initial: Initial })
       <div className="row" style={{ gap: 10 }}>
         <Link href="/admin/products" className="btn btn-secondary btn-sm"><Icon name="chevron-left" size={14} /> 제품 목록</Link>
         <div className="grow" />
-        <button type="button" className="btn btn-primary" onClick={save} disabled={busy || uploading || !name || !slug}>
+        <button type="button" className="btn btn-primary" onClick={save} disabled={busy || uploading || !name}>
           {busy ? "저장 중..." : "저장"}
         </button>
       </div>
@@ -164,12 +162,21 @@ export function ProductForm({ mode, initial }: { mode: Mode; initial: Initial })
           </div>
           <div>
             <label className="field-label">슬러그 (URL)</label>
-            <input
-              className="input mono"
-              value={slug}
-              onChange={(e) => mode === "new" && setSlug(e.target.value.replace(/[^a-z0-9-]/gi, "-").toLowerCase())}
-              disabled={mode === "edit"}
-            />
+            {mode === "edit" ? (
+              <input
+                className="input mono"
+                value={initial.slug}
+                disabled
+                style={{ background: "var(--surface-2)", color: "var(--fg-3)" }}
+              />
+            ) : (
+              <div
+                className="input mono"
+                style={{ display: "flex", alignItems: "center", background: "var(--surface-2)", color: "var(--fg-3)" }}
+              >
+                저장 시 자동 생성됩니다
+              </div>
+            )}
           </div>
           <div style={{ gridColumn: "span 2" }}>
             <label className="field-label">한 줄 pitch</label>

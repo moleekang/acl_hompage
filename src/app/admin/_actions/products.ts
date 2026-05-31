@@ -3,11 +3,11 @@
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/server";
 import { requireAdmin } from "./_auth";
+import { nextSlug } from "./_slug";
 
 type ProductStatus = "beta" | "coming" | "live" | "retired";
 
 type ProductInput = {
-  slug: string;
   name: string;
   pitch: string;
   status: ProductStatus;
@@ -21,8 +21,9 @@ type ProductInput = {
 export async function createProduct(input: ProductInput) {
   await requireAdmin();
   const admin = createAdminClient();
+  const slug = await nextSlug("products", "p");
   const { error } = await admin.from("products").insert({
-    slug: input.slug,
+    slug,
     name: input.name,
     pitch: input.pitch,
     status: input.status,

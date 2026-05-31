@@ -7,7 +7,7 @@ export default function NewPostPage() {
       <PageTopbar title="새 글 작성" crumb="/admin/posts/new" sub="MDX 작성" />
       <PostForm
         mode="new"
-        initial={{ slug: "", title: "", sub: "", cat: "사고방식", read_time: "5분", body_mdx: "" }}
+        initial={{ slug: "", title: "", sub: "", cat: "insight", read_time: "5분", body_mdx: "" }}
       />
     </>
   );

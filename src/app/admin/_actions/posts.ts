@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { requireAdmin } from "./_auth";
+import { nextSlug } from "./_slug";
 
 async function actorId(): Promise<string | null> {
   const supabase = await createClient();
@@ -11,7 +12,6 @@ async function actorId(): Promise<string | null> {
 }
 
 type PostInput = {
-  slug: string;
   title: string;
   sub?: string;
   body_mdx?: string;
@@ -24,8 +24,9 @@ export async function createPost(input: PostInput) {
   await requireAdmin();
   const by = await actorId();
   const admin = createAdminClient();
+  const slug = await nextSlug("posts", input.cat);
   const { error } = await admin.from("posts").insert({
-    slug: input.slug,
+    slug,
     title: input.title,
     sub: input.sub,
     body_mdx: input.body_mdx ?? "",

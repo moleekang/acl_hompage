@@ -78,3 +78,12 @@
 - 검증: https://aicon.lol + https://www.aicon.lol 둘 다 HTTP/2 200 OK
 - 추가 작업 가능: www → apex 자동 redirect (Vercel 대시보드에서 한 줄로 설정)
 
+## [2026-05-31] update | 슬러그 자동 생성 + posts 카테고리 정렬
+- 문제: admin 에서 슬러그를 수동 입력 → 운영자가 영문 슬러그를 매번 지어내며 헷갈림, 기존 URL 도 파악 어려움
+- 해결: `nextSlug(table, prefix)` 서버 헬퍼(`_actions/_slug.ts`)로 `{카테고리}-{순번}` 자동 부여
+  - posts=cat(영문), notes=cat(영문 key), products=고정 `p`
+  - new 폼: 슬러그 입력란 제거 + 자동생성 안내 / edit 폼: 읽기전용 표시(URL 확인용)
+- 부수: posts 폼 카테고리(한글 5종)가 DB·공개 영문 6종(brand/dev/insight/ops/retro/tool)과 불일치 → DB 영문값으로 통일(value=영문, label=한글). 사용자 결정.
+- 검증: tsc 통과, 변경 파일 lint 무에러, 기존 DB 슬러그(`record` 의 `1/2/11`, products `pw-prod-*`)와 충돌 없음 확인
+- 상세: concepts/slug-rules.md
+

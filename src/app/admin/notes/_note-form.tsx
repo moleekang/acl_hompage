@@ -34,7 +34,6 @@ export function NoteForm({ mode, initial }: { mode: Mode; initial: Initial }) {
   const router = useRouter();
   const [busy, start] = useTransition();
   const [uploading, startUpload] = useTransition();
-  const [slug, setSlug] = useState(initial.slug);
   const [title, setTitle] = useState(initial.title);
   const [sub, setSub] = useState(initial.sub ?? "");
   const [cat, setCat] = useState(initial.cat);
@@ -90,7 +89,7 @@ export function NoteForm({ mode, initial }: { mode: Mode; initial: Initial }) {
     start(async () => {
       try {
         if (mode === "new") {
-          await createNote({ slug, title, sub, cat, read_time: read, body_mdx: body, render_mode: renderMode, content_type: contentType, thumbnail_url: thumbnailUrl });
+          await createNote({ title, sub, cat, read_time: read, body_mdx: body, render_mode: renderMode, content_type: contentType, thumbnail_url: thumbnailUrl });
         } else {
           await updateNote(initial.slug, { title, sub, cat, read_time: read, body_mdx: body, render_mode: renderMode, content_type: contentType, thumbnail_url: thumbnailUrl });
         }
@@ -145,7 +144,7 @@ export function NoteForm({ mode, initial }: { mode: Mode; initial: Initial }) {
             </button>
           </>
         )}
-        <button type="button" className="btn btn-primary" onClick={save} disabled={busy || uploading || !title || !slug}>
+        <button type="button" className="btn btn-primary" onClick={save} disabled={busy || uploading || !title}>
           {busy ? "저장 중..." : mode === "new" ? "★ 발행 준비 (초안 저장)" : "저장"}
         </button>
       </div>
@@ -170,13 +169,21 @@ export function NoteForm({ mode, initial }: { mode: Mode; initial: Initial }) {
           </div>
           <div style={{ gridColumn: "span 2" }}>
             <label className="field-label">슬러그 (URL)</label>
-            <input
-              className="input mono"
-              value={slug}
-              onChange={(e) => mode === "new" && setSlug(e.target.value.replace(/[^a-z0-9-]/gi, "-").toLowerCase())}
-              disabled={mode === "edit"}
-              style={mode === "edit" ? { background: "var(--surface-2)", color: "var(--fg-3)" } : undefined}
-            />
+            {mode === "edit" ? (
+              <input
+                className="input mono"
+                value={initial.slug}
+                disabled
+                style={{ background: "var(--surface-2)", color: "var(--fg-3)" }}
+              />
+            ) : (
+              <div
+                className="input mono"
+                style={{ display: "flex", alignItems: "center", background: "var(--surface-2)", color: "var(--fg-3)" }}
+              >
+                저장 시 카테고리 기준으로 자동 생성됩니다
+              </div>
+            )}
           </div>
           <div style={{ gridColumn: "span 2" }}>
             <label className="field-label">부제</label>

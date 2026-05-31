@@ -1,5 +1,5 @@
 # Index — acl_hompage
-> 마지막 업데이트: 2026-05-27
+> 마지막 업데이트: 2026-05-31
 
 AICONLAB 홈페이지(Next.js 16 + Supabase) 운영용 로컬 wiki.
 
@@ -15,6 +15,7 @@ AICONLAB 홈페이지(Next.js 16 + Supabase) 운영용 로컬 wiki.
 - [notes-area](entities/notes-area.md) — 인사이트(/notes) 영역 구조 — posts 미러 + author 표시 (2026-05-27)
 
 ## Concepts
+- [slug-rules](concepts/slug-rules.md) — 슬러그(URL) 자동 생성 규칙 `{카테고리}-{순번}` + posts 카테고리 영문/한글 정렬 (2026-05-31)
 
 ## Sources
 - [admin-design-system](../docs/design/admin/README.md) — Claude Design에서 받은 admin UI 시안 (시스템 토큰·atoms·6 화면)

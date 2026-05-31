@@ -19,7 +19,20 @@ export type PostRow = {
   author_id: string | null;
 };
 
-const CATEGORIES = ["전체", "사고방식", "자동화", "회사", "실패담", "logs"];
+// cat value는 DB 영문값, 화면 표시는 한글 label
+const POST_CATEGORIES: Record<string, { label: string }> = {
+  brand:   { label: "브랜드" },
+  dev:     { label: "개발" },
+  insight: { label: "인사이트" },
+  ops:     { label: "운영" },
+  retro:   { label: "회고" },
+  tool:    { label: "AI 도구" },
+};
+
+const CAT_FILTERS: Array<{ key: string; label: string }> = [
+  { key: "전체", label: "전체" },
+  ...Object.entries(POST_CATEGORIES).map(([key, v]) => ({ key, label: v.label })),
+];
 
 export function PostsTable({ posts, members }: { posts: PostRow[]; members: MemberRow[] }) {
   const [cat, setCat] = useState("전체");
@@ -49,8 +62,8 @@ export function PostsTable({ posts, members }: { posts: PostRow[]; members: Memb
           <input className="input" placeholder="제목으로 검색" />
         </div>
         <div className="row" style={{ gap: 6 }}>
-          {CATEGORIES.map((c) => (
-            <button key={c} type="button" className={"chip " + (cat === c ? "active" : "")} onClick={() => setCat(c)}>{c}</button>
+          {CAT_FILTERS.map(({ key, label }) => (
+            <button key={key} type="button" className={"chip " + (cat === key ? "active" : "")} onClick={() => setCat(key)}>{label}</button>
           ))}
         </div>
         <div className="grow" />
@@ -86,7 +99,7 @@ export function PostsTable({ posts, members }: { posts: PostRow[]; members: Memb
                       {p.sub && <div style={{ fontSize: 12, color: "var(--fg-3)", marginTop: 2 }}>{p.sub}</div>}
                     </Link>
                   </td>
-                  <td><span className="chip" style={{ padding: "3px 9px", fontSize: 11 }}>{p.cat}</span></td>
+                  <td><span className="chip" style={{ padding: "3px 9px", fontSize: 11 }}>{POST_CATEGORIES[p.cat]?.label ?? p.cat}</span></td>
                   <td className="num">{p.published_at ? new Date(p.published_at).toLocaleDateString("ko-KR") : "—"}</td>
                   <td className="num">{p.read_time ?? "—"}</td>
                   <td>
