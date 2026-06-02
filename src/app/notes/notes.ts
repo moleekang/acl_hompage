@@ -3,27 +3,22 @@
 
 import { createClient } from "@/lib/supabase/server";
 
-// 카테고리 정의 — 개인 인사이트 톤 (사색/도구/운영/기록)
+// 카테고리 정의 — 인사이트 주제 (유튜브/AI/도메인)
 export const categories = {
-  thought: {
-    label: "사색",
-    color: "var(--text-electric)",
-    glow: "rgba(90,124,255,0.16)",
-  },
-  tool: {
-    label: "도구",
-    color: "var(--text-mint)",
-    glow: "rgba(77,224,166,0.18)",
-  },
-  ops: {
-    label: "운영",
+  youtube: {
+    label: "유튜브",
     color: "var(--text-hot)",
     glow: "rgba(255,107,71,0.14)",
   },
-  record: {
-    label: "기록",
-    color: "var(--text-sun)",
-    glow: "rgba(255,210,63,0.22)",
+  ai: {
+    label: "AI",
+    color: "var(--text-electric)",
+    glow: "rgba(90,124,255,0.16)",
+  },
+  domain: {
+    label: "도메인",
+    color: "var(--text-mint)",
+    glow: "rgba(77,224,166,0.18)",
   },
 } as const;
 
@@ -56,10 +51,10 @@ export type Note = {
   thumbnailUrl: string | null;
 };
 
-// DB cat 문자열을 알려진 CatKey로 폴백 (모르는 값이면 'record'로).
+// DB cat 문자열을 알려진 CatKey로 폴백 (모르는 값이면 'ai'로).
 function normalizeCat(value: string | null | undefined): CatKey {
   if (value && value in categories) return value as CatKey;
-  return "record";
+  return "ai";
 }
 
 // DB render_mode 문자열 정규화 — 모르는 값이면 'embed' 폴백.

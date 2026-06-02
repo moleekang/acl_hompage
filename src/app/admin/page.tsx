@@ -6,6 +6,7 @@ import { Sparkline } from "@/components/admin/sparkline";
 import { RoleBadge, Status, SectionHead, type StatusKind } from "@/components/admin/badges";
 import { PageTopbar } from "./_components/page-topbar";
 import { fetchDashboardCounts, fetchMembers } from "@/lib/admin/fetchers";
+import { getSiteStats } from "@/lib/site-stats";
 
 export const dynamic = "force-dynamic";
 
@@ -14,7 +15,11 @@ const STATUS_LABEL: Record<string, string> = {
 };
 
 export default async function DashboardPage() {
-  const [counts, members] = await Promise.all([fetchDashboardCounts(), fetchMembers()]);
+  const [counts, members, stats] = await Promise.all([
+    fetchDashboardCounts(),
+    fetchMembers(),
+    getSiteStats(),
+  ]);
   const nameById = new Map(members.map((m) => [m.id, m.name]));
   const next = counts.nextEvent;
 
@@ -128,6 +133,17 @@ export default async function DashboardPage() {
           </div>
         </div>
 
+        {/* 유튜브 채널 현황 (YouTube Data API · 6h 캐시) */}
+        <div className="card elevated">
+          <SectionHead title="유튜브 채널" sub="Ai-Con Lab · 6시간마다 자동 갱신" />
+          <div className="grid-4" style={{ marginTop: 4 }}>
+            <YtStat n={stats.youtubeSubscribers} label="구독자" />
+            <YtStat n={stats.youtubeTotalViews} label="총 조회수" />
+            <YtStat n={stats.youtubeVideoCount} label="영상 수" />
+            <YtStat n={stats.topVideoViews} label="인기 영상 뷰" />
+          </div>
+        </div>
+
         {/* 빠른 액션 */}
         <div className="card elevated">
           <SectionHead title="빠른 액션" sub="자주 쓰는 글쓰기와 발행 작업" />
@@ -148,5 +164,15 @@ export default async function DashboardPage() {
         </div>
       </div>
     </>
+  );
+}
+
+// 유튜브 통계 미니 stat — 큰 숫자 + 라벨
+function YtStat({ n, label }: { n: string; label: string }) {
+  return (
+    <div>
+      <div className="mono" style={{ fontSize: 32, fontWeight: 700, lineHeight: 1 }}>{n}</div>
+      <div className="micro" style={{ marginTop: 6 }}>{label}</div>
+    </div>
   );
 }

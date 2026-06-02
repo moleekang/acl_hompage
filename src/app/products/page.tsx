@@ -2,10 +2,7 @@
 // 헤더의 "자동화앱" 메뉴와 연결 (/products)
 // 셀피쉬클럽의 카드 그리드 패턴 + AICONLAB 페이퍼 톤
 //
-// 현재 진열 상품:
-//   1. Congen (BETA) — 메인 카드
-//   2. Congen Cloud — SaaS 버전 (Coming Soon)
-//   3. ACL Claude Skills — 클로드 스킬 (Coming Soon)
+// 진열 상품은 products 테이블(published=true)에서 조회 — 현재 Congen.
 //
 // Note: layout.tsx가 Header/Footer를 감싸므로 본문만 정의
 
@@ -94,7 +91,7 @@ function ProductsHero() {
           >
             프롬프트 너머의 컨텍스트로, 1인 기업의 작업을 통째로 자동화합니다.
             <br />
-            지금 운영 중인 앱부터 곧 출시할 SaaS·클로드 스킬까지 한자리에.
+            직접 만들어 직접 운영하는 앱들을 한자리에.
           </p>
         </FadeUp>
       </div>
@@ -134,7 +131,8 @@ function ProductCard({
     live: { label: "LIVE", color: "var(--text-mint)", bg: "rgba(77,224,166,0.18)" },
     soon: { label: "COMING SOON", color: "var(--fg-3)", bg: "rgba(0,0,0,0.06)" },
   } as const;
-  const meta = statusMeta[status];
+  // status가 알 수 없는 값(예: DB의 'retired')이면 soon으로 폴백 — 렌더 크래시 방지
+  const meta = statusMeta[status] ?? statusMeta.soon;
   const isSoon = status === "soon";
 
   return (

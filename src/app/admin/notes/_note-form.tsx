@@ -7,12 +7,12 @@ import { Icon } from "@/components/admin/icons";
 import { createNote, updateNote, publishNote, deleteNote } from "../_actions/notes";
 import { uploadAdminImage } from "../_actions/uploads";
 
-// categories는 notes.ts에서 가져올 수 없음 (server-only 모듈) — 여기서 직접 정의
+// categories는 notes.ts에서 가져올 수 없음 (server-only 모듈) — 여기서 직접 정의.
+// notes.ts의 categories와 키/라벨을 일치시킬 것.
 const NOTE_CATEGORIES: Array<{ key: string; label: string }> = [
-  { key: "thought", label: "사색" },
-  { key: "tool",    label: "도구" },
-  { key: "ops",     label: "운영" },
-  { key: "record",  label: "기록" },
+  { key: "youtube", label: "유튜브" },
+  { key: "ai",      label: "AI" },
+  { key: "domain",  label: "도메인" },
 ];
 
 type Mode = "new" | "edit";

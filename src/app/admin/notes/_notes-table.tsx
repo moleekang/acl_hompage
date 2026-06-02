@@ -6,12 +6,12 @@ import { Avatar } from "@/components/admin/avatar";
 import { Icon } from "@/components/admin/icons";
 import { publishNote, deleteNote } from "../_actions/notes";
 
-// categories는 notes.ts에서 가져올 수 없음 (server-only 모듈) — 여기서 직접 정의
+// categories는 notes.ts에서 가져올 수 없음 (server-only 모듈) — 여기서 직접 정의.
+// notes.ts의 categories와 키/라벨을 일치시킬 것.
 const NOTE_CATEGORIES: Record<string, { label: string }> = {
-  thought: { label: "사색" },
-  tool:    { label: "도구" },
-  ops:     { label: "운영" },
-  record:  { label: "기록" },
+  youtube: { label: "유튜브" },
+  ai:      { label: "AI" },
+  domain:  { label: "도메인" },
 };
 
 export type NoteRow = {

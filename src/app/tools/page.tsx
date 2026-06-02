@@ -9,6 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { CategoryFilterGrid } from "@/components/aiconlab/category-filter-grid";
 import { createAdminClient } from "@/lib/supabase/server";
 
 type Tool = {
@@ -61,72 +62,63 @@ export default async function ToolsPage() {
         </p>
       </section>
 
-      {/* ===== 카테고리 필터 (셀피쉬 패턴) ===== */}
-      <section className="border-y border-border bg-secondary/40">
-        <div className="container mx-auto max-w-6xl px-6 py-4">
-          <div className="flex flex-wrap gap-2">
-            {categories.map((cat, i) => (
-              <button
-                key={cat}
-                className={`rounded-md px-4 py-2 text-sm font-medium transition-colors ${
-                  i === 0
-                    ? "bg-card text-foreground"
-                    : "text-muted-foreground hover:bg-card/60"
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ===== 도구 카드 그리드 (4-up, 작은 카드) ===== */}
+      {/* ===== 도구 카드 그리드 (4-up, 카테고리 필터) ===== */}
       <section className="container mx-auto max-w-6xl px-6 py-16">
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {tools.map((tool) => (
-            <Card
-              key={tool.id}
-              className="group relative overflow-hidden rounded-xl border-0 bg-card shadow-none transition-all hover:-translate-y-1 hover:shadow-md"
-            >
-              <CardHeader className="p-5">
-                <div className="mb-3 flex items-center justify-between">
-                  <span className="text-2xl">{tool.icon}</span>
-                  <span className="text-xs uppercase tracking-wider text-muted-foreground">
-                    {tool.category}
-                  </span>
-                </div>
-                <CardTitle className="font-serif text-lg font-normal">
-                  {tool.name}
-                </CardTitle>
-                <CardDescription className="mt-1 text-xs leading-relaxed">
-                  {tool.desc}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="px-5 pb-5">
-                {tool.deal !== "-" ? (
-                  <Badge className="rounded-full bg-primary text-xs text-primary-foreground">
-                    🎁 {tool.deal}
-                  </Badge>
-                ) : (
-                  <Badge
-                    variant="outline"
-                    className="rounded-full border-border text-xs"
-                  >
-                    추천만
-                  </Badge>
-                )}
-              </CardContent>
+        <CategoryFilterGrid
+          chip="shadcn"
+          gridClassName="grid gap-4 md:grid-cols-2 lg:grid-cols-4"
+          buttonClassName="rounded-md border border-border bg-background px-6 py-3 text-sm font-medium transition-colors hover:bg-muted"
+          buttonStyle={{ minWidth: 160 }}
+          loadMoreLabel="도구 더 보기"
+          emptyText="이 카테고리의 도구는 아직 없어요."
+          categories={categories.slice(1).map((c) => ({ key: c, label: c }))}
+          items={tools.map((tool) => ({
+            key: tool.id,
+            cat: tool.category,
+            node: (
+              <Card
+                key={tool.id}
+                className="group relative overflow-hidden rounded-xl border-0 bg-card shadow-none transition-all hover:-translate-y-1 hover:shadow-md"
+              >
+                <CardHeader className="p-5">
+                  <div className="mb-3 flex items-center justify-between">
+                    <span className="text-2xl">{tool.icon}</span>
+                    <span className="text-xs uppercase tracking-wider text-muted-foreground">
+                      {tool.category}
+                    </span>
+                  </div>
+                  <CardTitle className="font-serif text-lg font-normal">
+                    {tool.name}
+                  </CardTitle>
+                  <CardDescription className="mt-1 text-xs leading-relaxed">
+                    {tool.desc}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="px-5 pb-5">
+                  {tool.deal !== "-" ? (
+                    <Badge className="rounded-full bg-primary text-xs text-primary-foreground">
+                      🎁 {tool.deal}
+                    </Badge>
+                  ) : (
+                    <Badge
+                      variant="outline"
+                      className="rounded-full border-border text-xs"
+                    >
+                      추천만
+                    </Badge>
+                  )}
+                </CardContent>
 
-              {/* 호버 시 노출되는 멤버 안내 (셀피쉬 패턴) */}
-              {tool.deal !== "-" && (
-                <div className="absolute inset-x-0 bottom-0 translate-y-full bg-primary p-4 text-center text-xs text-primary-foreground transition-transform group-hover:translate-y-0">
-                  멤버 가입 시 코드 자동 발급
-                </div>
-              )}
-            </Card>
-          ))}
-        </div>
+                {/* 호버 시 노출되는 멤버 안내 (셀피쉬 패턴) */}
+                {tool.deal !== "-" && (
+                  <div className="absolute inset-x-0 bottom-0 translate-y-full bg-primary p-4 text-center text-xs text-primary-foreground transition-transform group-hover:translate-y-0">
+                    멤버 가입 시 코드 자동 발급
+                  </div>
+                )}
+              </Card>
+            ),
+          }))}
+        />
 
         <p className="mt-12 text-center text-sm text-muted-foreground">
           ✦ 호버 시 멤버 혜택이 나타납니다 (UI 미리보기)

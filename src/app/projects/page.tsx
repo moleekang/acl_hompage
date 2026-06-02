@@ -10,6 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { CONGEN_DOWNLOAD } from "@/lib/links";
 
 // AICONLAB 프로젝트 — 진행 중 + 출시 + 계획
 const projects = [
@@ -190,7 +191,9 @@ export default function ProjectsPage() {
                     ))}
                   </div>
                   <a
-                    href="#"
+                    href={CONGEN_DOWNLOAD.home}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="mt-8 inline-flex items-center gap-2 rounded-md bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-[#a9583e]"
                   >
                     ConGen 다운로드 →

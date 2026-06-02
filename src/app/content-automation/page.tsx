@@ -10,6 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { CONGEN_DOWNLOAD } from "@/lib/links";
 
 // 영상 제작 7단계 워크플로우
 const workflow = [
@@ -242,13 +243,13 @@ export default function ContentAutomationPage() {
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <a
-                href="#"
+                href={CONGEN_DOWNLOAD.mac}
                 className="inline-flex items-center gap-2 rounded-md bg-background px-6 py-3 text-sm font-medium text-foreground transition-colors hover:bg-card"
               >
                 ⬇ Mac 다운로드
               </a>
               <a
-                href="#"
+                href={CONGEN_DOWNLOAD.win}
                 className="inline-flex items-center gap-2 rounded-md border border-background/30 px-6 py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-background/10"
               >
                 ⬇ Windows 다운로드

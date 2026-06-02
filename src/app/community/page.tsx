@@ -4,7 +4,8 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { SITE_STATS } from "@/lib/site-stats";
+import { getSiteStats } from "@/lib/site-stats";
+import { KAKAO_OPENCHAT } from "@/lib/links";
 import { createAdminClient } from "@/lib/supabase/server";
 
 type Testimonial = {
@@ -30,7 +31,10 @@ async function fetchTestimonials(): Promise<Testimonial[]> {
 }
 
 export default async function CommunityPage() {
-  const testimonials = await fetchTestimonials();
+  const [testimonials, stats] = await Promise.all([
+    fetchTestimonials(),
+    getSiteStats(),
+  ]);
   return (
     <div className="bg-background">
       {/* ===== Hero — 큰 단톡방 CTA ===== */}
@@ -54,13 +58,10 @@ export default async function CommunityPage() {
               size="lg"
               className="rounded-md bg-primary px-8 py-7 text-lg text-primary-foreground hover:bg-[#a9583e]"
             >
-              <a href="#" target="_blank" rel="noopener noreferrer">
+              <a href={KAKAO_OPENCHAT} target="_blank" rel="noopener noreferrer">
                 💬 카카오톡 단톡방 입장하기 →
               </a>
             </Button>
-            <p className="mt-3 text-xs text-muted-foreground">
-              * 링크는 곧 연결 예정
-            </p>
           </div>
         </div>
       </section>
@@ -71,19 +72,19 @@ export default async function CommunityPage() {
           <div className="grid gap-8 md:grid-cols-4">
             <div>
               <p className="font-serif text-4xl text-[var(--text-mint)] md:text-5xl">
-                {SITE_STATS.communityMembers}
+                {stats.communityMembers}
               </p>
               <p className="mt-2 text-sm text-[#a09d96]">단톡방 멤버</p>
             </div>
             <div>
               <p className="font-serif text-4xl text-[var(--text-mint)] md:text-5xl">
-                {SITE_STATS.youtubeSubscribers}
+                {stats.youtubeSubscribers}
               </p>
               <p className="mt-2 text-sm text-[#a09d96]">유튜브 구독자</p>
             </div>
             <div>
               <p className="font-serif text-4xl text-[var(--text-mint)] md:text-5xl">
-                {SITE_STATS.betaTesters}
+                {stats.betaTesters}
               </p>
               <p className="mt-2 text-sm text-[#a09d96]">베타 테스터</p>
             </div>
@@ -111,7 +112,7 @@ export default async function CommunityPage() {
 
           <div className="grid gap-4 md:grid-cols-4">
             {[
-              { step: "1", icon: "📺", title: "유튜브 시청", desc: `${SITE_STATS.youtubeSubscribers}명 구독자` },
+              { step: "1", icon: "📺", title: "유튜브 시청", desc: `${stats.youtubeSubscribers}명 구독자` },
               { step: "2", icon: "💬", title: "단톡방 합류", desc: "마을 회관에 머물기" },
               { step: "3", icon: "🤝", title: "능동적 활동", desc: "질문 · 공유 · 기여" },
               { step: "4", icon: "✦", title: "코어 자연 형성", desc: "공동 프로젝트 동료" },

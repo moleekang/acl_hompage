@@ -23,12 +23,13 @@ import {
   StickerStamp,
 } from "@/components/aiconlab/sticker";
 import { fetchPosts, categories, type Post } from "./log/posts";
-import { SITE_STATS } from "@/lib/site-stats";
+import { getSiteStats } from "@/lib/site-stats";
 
 // ──────────────────────────────────────────────────────────
 // 1. HERO — 새 비전 카피 (④번 확정안)
 // ──────────────────────────────────────────────────────────
-function Hero() {
+async function Hero() {
+  const stats = await getSiteStats();
   return (
     <section
       className="aicon-section"
@@ -123,11 +124,11 @@ function Hero() {
                   flexWrap: "wrap",
                 }}
               >
-                <Stat n={SITE_STATS.youtubeSubscribers} label="함께하는 시청자" />
+                <Stat n={stats.youtubeSubscribers} label="함께하는 시청자" />
                 <Divider />
-                <Stat n={SITE_STATS.topVideoViews} label="인기 영상 뷰" />
+                <Stat n={stats.topVideoViews} label="인기 영상 뷰" />
                 <Divider />
-                <Stat n={SITE_STATS.wikiPages} label="공유 위키" />
+                <Stat n={stats.wikiPages} label="공유 위키" />
               </div>
             </FadeUp>
           </div>
@@ -225,7 +226,7 @@ function Hero() {
                       fontFamily: "var(--font-mono)",
                     }}
                   >
-                    {SITE_STATS.topVideoViews}
+                    {stats.topVideoViews}
                   </div>
                 </div>
                 <div
@@ -323,7 +324,7 @@ function Hero() {
                 style={{
                   display: "grid",
                   gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-                  gap: "8px 20px",
+                  gap: "16px 24px",
                   paddingTop: 12,
                   borderTop: "1px dashed var(--border-1)",
                 }}
@@ -337,13 +338,13 @@ function Hero() {
                 <ActivityRow
                   emoji="✏️"
                   label="Writing"
-                  content={`위키 ${SITE_STATS.wikiPages} 페이지`}
+                  content={`위키 ${stats.wikiPages} 페이지`}
                   color="var(--text-electric)"
                 />
                 <ActivityRow
                   emoji="📺"
                   label="Streaming"
-                  content={`유튜브 AiConLab · ${SITE_STATS.youtubeSubscribers}명`}
+                  content={`유튜브 AiConLab · ${stats.youtubeSubscribers}명`}
                   color="var(--text-hot)"
                 />
                 <ActivityRow
@@ -400,31 +401,28 @@ function ActivityRow({
   color: string;
 }) {
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 8,
-        fontSize: 13,
-        lineHeight: 1.4,
-      }}
-    >
-      <span style={{ fontSize: 15, flexShrink: 0 }} aria-hidden>
+    <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+      <span style={{ fontSize: 16, flexShrink: 0, lineHeight: 1.3 }} aria-hidden>
         {emoji}
       </span>
-      <span
-        style={{
-          fontSize: 10.5,
-          fontWeight: 800,
-          color,
-          letterSpacing: "0.1em",
-          textTransform: "uppercase",
-          flexShrink: 0,
-        }}
-      >
-        {label}
-      </span>
-      <span style={{ color: "var(--fg-2)" }}>{content}</span>
+      {/* 라벨(위) + 내용(아래) 세로 스택 — content가 길어도 자연스럽게 줄바꿈 */}
+      <div style={{ minWidth: 0 }}>
+        <div
+          style={{
+            fontSize: 10.5,
+            fontWeight: 800,
+            color,
+            letterSpacing: "0.1em",
+            textTransform: "uppercase",
+            marginBottom: 3,
+          }}
+        >
+          {label}
+        </div>
+        <div style={{ fontSize: 13, color: "var(--fg-2)", lineHeight: 1.45 }}>
+          {content}
+        </div>
+      </div>
     </div>
   );
 }

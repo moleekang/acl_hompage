@@ -4,6 +4,7 @@
 import Link from "next/link";
 import { FadeUp } from "@/components/aiconlab/fade-up";
 import { Icon } from "@/components/aiconlab/icon";
+import { CategoryFilterGrid } from "@/components/aiconlab/category-filter-grid";
 import { fetchNotes, categories, type Note } from "./notes";
 
 // ──────────────────────────────────────────────────────────
@@ -50,313 +51,160 @@ function NotesIntro() {
             </span>
           </p>
         </FadeUp>
-
-        {/* 카테고리 필터 (목업 — 클릭 동작 없음) */}
-        <FadeUp delay={220}>
-          <div
-            style={{
-              marginTop: 32,
-              display: "flex",
-              gap: 8,
-              flexWrap: "wrap",
-            }}
-          >
-            <CategoryChip label="전체" active />
-            {Object.entries(categories).map(([k, v]) => (
-              <CategoryChip key={k} label={v.label} color={v.color} />
-            ))}
-          </div>
-        </FadeUp>
       </div>
     </section>
-  );
-}
-
-// 카테고리 필터 칩 (목업 — 동작 X, 시각 요소만)
-function CategoryChip({
-  label,
-  color,
-  active,
-}: {
-  label: string;
-  color?: string;
-  active?: boolean;
-}) {
-  return (
-    <span
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 6,
-        padding: "8px 14px",
-        borderRadius: 999,
-        background: active ? "var(--ink-900)" : "rgba(255,255,255,0.04)",
-        color: active ? "#fff" : "var(--fg-2)",
-        border: `1px solid ${active ? "var(--ink-900)" : "var(--border-1)"}`,
-        fontSize: 13,
-        fontWeight: 600,
-        cursor: "pointer",
-        userSelect: "none",
-      }}
-    >
-      {color && (
-        <span
-          style={{
-            width: 8,
-            height: 8,
-            borderRadius: 999,
-            background: color,
-          }}
-        />
-      )}
-      {label}
-    </span>
   );
 }
 
 // ──────────────────────────────────────────────────────────
 // 2. NOTE CARD — 단일 글 카드 (작성자 아바타 + 이름 포함)
 // ──────────────────────────────────────────────────────────
-function NoteCard({ note }: { note: Note }) {
+function NoteCard({ note, index }: { note: Note; index: number }) {
   const meta = categories[note.cat];
-
-  // 작성자 표시: nickname 우선, 없으면 email local part 불가(공개 측엔 없음) → "작성자"
-  const authorName = note.author?.nickname ?? "작성자";
-  const authorInitial = authorName.charAt(0).toUpperCase();
 
   // newtab 모드: raw 경로로 새 탭 열기, embed 모드: 상세 페이지로 이동
   const isNewTab = note.renderMode === "newtab";
+  // 도판 인덱스 — NO. 001 형식
+  const no = String(index).padStart(3, "0");
 
   return (
     <Link
       href={isNewTab ? `/notes/${note.slug}/raw` : `/notes/${note.slug}`}
       target={isNewTab ? "_blank" : undefined}
       rel={isNewTab ? "noopener noreferrer" : undefined}
-      style={{
-        textDecoration: "none",
-        color: "inherit",
-        display: "block",
-        height: "100%",
-      }}
+      className="gallery-card"
+      style={{ textDecoration: "none", color: "inherit", display: "block" }}
     >
-      <article
-        className="card-dark"
+      {/* ─── 썸네일 (미술관 도판의 '작품') — 테두리 없는 크림 박스 ─── */}
+      <div
+        className="gallery-card__plate"
         style={{
-          height: "100%",
-          padding: 0,
-          display: "flex",
-          flexDirection: "column",
+          aspectRatio: "4 / 3",
+          background: "var(--surface-2)",
+          borderRadius: 16,
+          position: "relative",
           overflow: "hidden",
-          cursor: "pointer",
-          transition: "transform .15s ease",
+          boxShadow: "0 6px 22px rgba(0,0,0,0.05)",
         }}
       >
-        {/* ─── 썸네일 영역 (16:9) ─── */}
-        <div
-          style={{
-            aspectRatio: "16/9",
-            background: "var(--ink-900)",
-            position: "relative",
-            overflow: "hidden",
-            borderBottom: "1px solid var(--border-1)",
-          }}
-        >
-          {note.thumbnailUrl ? (
-            // 썸네일 이미지가 있으면 커버 표시
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={note.thumbnailUrl}
-              alt={note.title}
-              style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
-            />
-          ) : (
-            // 없으면 기존 그라데이션 + 카테고리 큰 텍스트 fallback
-            <>
-              {/* 다층 글로우 (카테고리 색) */}
-              <div
-                style={{
-                  position: "absolute",
-                  inset: 0,
-                  background: `radial-gradient(ellipse at 30% 30%, ${meta.glow}, transparent 60%), radial-gradient(ellipse at 70% 70%, rgba(255,255,255,0.04), transparent 60%)`,
-                }}
-              />
-              {/* 가운데 — 카테고리 큰 텍스트 (시각 액센트) */}
-              <div
-                style={{
-                  position: "absolute",
-                  inset: 0,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontFamily: "var(--font-mono)",
-                  fontSize: 36,
-                  fontWeight: 800,
-                  color: meta.color,
-                  opacity: 0.18,
-                  letterSpacing: "-0.02em",
-                  textTransform: "uppercase",
-                  pointerEvents: "none",
-                }}
-              >
-                {meta.label}
-              </div>
-            </>
-          )}
-          {/* 좌상단 — 카테고리 배지 (항상 오버레이) */}
+        {note.thumbnailUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={note.thumbnailUrl}
+            alt={note.title}
+            // contain + 약간의 여백: 비율이 안 맞아도 이미지가 잘리지 않고 전체가 보인다. 빈 공간은 크림 배경.
+            style={{ position: "absolute", inset: 10, width: "calc(100% - 20px)", height: "calc(100% - 20px)", objectFit: "contain" }}
+          />
+        ) : (
+          // 이미지 없으면 손글씨 제목 + 부제 + 카테고리 마크 (프로토타입 C)
           <div
             style={{
               position: "absolute",
-              top: 14,
-              left: 14,
-              padding: "4px 10px",
-              background: meta.glow,
-              color: meta.color,
-              borderRadius: 999,
-              fontSize: 11,
-              fontWeight: 800,
-              letterSpacing: "0.1em",
-              textTransform: "uppercase",
-              zIndex: 2,
+              inset: 0,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 12,
+              padding: "24px 28px",
+              textAlign: "center",
             }}
           >
-            ● {meta.label}
+            <h3
+              style={{
+                fontFamily: "var(--font-display)",
+                fontSize: 30,
+                fontWeight: 700,
+                color: "var(--fg-1)",
+                lineHeight: 1.25,
+                margin: 0,
+              }}
+            >
+              {note.title}
+            </h3>
+            {note.sub && (
+              <p style={{ fontSize: 13, color: "var(--fg-3)", lineHeight: 1.5, margin: 0 }}>
+                {note.sub}
+              </p>
+            )}
+            <span
+              aria-hidden
+              style={{
+                marginTop: 4,
+                width: 34,
+                height: 30,
+                borderRadius: 8,
+                background: meta.color,
+                display: "inline-block",
+              }}
+            />
           </div>
-          {/* 우하단 — 읽기 시간 (항상 오버레이) */}
+        )}
+        {/* 우하단 — 읽기 시간 배지 */}
+        {note.readTime && (
           <div
             style={{
               position: "absolute",
               bottom: 12,
               right: 12,
-              padding: "3px 8px",
-              background: "rgba(0,0,0,0.55)",
-              borderRadius: 4,
+              padding: "3px 10px",
+              background: "rgba(14,17,22,0.82)",
+              borderRadius: 999,
               fontSize: 11,
               color: "#fff",
               fontFamily: "var(--font-mono)",
-              letterSpacing: "0.06em",
-              zIndex: 2,
+              letterSpacing: "0.04em",
             }}
           >
             {note.readTime}
           </div>
-        </div>
+        )}
+      </div>
 
-        {/* ─── 본문 영역 ─── */}
+      {/* ─── 도판 캡션 (카드 밖) — 인덱스·카테고리 / 제목 / 메타 ─── */}
+      <div style={{ padding: "16px 4px 0" }}>
         <div
+          className="mono"
           style={{
-            padding: 22,
             display: "flex",
-            flexDirection: "column",
-            flex: 1,
-            gap: 10,
+            alignItems: "center",
+            gap: 7,
+            fontSize: 12,
+            color: "var(--fg-3)",
+            letterSpacing: "0.06em",
+            marginBottom: 8,
           }}
         >
-          {/* 날짜 + 카테고리 메타 */}
-          <div
-            className="mono"
-            style={{
-              fontSize: 12,
-              color: "var(--fg-3)",
-              letterSpacing: "0.06em",
-            }}
-          >
-            {note.date} · {meta.label}
-          </div>
-
-          {/* 제목 */}
-          <h3
-            className="aicon-h2"
-            style={{
-              fontSize: 19,
-              fontWeight: 700,
-              lineHeight: 1.4,
-              margin: 0,
-            }}
-          >
-            {note.title}
-          </h3>
-
-          {/* 부제 (한 줄 요약) */}
-          <p
-            style={{
-              fontSize: 14.5,
-              color: "var(--fg-2)",
-              lineHeight: 1.6,
-              margin: 0,
-              flex: 1,
-            }}
-          >
-            {note.sub}
-          </p>
-
-          {/* 하단 — 작성자 + 읽기 화살표 */}
-          <div
-            style={{
-              marginTop: 8,
-              paddingTop: 12,
-              borderTop: "1px dashed var(--border-1)",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            {/* 작성자 아바타 + 이름 */}
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              {note.author?.avatar_url ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={note.author.avatar_url}
-                  alt={authorName}
-                  style={{
-                    width: 24,
-                    height: 24,
-                    borderRadius: 999,
-                    objectFit: "cover",
-                    border: "1px solid var(--border-1)",
-                  }}
-                />
-              ) : (
-                <span
-                  style={{
-                    width: 24,
-                    height: 24,
-                    borderRadius: 999,
-                    background: "var(--text-electric)",
-                    color: "#fff",
-                    fontSize: 11,
-                    fontWeight: 800,
-                    display: "inline-flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    flexShrink: 0,
-                  }}
-                >
-                  {authorInitial}
-                </span>
-              )}
-              <span
-                className="mono"
-                style={{ fontSize: 11, color: "var(--fg-3)", letterSpacing: "0.06em" }}
-              >
-                {authorName}
-              </span>
-            </div>
-            <span
-              style={{
-                fontSize: 13,
-                fontWeight: 700,
-                color: "var(--text-mint)",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 4,
-              }}
-            >
-              읽기 <span aria-hidden>→</span>
-              {isNewTab && <span aria-label="새 탭에서 열림" style={{ fontSize: 12, opacity: 0.7 }}>🪟</span>}
-            </span>
-          </div>
+          <span
+            style={{ width: 7, height: 7, borderRadius: 999, background: meta.color, flexShrink: 0 }}
+          />
+          NO. {no} — {meta.label}
         </div>
-      </article>
+        <h3
+          style={{
+            fontFamily: "var(--font-display)",
+            fontSize: 20,
+            fontWeight: 700,
+            color: "var(--fg-1)",
+            lineHeight: 1.4,
+            margin: "0 0 12px",
+          }}
+        >
+          {note.title}
+        </h3>
+        <span
+          className="mono"
+          style={{ fontSize: 12, color: "var(--fg-3)", letterSpacing: "0.04em" }}
+        >
+          {note.date}
+          {note.readTime && ` · ${note.readTime}`}
+          {isNewTab && (
+            <span aria-label="새 탭에서 열림" style={{ marginLeft: 6, opacity: 0.7 }}>
+              🪟
+            </span>
+          )}
+        </span>
+      </div>
     </Link>
   );
 }
@@ -382,13 +230,23 @@ function NoteGrid({ notes }: { notes: Note[] }) {
       style={{ paddingTop: 16, paddingBottom: 48 }}
     >
       <div className="aicon-container">
-        <div className="grid-3">
-          {notes.map((n, i) => (
-            <FadeUp key={n.slug} delay={80 + i * 50}>
-              <NoteCard note={n} />
-            </FadeUp>
-          ))}
-        </div>
+        <CategoryFilterGrid
+          chip="aicon"
+          categories={Object.entries(categories).map(([key, v]) => ({
+            key,
+            label: v.label,
+            color: v.color,
+          }))}
+          items={notes.map((n, i) => ({
+            key: n.slug,
+            cat: n.cat,
+            node: (
+              <FadeUp key={n.slug} delay={80 + i * 50}>
+                <NoteCard note={n} index={i + 1} />
+              </FadeUp>
+            ),
+          }))}
+        />
       </div>
     </section>
   );
@@ -408,24 +266,6 @@ function NotesCTA() {
       }}
     >
       <div className="aicon-container">
-        <FadeUp>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              marginBottom: 56,
-            }}
-          >
-            <button
-              type="button"
-              className="btn btn-secondary btn-lg"
-              style={{ minWidth: 200 }}
-            >
-              더 많은 글 보기
-            </button>
-          </div>
-        </FadeUp>
-
         <FadeUp delay={120}>
           <div
             className="card-dark"

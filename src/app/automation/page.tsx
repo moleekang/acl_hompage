@@ -10,6 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { CategoryFilterGrid } from "@/components/aiconlab/category-filter-grid";
 import { createClient } from "@/lib/supabase/server";
 
 // DB row 구조 — supabase automations 테이블타입한다.
@@ -129,83 +130,74 @@ export default async function AutomationPage() {
         </div>
       </section>
 
-      {/* ===== 카테고리 필터 ===== */}
-      <section className="border-y border-border bg-secondary/40">
-        <div className="container mx-auto max-w-6xl px-6 py-4">
-          <div className="flex flex-wrap gap-2">
-            {CATEGORY_FILTERS.map((cat, i) => (
-              <button
-                key={cat}
-                className={`rounded-md px-4 py-2 text-sm font-medium transition-colors ${
-                  i === 0
-                    ? "bg-card text-foreground"
-                    : "text-muted-foreground hover:bg-card/60"
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ===== 자동화 카드 그리드 ===== */}
+      {/* ===== 자동화 카드 그리드 (카테고리 필터) ===== */}
       <section className="container mx-auto max-w-6xl px-6 py-16">
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {automations.map((auto) => (
-            <Card
-              key={auto.title}
-              className="rounded-xl border-0 bg-card shadow-none transition-all hover:-translate-y-1 hover:shadow-md"
-            >
-              <CardHeader className="p-6">
-                {/* 상단: 아이콘 + 카테고리 */}
-                <div className="mb-4 flex items-start justify-between">
-                  <span className="text-3xl">{auto.icon}</span>
-                  <Badge
-                    variant="outline"
-                    className="rounded-full border-border bg-background text-xs"
-                  >
-                    {auto.category}
-                  </Badge>
-                </div>
-
-                <CardTitle className="font-serif text-xl font-normal leading-tight">
-                  {auto.title}
-                </CardTitle>
-                <CardDescription className="mt-3 text-sm leading-relaxed">
-                  {auto.desc}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="px-6 pb-6">
-                {/* 사용 도구 태그 */}
-                <div className="mb-4 flex flex-wrap gap-1.5">
-                  {auto.tools.map((tool) => (
-                    <span
-                      key={tool}
-                      className="rounded-md bg-secondary px-2 py-0.5 text-xs text-muted-foreground"
+        <CategoryFilterGrid
+          chip="shadcn"
+          gridClassName="grid gap-6 md:grid-cols-2 lg:grid-cols-3"
+          buttonClassName="rounded-md border border-border bg-background px-6 py-3 text-sm font-medium transition-colors hover:bg-muted"
+          buttonStyle={{ minWidth: 160 }}
+          loadMoreLabel="자동화 더 보기"
+          emptyText="이 카테고리의 자동화 실험은 아직 없어요."
+          categories={CATEGORY_FILTERS.slice(1).map((c) => ({ key: c, label: c }))}
+          items={automations.map((auto) => ({
+            key: auto.slug,
+            cat: auto.category,
+            node: (
+              <Card
+                key={auto.slug}
+                className="rounded-xl border-0 bg-card shadow-none transition-all hover:-translate-y-1 hover:shadow-md"
+              >
+                <CardHeader className="p-6">
+                  {/* 상단: 아이콘 + 카테고리 */}
+                  <div className="mb-4 flex items-start justify-between">
+                    <span className="text-3xl">{auto.icon}</span>
+                    <Badge
+                      variant="outline"
+                      className="rounded-full border-border bg-background text-xs"
                     >
-                      {tool}
-                    </span>
-                  ))}
-                </div>
+                      {auto.category}
+                    </Badge>
+                  </div>
 
-                {/* 하단: 상태 + 효과 */}
-                <div className="flex items-center justify-between border-t border-border pt-4">
-                  <span
-                    className={`rounded-full px-3 py-1 text-xs font-medium ${
-                      statusColors[auto.status]
-                    }`}
-                  >
-                    {auto.status}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {auto.impact}
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                  <CardTitle className="font-serif text-xl font-normal leading-tight">
+                    {auto.title}
+                  </CardTitle>
+                  <CardDescription className="mt-3 text-sm leading-relaxed">
+                    {auto.desc}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="px-6 pb-6">
+                  {/* 사용 도구 태그 */}
+                  <div className="mb-4 flex flex-wrap gap-1.5">
+                    {auto.tools.map((tool) => (
+                      <span
+                        key={tool}
+                        className="rounded-md bg-secondary px-2 py-0.5 text-xs text-muted-foreground"
+                      >
+                        {tool}
+                      </span>
+                    ))}
+                  </div>
+
+                  {/* 하단: 상태 + 효과 */}
+                  <div className="flex items-center justify-between border-t border-border pt-4">
+                    <span
+                      className={`rounded-full px-3 py-1 text-xs font-medium ${
+                        statusColors[auto.status]
+                      }`}
+                    >
+                      {auto.status}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {auto.impact}
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+            ),
+          }))}
+        />
 
         <p className="mt-12 text-center text-sm text-muted-foreground">
           ✦ 새 자동화 실험이 매주 추가됩니다.

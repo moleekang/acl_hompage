@@ -8,6 +8,7 @@
 import Link from "next/link";
 import { FadeUp } from "@/components/aiconlab/fade-up";
 import { Icon } from "@/components/aiconlab/icon";
+import { CategoryFilterGrid } from "@/components/aiconlab/category-filter-grid";
 import { fetchPosts, categories, type Post } from "./posts";
 
 // ──────────────────────────────────────────────────────────
@@ -56,267 +57,141 @@ function BlogIntro() {
           </p>
         </FadeUp>
 
-        {/* 카테고리 필터 (목업 — 클릭 동작 없음) */}
-        <FadeUp delay={220}>
-          <div
-            style={{
-              marginTop: 32,
-              display: "flex",
-              gap: 8,
-              flexWrap: "wrap",
-            }}
-          >
-            <CategoryChip label="전체" active />
-            {Object.entries(categories).map(([k, v]) => (
-              <CategoryChip key={k} label={v.label} color={v.color} />
-            ))}
-          </div>
-        </FadeUp>
       </div>
     </section>
-  );
-}
-
-// 카테고리 필터 칩 (목업 — 동작 X, 시각 요소만)
-function CategoryChip({
-  label,
-  color,
-  active,
-}: {
-  label: string;
-  color?: string;
-  active?: boolean;
-}) {
-  return (
-    <span
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 6,
-        padding: "8px 14px",
-        borderRadius: 999,
-        background: active ? "var(--ink-900)" : "rgba(255,255,255,0.04)",
-        color: active ? "#fff" : "var(--fg-2)",
-        border: `1px solid ${active ? "var(--ink-900)" : "var(--border-1)"}`,
-        fontSize: 13,
-        fontWeight: 600,
-        cursor: "pointer",
-        userSelect: "none",
-      }}
-    >
-      {color && (
-        <span
-          style={{
-            width: 8,
-            height: 8,
-            borderRadius: 999,
-            background: color,
-          }}
-        />
-      )}
-      {label}
-    </span>
   );
 }
 
 // ──────────────────────────────────────────────────────────
 // 2. POST CARD — 단일 글 카드 (셀피시 팀 블로그 카드 패턴)
 // ──────────────────────────────────────────────────────────
-function PostCard({ post }: { post: Post }) {
+function PostCard({ post, index }: { post: Post; index: number }) {
   const meta = categories[post.cat];
+  // 도판 인덱스 — NO. 001 형식
+  const no = String(index).padStart(3, "0");
 
   return (
     <Link
       href={`/log/${post.slug}`}
-      style={{
-        textDecoration: "none",
-        color: "inherit",
-        display: "block",
-        height: "100%",
-      }}
+      className="gallery-card"
+      style={{ textDecoration: "none", color: "inherit", display: "block" }}
     >
-    <article
-      className="card-dark"
-      style={{
-        height: "100%",
-        padding: 0,
-        display: "flex",
-        flexDirection: "column",
-        overflow: "hidden",
-        cursor: "pointer",
-        transition: "transform .15s ease",
-      }}
-    >
-      {/* ─── 썸네일 영역 (16:9) ─── */}
+      {/* ─── 썸네일 (미술관 도판의 '작품') — 테두리 없는 크림 박스 ─── */}
       <div
+        className="gallery-card__plate"
         style={{
-          aspectRatio: "16/9",
-          background: "var(--ink-900)",
+          aspectRatio: "4 / 3",
+          background: "var(--surface-2)",
+          borderRadius: 16,
           position: "relative",
           overflow: "hidden",
-          borderBottom: "1px solid var(--border-1)",
+          boxShadow: "0 6px 22px rgba(0,0,0,0.05)",
         }}
       >
         {post.thumbnailUrl ? (
-          // 썸네일 이미지가 있으면 커버 표시
+          // contain + 약간의 여백: 비율이 안 맞아도 이미지가 잘리지 않고 전체가 보인다.
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={post.thumbnailUrl}
             alt={post.title}
-            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
+            style={{ position: "absolute", inset: 10, width: "calc(100% - 20px)", height: "calc(100% - 20px)", objectFit: "contain" }}
           />
         ) : (
-          // 없으면 기존 그라데이션 + 카테고리 큰 텍스트 fallback
-          <>
-            {/* 다층 글로우 (카테고리 색) */}
-            <div
+          // 이미지 없으면 손글씨 제목 + 부제 + 카테고리 마크
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 12,
+              padding: "24px 28px",
+              textAlign: "center",
+            }}
+          >
+            <h3
               style={{
-                position: "absolute",
-                inset: 0,
-                background: `radial-gradient(ellipse at 30% 30%, ${meta.glow}, transparent 60%), radial-gradient(ellipse at 70% 70%, rgba(255,255,255,0.04), transparent 60%)`,
-              }}
-            />
-            {/* 가운데 — 카테고리 큰 텍스트 (시각 액센트) */}
-            <div
-              style={{
-                position: "absolute",
-                inset: 0,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontFamily: "var(--font-mono)",
-                fontSize: 36,
-                fontWeight: 800,
-                color: meta.color,
-                opacity: 0.18,
-                letterSpacing: "-0.02em",
-                textTransform: "uppercase",
-                pointerEvents: "none",
+                fontFamily: "var(--font-display)",
+                fontSize: 30,
+                fontWeight: 700,
+                color: "var(--fg-1)",
+                lineHeight: 1.25,
+                margin: 0,
               }}
             >
-              {meta.label}
-            </div>
-          </>
+              {post.title}
+            </h3>
+            {post.sub && (
+              <p style={{ fontSize: 13, color: "var(--fg-3)", lineHeight: 1.5, margin: 0 }}>
+                {post.sub}
+              </p>
+            )}
+            <span
+              aria-hidden
+              style={{ marginTop: 4, width: 34, height: 30, borderRadius: 8, background: meta.color, display: "inline-block" }}
+            />
+          </div>
         )}
-        {/* 좌상단 — 카테고리 배지 (항상 오버레이) */}
-        <div
-          style={{
-            position: "absolute",
-            top: 14,
-            left: 14,
-            padding: "4px 10px",
-            background: meta.glow,
-            color: meta.color,
-            borderRadius: 999,
-            fontSize: 11,
-            fontWeight: 800,
-            letterSpacing: "0.1em",
-            textTransform: "uppercase",
-            zIndex: 2,
-          }}
-        >
-          ● {meta.label}
-        </div>
-        {/* 우하단 — 읽기 시간 (항상 오버레이) */}
-        <div
-          style={{
-            position: "absolute",
-            bottom: 12,
-            right: 12,
-            padding: "3px 8px",
-            background: "rgba(0,0,0,0.55)",
-            borderRadius: 4,
-            fontSize: 11,
-            color: "#fff",
-            fontFamily: "var(--font-mono)",
-            letterSpacing: "0.06em",
-            zIndex: 2,
-          }}
-        >
-          {post.readTime}
-        </div>
+        {/* 우하단 — 읽기 시간 배지 */}
+        {post.readTime && (
+          <div
+            style={{
+              position: "absolute",
+              bottom: 12,
+              right: 12,
+              padding: "3px 10px",
+              background: "rgba(14,17,22,0.82)",
+              borderRadius: 999,
+              fontSize: 11,
+              color: "#fff",
+              fontFamily: "var(--font-mono)",
+              letterSpacing: "0.04em",
+            }}
+          >
+            {post.readTime}
+          </div>
+        )}
       </div>
 
-      {/* ─── 본문 영역 ─── */}
-      <div
-        style={{
-          padding: 22,
-          display: "flex",
-          flexDirection: "column",
-          flex: 1,
-          gap: 10,
-        }}
-      >
-        {/* 날짜 + 카테고리 메타 */}
+      {/* ─── 도판 캡션 (카드 밖) ─── */}
+      <div style={{ padding: "16px 4px 0" }}>
         <div
           className="mono"
           style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 7,
             fontSize: 12,
             color: "var(--fg-3)",
             letterSpacing: "0.06em",
+            marginBottom: 8,
           }}
         >
-          {post.date} · {meta.label}
+          <span style={{ width: 7, height: 7, borderRadius: 999, background: meta.color, flexShrink: 0 }} />
+          NO. {no} — {meta.label}
         </div>
-
-        {/* 제목 */}
         <h3
-          className="aicon-h2"
           style={{
-            fontSize: 19,
+            fontFamily: "var(--font-display)",
+            fontSize: 20,
             fontWeight: 700,
+            color: "var(--fg-1)",
             lineHeight: 1.4,
-            margin: 0,
+            margin: "0 0 12px",
           }}
         >
           {post.title}
         </h3>
-
-        {/* 부제 (한 줄 요약) */}
-        <p
-          style={{
-            fontSize: 14.5,
-            color: "var(--fg-2)",
-            lineHeight: 1.6,
-            margin: 0,
-            flex: 1,
-          }}
+        <span
+          className="mono"
+          style={{ fontSize: 12, color: "var(--fg-3)", letterSpacing: "0.04em" }}
         >
-          {post.sub}
-        </p>
-
-        {/* 하단 — 읽기 화살표 */}
-        <div
-          style={{
-            marginTop: 8,
-            paddingTop: 12,
-            borderTop: "1px dashed var(--border-1)",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <span
-            className="mono"
-            style={{ fontSize: 11, color: "var(--fg-3)", letterSpacing: "0.06em" }}
-          >
-            AICONLAB
-          </span>
-          <span
-            style={{
-              fontSize: 13,
-              fontWeight: 700,
-              color: "var(--text-mint)",
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 4,
-            }}
-          >
-            읽기 <span aria-hidden>→</span>
-          </span>
-        </div>
+          {post.date}
+          {post.readTime && ` · ${post.readTime}`}
+        </span>
       </div>
-    </article>
     </Link>
   );
 }
@@ -342,13 +217,23 @@ function PostGrid({ posts }: { posts: Post[] }) {
       style={{ paddingTop: 16, paddingBottom: 48 }}
     >
       <div className="aicon-container">
-        <div className="grid-3">
-          {posts.map((p, i) => (
-            <FadeUp key={p.slug} delay={80 + i * 50}>
-              <PostCard post={p} />
-            </FadeUp>
-          ))}
-        </div>
+        <CategoryFilterGrid
+          chip="aicon"
+          categories={Object.entries(categories).map(([key, v]) => ({
+            key,
+            label: v.label,
+            color: v.color,
+          }))}
+          items={posts.map((p, i) => ({
+            key: p.slug,
+            cat: p.cat,
+            node: (
+              <FadeUp key={p.slug} delay={80 + i * 50}>
+                <PostCard post={p} index={i + 1} />
+              </FadeUp>
+            ),
+          }))}
+        />
       </div>
     </section>
   );
@@ -368,25 +253,6 @@ function PaginationCTA() {
       }}
     >
       <div className="aicon-container">
-        {/* 더보기 (목업) */}
-        <FadeUp>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              marginBottom: 56,
-            }}
-          >
-            <button
-              type="button"
-              className="btn btn-secondary btn-lg"
-              style={{ minWidth: 200 }}
-            >
-              더 많은 글 보기
-            </button>
-          </div>
-        </FadeUp>
-
         {/* 구독 CTA (셀피시 뉴스레터 마퀴 패턴 축약 버전) */}
         <FadeUp delay={120}>
           <div

@@ -10,6 +10,8 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { LoadMoreGrid } from "@/components/aiconlab/load-more-grid";
+import { CONGEN_DOWNLOAD } from "@/lib/links";
 import { createAdminClient } from "@/lib/supabase/server";
 
 type Resource = {
@@ -83,7 +85,7 @@ export default async function ResourcesPage() {
                   size="lg"
                   className="rounded-md bg-primary px-6 text-primary-foreground hover:bg-[#a9583e]"
                 >
-                  <a href="#">⬇ Mac 다운로드</a>
+                  <a href={CONGEN_DOWNLOAD.mac}>⬇ Mac 다운로드</a>
                 </Button>
                 <Button
                   asChild
@@ -91,7 +93,7 @@ export default async function ResourcesPage() {
                   variant="outline"
                   className="rounded-md border-[#a09d96] bg-transparent px-6 text-[#faf9f5] hover:bg-[#252320] hover:text-[#faf9f5]"
                 >
-                  <a href="#">⬇ Windows 다운로드</a>
+                  <a href={CONGEN_DOWNLOAD.win}>⬇ Windows 다운로드</a>
                 </Button>
               </div>
 
@@ -142,7 +144,12 @@ export default async function ResourcesPage() {
             </h2>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <LoadMoreGrid
+            className="grid gap-4 md:grid-cols-2 lg:grid-cols-3"
+            buttonClassName="rounded-md border border-border bg-background px-6 py-3 text-sm font-medium transition-colors hover:bg-muted"
+            buttonStyle={{ minWidth: 180 }}
+            label="자료 더 보기"
+          >
             {resources.map((res) => (
               <Card
                 key={res.id}
@@ -173,7 +180,7 @@ export default async function ResourcesPage() {
                 </CardContent>
               </Card>
             ))}
-          </div>
+          </LoadMoreGrid>
         </div>
       </section>
     </div>

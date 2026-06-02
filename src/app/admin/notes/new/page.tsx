@@ -7,7 +7,7 @@ export default function NewNotePage() {
       <PageTopbar title="새 글 작성" crumb="/admin/notes/new" sub="MDX 작성" />
       <NoteForm
         mode="new"
-        initial={{ slug: "", title: "", sub: "", cat: "record", read_time: "5분", body_mdx: "" }}
+        initial={{ slug: "", title: "", sub: "", cat: "ai", read_time: "5분", body_mdx: "" }}
       />
     </>
   );
