@@ -56,3 +56,6 @@ supabase/migrations/
 /playwright-report/
 /test-results/
 
+# 디자인 참고용 standalone HTML (번들 포함 대용량) — 로컬 보관, repo 제외
+docs/design/*.html
+
