@@ -15,6 +15,8 @@ const navItems = [
   { label: "팀 블로그", href: "/log" },
   { label: "인사이트", href: "/notes" },
   { label: "단톡방", href: "/community" },
+  // 외부 서브도메인(별도 토이 사이트) → 새 탭으로 연다
+  { label: "딴짓", href: "https://toy.aicon.lol", external: true },
 ];
 
 interface Props {
@@ -56,6 +58,8 @@ export function HeaderClient({ userDisplay }: Props) {
             <li key={item.href}>
               <a
                 href={item.href}
+                target={item.external ? "_blank" : undefined}
+                rel={item.external ? "noopener noreferrer" : undefined}
                 className="rounded-md px-4 py-2 text-[15px] font-semibold text-foreground transition-colors hover:bg-secondary"
               >
                 {item.label}
@@ -153,6 +157,8 @@ export function HeaderClient({ userDisplay }: Props) {
               <li key={item.href}>
                 <a
                   href={item.href}
+                  target={item.external ? "_blank" : undefined}
+                  rel={item.external ? "noopener noreferrer" : undefined}
                   className="block rounded-md px-3 py-3 text-base font-medium text-foreground hover:bg-secondary"
                   onClick={() => setIsOpen(false)}
                 >
