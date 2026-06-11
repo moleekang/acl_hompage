@@ -36,15 +36,15 @@ test.describe("Admin 전 영역", () => {
   // ── posts ─────────────────────────────────────────────────────
   test("posts: 새 글 등록 → 목록 노출 → 삭제", async ({ page }) => {
     const title = unique("PostTitle");
-    const slug = slugify(unique("post"));
 
     await page.goto("/admin/posts");
     await page.getByRole("link", { name: /새 글/ }).click();
     await page.waitForURL(/\/admin\/posts\/new/);
 
+    // 슬러그는 저장 시 카테고리 기준 자동 생성 (99925f5) — 입력란 없음.
+    // 카테고리 select value는 DB 영문값 (brand/dev/insight/ops/retro/tool).
     await fillByLabel(page, "제목", title);
-    await fillByLabel(page, "슬러그 (URL)", slug);
-    await fillByLabel(page, "카테고리", "사고방식");
+    await fillByLabel(page, "카테고리", "dev");
 
     await page.getByRole("button", { name: /발행 준비/ }).click();
     await page.waitForURL(/\/admin\/posts(\b|$)/, { timeout: 15_000 });
