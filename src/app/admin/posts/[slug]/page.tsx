@@ -21,6 +21,7 @@ export default async function EditPostPage({ params }: { params: Params }) {
           slug: p.slug, title: p.title, sub: p.sub,
           cat: p.cat, read_time: p.read_time, body_mdx: p.body_mdx,
           thumbnail_url: p.thumbnail_url ?? null,
+          visibility: p.visibility ?? "public",
         }}
       />
     </>

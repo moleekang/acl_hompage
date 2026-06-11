@@ -17,6 +17,7 @@ export type PostRow = {
   read_time: string | null;
   published_at: string | null;
   author_id: string | null;
+  visibility: string | null;
 };
 
 // cat value는 DB 영문값, 화면 표시는 한글 label
@@ -95,7 +96,12 @@ export function PostsTable({ posts, members }: { posts: PostRow[]; members: Memb
                 <tr key={p.slug}>
                   <td>
                     <Link href={`/admin/posts/${p.slug}`} style={{ textDecoration: "none", color: "inherit" }}>
-                      <div style={{ fontWeight: 700 }}>{p.title}</div>
+                      <div style={{ fontWeight: 700 }}>
+                        {p.title}
+                        {p.visibility === "member" && (
+                          <span className="chip" style={{ marginLeft: 8, padding: "2px 8px", fontSize: 11 }}>🔒 멤버 전용</span>
+                        )}
+                      </div>
                       {p.sub && <div style={{ fontSize: 12, color: "var(--fg-3)", marginTop: 2 }}>{p.sub}</div>}
                     </Link>
                   </td>

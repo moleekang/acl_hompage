@@ -15,8 +15,10 @@ import {
   type Post,
 } from "../posts";
 import { createAdminClient } from "@/lib/supabase/server";
+import { getViewerMembership } from "@/lib/membership";
 import { renderNoteBody } from "@/lib/notes/render";
 import { HtmlBody } from "@/components/notes/html-body";
+import { MemberGate } from "@/components/aiconlab/member-gate";
 
 // 빌드 타임에 모든 글 slug 미리 생성 (SSG) — generateStaticParams는 쿠키 기반 클라이언트를 쓸 수 없어
 // 서비스 롤 클라이언트로 직접 조회한다.
@@ -46,10 +48,17 @@ export default async function PostDetailPage({
   const cat = categories[post.cat];
   const related = await fetchRelatedPosts(slug, 3);
 
+  // 멤버 전용 글 + 비멤버 뷰어 — 본문 대신 게이트.
+  let gate = null;
+  if (post.locked) {
+    const { loggedIn } = await getViewerMembership();
+    gate = <MemberGate loggedIn={loggedIn} nextPath={`/log/${slug}`} />;
+  }
+
   return (
     <>
       <PostHero post={post} cat={cat} />
-      <PostBody post={post} />
+      {gate ?? <PostBody post={post} />}
       <RelatedSection related={related} />
       <BackToListCTA />
     </>

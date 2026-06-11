@@ -28,6 +28,7 @@ export default async function NotesAdminPage() {
     published_at: n.published_at,
     author_id: n.author_id,
     author: extractAuthor(n.author),
+    visibility: n.visibility,
   }));
   return (
     <>

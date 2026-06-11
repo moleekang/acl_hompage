@@ -7,7 +7,7 @@ import { fetchNote } from "../../notes";
 import { renderNoteBody } from "@/lib/notes/render";
 
 export async function GET(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ slug: string }> },
 ) {
   const { slug } = await params;
@@ -15,6 +15,11 @@ export async function GET(
 
   if (!note) {
     return new NextResponse("Not Found", { status: 404 });
+  }
+
+  // 멤버 전용 글 + 비멤버 — 상세 페이지로 보내 게이트를 보여준다.
+  if (note.locked) {
+    return NextResponse.redirect(new URL(`/notes/${slug}`, req.url));
   }
 
   const html = renderNoteBody(note.body_mdx, note.contentType);

@@ -18,6 +18,7 @@ type PostInput = {
   cat: string;
   read_time?: string;
   thumbnail_url?: string | null;
+  visibility?: "public" | "member";
 };
 
 export async function createPost(input: PostInput) {
@@ -33,6 +34,7 @@ export async function createPost(input: PostInput) {
     cat: input.cat,
     read_time: input.read_time,
     thumbnail_url: input.thumbnail_url ?? null,
+    visibility: input.visibility ?? "public",
     author_id: by,
     published_at: null,
   });

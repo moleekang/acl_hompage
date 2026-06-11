@@ -169,7 +169,7 @@ export async function fetchNotesAdmin() {
   const admin = createAdminClient();
   const { data } = await admin
     .from("notes")
-    .select("slug,title,sub,cat,read_time,published_at,render_mode,content_type,author_id,author:profiles(id,nickname,avatar_url)")
+    .select("slug,title,sub,cat,read_time,published_at,render_mode,content_type,visibility,author_id,author:profiles(id,nickname,avatar_url)")
     .order("published_at", { ascending: false, nullsFirst: false });
   return data ?? [];
 }

@@ -63,7 +63,8 @@ function NoteCard({ note, index }: { note: Note; index: number }) {
   const meta = categories[note.cat];
 
   // newtab 모드: raw 경로로 새 탭 열기, embed 모드: 상세 페이지로 이동
-  const isNewTab = note.renderMode === "newtab";
+  // 단, 잠긴 글은 상세 페이지(게이트)로 보낸다.
+  const isNewTab = note.renderMode === "newtab" && !note.locked;
   // 도판 인덱스 — NO. 001 형식
   const no = String(index).padStart(3, "0");
 
@@ -138,6 +139,25 @@ function NoteCard({ note, index }: { note: Note; index: number }) {
                 display: "inline-block",
               }}
             />
+          </div>
+        )}
+        {/* 좌상단 — 멤버 전용 잠금 배지 */}
+        {note.locked && (
+          <div
+            style={{
+              position: "absolute",
+              top: 12,
+              left: 12,
+              padding: "3px 10px",
+              background: "rgba(14,17,22,0.82)",
+              borderRadius: 999,
+              fontSize: 11,
+              color: "#fff",
+              fontFamily: "var(--font-mono)",
+              letterSpacing: "0.04em",
+            }}
+          >
+            🔒 멤버 전용
           </div>
         )}
         {/* 우하단 — 읽기 시간 배지 */}

@@ -28,6 +28,7 @@ type Initial = {
   render_mode?: "embed" | "newtab";
   content_type?: "html" | "markdown";
   thumbnail_url?: string | null;
+  visibility?: "public" | "member";
 };
 
 export function NoteForm({ mode, initial }: { mode: Mode; initial: Initial }) {
@@ -43,6 +44,7 @@ export function NoteForm({ mode, initial }: { mode: Mode; initial: Initial }) {
   const [contentType, setContentType] = useState<"html" | "markdown">(initial.content_type ?? "html");
   const [publishedAt, setPublishedAt] = useState<string | null>(initial.published_at ?? null);
   const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(initial.thumbnail_url ?? null);
+  const [visibility, setVisibility] = useState<"public" | "member">(initial.visibility ?? "public");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isPublished = !!publishedAt;
 
@@ -89,9 +91,9 @@ export function NoteForm({ mode, initial }: { mode: Mode; initial: Initial }) {
     start(async () => {
       try {
         if (mode === "new") {
-          await createNote({ title, sub, cat, read_time: read, body_mdx: body, render_mode: renderMode, content_type: contentType, thumbnail_url: thumbnailUrl });
+          await createNote({ title, sub, cat, read_time: read, body_mdx: body, render_mode: renderMode, content_type: contentType, thumbnail_url: thumbnailUrl, visibility });
         } else {
-          await updateNote(initial.slug, { title, sub, cat, read_time: read, body_mdx: body, render_mode: renderMode, content_type: contentType, thumbnail_url: thumbnailUrl });
+          await updateNote(initial.slug, { title, sub, cat, read_time: read, body_mdx: body, render_mode: renderMode, content_type: contentType, thumbnail_url: thumbnailUrl, visibility });
         }
         router.push("/admin/notes");
       } catch (e) {
@@ -188,6 +190,17 @@ export function NoteForm({ mode, initial }: { mode: Mode; initial: Initial }) {
           <div style={{ gridColumn: "span 2" }}>
             <label className="field-label">부제</label>
             <input className="input" value={sub} onChange={(e) => setSub(e.target.value)} />
+          </div>
+          <div>
+            <label className="field-label">공개 범위</label>
+            <select
+              className="select"
+              value={visibility}
+              onChange={(e) => setVisibility(e.target.value as "public" | "member")}
+            >
+              <option value="public">전체 공개</option>
+              <option value="member">🔒 멤버 전용</option>
+            </select>
           </div>
 
           {/* 카드 썸네일 이미지 */}

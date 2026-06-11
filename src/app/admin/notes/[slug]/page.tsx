@@ -24,6 +24,7 @@ export default async function EditNotePage({ params }: { params: Params }) {
           render_mode: n.render_mode ?? "embed",
           content_type: n.content_type ?? "html",
           thumbnail_url: n.thumbnail_url ?? null,
+          visibility: n.visibility ?? "public",
         }}
       />
     </>

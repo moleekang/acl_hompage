@@ -15,6 +15,7 @@ export default async function PostsAdminPage() {
     read_time: p.read_time,
     published_at: p.published_at,
     author_id: p.author_id,
+    visibility: p.visibility,
   }));
   return (
     <>

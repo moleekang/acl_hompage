@@ -134,6 +134,25 @@ function PostCard({ post, index }: { post: Post; index: number }) {
             />
           </div>
         )}
+        {/* 좌상단 — 멤버 전용 잠금 배지 */}
+        {post.locked && (
+          <div
+            style={{
+              position: "absolute",
+              top: 12,
+              left: 12,
+              padding: "3px 10px",
+              background: "rgba(14,17,22,0.82)",
+              borderRadius: 999,
+              fontSize: 11,
+              color: "#fff",
+              fontFamily: "var(--font-mono)",
+              letterSpacing: "0.04em",
+            }}
+          >
+            🔒 멤버 전용
+          </div>
+        )}
         {/* 우하단 — 읽기 시간 배지 */}
         {post.readTime && (
           <div

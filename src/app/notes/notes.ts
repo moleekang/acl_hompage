@@ -1,7 +1,12 @@
 // /notes 카테고리 메타데이터 + DB → UI 어댑터.
 // 데이터(글 목록)는 Supabase notes 테이블에서 조회한다 — 이 모듈은 표현 토큰만 보관.
+//
+// 멤버 전용 글(visibility='member'): RLS가 비멤버 anon 조회를 차단하므로,
+// 목록에 잠금 카드를 보여주기 위해 service-role 클라이언트로 조회하되
+// 비멤버에게는 body_mdx를 서버에서 비우고 locked=true로 표시한다.
 
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
+import { getViewerMembership } from "@/lib/membership";
 
 // 카테고리 정의 — 인사이트 주제 (유튜브/AI/도메인)
 export const categories = {
@@ -49,6 +54,7 @@ export type Note = {
   renderMode: RenderMode;
   contentType: ContentType;
   thumbnailUrl: string | null;
+  locked: boolean;  // 멤버 전용 글인데 뷰어가 비멤버 — 본문은 비워져 있음
 };
 
 // DB cat 문자열을 알려진 CatKey로 폴백 (모르는 값이면 'ai'로).
@@ -90,29 +96,34 @@ type RawNoteRow = {
   render_mode: string | null;
   content_type: string | null;
   thumbnail_url: string | null;
+  visibility: string | null;
 };
 
-function toNote(row: RawNoteRow): Note {
+// locked면 본문을 서버에서 비워서 클라이언트로 내려보내지 않는다.
+function toNote(row: RawNoteRow, isMember: boolean): Note {
+  const locked = row.visibility === "member" && !isMember;
   return {
     slug: row.slug,
     cat: normalizeCat(row.cat),
     title: row.title,
     sub: row.sub ?? "",
-    body_mdx: row.body_mdx ?? "",
+    body_mdx: locked ? "" : row.body_mdx ?? "",
     date: (row.published_at ?? "").slice(0, 10),
     readTime: row.read_time ?? "",
     author: extractAuthor(row.author),
     renderMode: normalizeRenderMode(row.render_mode),
     contentType: normalizeContentType(row.content_type),
     thumbnailUrl: row.thumbnail_url ?? null,
+    locked,
   };
 }
 
-const NOTE_COLS = "slug,title,sub,body_mdx,cat,read_time,published_at,render_mode,content_type,thumbnail_url,author:profiles(id,nickname,avatar_url)";
+const NOTE_COLS = "slug,title,sub,body_mdx,cat,read_time,published_at,render_mode,content_type,thumbnail_url,visibility,author:profiles(id,nickname,avatar_url)";
 
 // 발행된 글 전체 — 최신순.
 export async function fetchNotes(limit?: number): Promise<Note[]> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
+  const { isMember } = await getViewerMembership();
   let query = supabase
     .from("notes")
     .select(NOTE_COLS)
@@ -121,12 +132,13 @@ export async function fetchNotes(limit?: number): Promise<Note[]> {
   if (limit) query = query.limit(limit);
   const { data, error } = await query;
   if (error || !data) return [];
-  return (data as RawNoteRow[]).map(toNote);
+  return (data as RawNoteRow[]).map((row) => toNote(row, isMember));
 }
 
 // 단일 글 by slug.
 export async function fetchNote(slug: string): Promise<Note | null> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
+  const { isMember } = await getViewerMembership();
   const { data, error } = await supabase
     .from("notes")
     .select(NOTE_COLS)
@@ -134,7 +146,7 @@ export async function fetchNote(slug: string): Promise<Note | null> {
     .not("published_at", "is", null)
     .maybeSingle();
   if (error || !data) return null;
-  return toNote(data as RawNoteRow);
+  return toNote(data as RawNoteRow, isMember);
 }
 
 // 관련 글: 같은 카테고리 우선, 부족하면 다른 카테고리로 채움.

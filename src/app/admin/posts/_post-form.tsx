@@ -27,6 +27,7 @@ type Initial = {
   read_time: string | null;
   body_mdx: string | null;
   thumbnail_url?: string | null;
+  visibility?: "public" | "member";
 };
 
 export function PostForm({ mode, initial }: { mode: Mode; initial: Initial }) {
@@ -39,6 +40,7 @@ export function PostForm({ mode, initial }: { mode: Mode; initial: Initial }) {
   const [read, setRead] = useState(initial.read_time ?? "");
   const [body, setBody] = useState(initial.body_mdx ?? "");
   const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(initial.thumbnail_url ?? null);
+  const [visibility, setVisibility] = useState<"public" | "member">(initial.visibility ?? "public");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -61,9 +63,9 @@ export function PostForm({ mode, initial }: { mode: Mode; initial: Initial }) {
     start(async () => {
       try {
         if (mode === "new") {
-          await createPost({ title, sub, cat, read_time: read, body_mdx: body, thumbnail_url: thumbnailUrl });
+          await createPost({ title, sub, cat, read_time: read, body_mdx: body, thumbnail_url: thumbnailUrl, visibility });
         } else {
-          await updatePost(initial.slug, { title, sub, cat, read_time: read, body_mdx: body, thumbnail_url: thumbnailUrl });
+          await updatePost(initial.slug, { title, sub, cat, read_time: read, body_mdx: body, thumbnail_url: thumbnailUrl, visibility });
         }
         router.push("/admin/posts");
       } catch (e) {
@@ -121,6 +123,17 @@ export function PostForm({ mode, initial }: { mode: Mode; initial: Initial }) {
           <div style={{ gridColumn: "span 2" }}>
             <label className="field-label">부제</label>
             <input className="input" value={sub} onChange={(e) => setSub(e.target.value)} />
+          </div>
+          <div>
+            <label className="field-label">공개 범위</label>
+            <select
+              className="select"
+              value={visibility}
+              onChange={(e) => setVisibility(e.target.value as "public" | "member")}
+            >
+              <option value="public">전체 공개</option>
+              <option value="member">🔒 멤버 전용</option>
+            </select>
           </div>
 
           {/* 카드 썸네일 이미지 */}

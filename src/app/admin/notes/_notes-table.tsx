@@ -23,6 +23,7 @@ export type NoteRow = {
   published_at: string | null;
   author_id: string | null;
   author: { id: string; nickname: string | null; avatar_url: string | null } | null;
+  visibility: string | null;
 };
 
 const CAT_LABELS = ["전체", ...Object.values(NOTE_CATEGORIES).map((v) => v.label)];
@@ -92,7 +93,12 @@ export function NotesTable({ notes }: { notes: NoteRow[] }) {
                 <tr key={n.slug}>
                   <td>
                     <Link href={`/admin/notes/${n.slug}`} style={{ textDecoration: "none", color: "inherit" }}>
-                      <div style={{ fontWeight: 700 }}>{n.title}</div>
+                      <div style={{ fontWeight: 700 }}>
+                        {n.title}
+                        {n.visibility === "member" && (
+                          <span className="chip" style={{ marginLeft: 8, padding: "2px 8px", fontSize: 11 }}>🔒 멤버 전용</span>
+                        )}
+                      </div>
                       {n.sub && <div style={{ fontSize: 12, color: "var(--fg-3)", marginTop: 2 }}>{n.sub}</div>}
                     </Link>
                   </td>

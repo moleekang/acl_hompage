@@ -16,6 +16,8 @@ import {
 } from "../notes";
 import { renderNoteBody } from "@/lib/notes/render";
 import { createAdminClient } from "@/lib/supabase/server";
+import { getViewerMembership } from "@/lib/membership";
+import { MemberGate } from "@/components/aiconlab/member-gate";
 
 // 빌드 타임에 모든 글 slug 미리 생성 (SSG)
 export async function generateStaticParams() {
@@ -44,10 +46,17 @@ export default async function NoteDetailPage({
   const cat = categories[note.cat];
   const related = await fetchRelatedNotes(slug, 3);
 
+  // 멤버 전용 글 + 비멤버 뷰어 — 본문 대신 게이트.
+  let gate = null;
+  if (note.locked) {
+    const { loggedIn } = await getViewerMembership();
+    gate = <MemberGate loggedIn={loggedIn} nextPath={`/notes/${slug}`} />;
+  }
+
   return (
     <>
       <NoteHero note={note} cat={cat} />
-      <NoteBody note={note} />
+      {gate ?? <NoteBody note={note} />}
       <RelatedSection related={related} />
       <BackToListCTA />
     </>
