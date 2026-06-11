@@ -101,3 +101,10 @@
 - admin: posts/notes 폼 "공개 범위" select + 테이블 배지.
 - 검증: tsc·eslint 통과. E2E·수동 확인은 마이그레이션 적용 후.
 - 상세: decisions/member-visibility.md
+
+## [2026-06-11] update | 멤버십 워딩 통일 + admin 권한 부여/회수 메뉴
+- 워딩: 잠금 글·위키 게이트·resources 배지·admin 폼/테이블의 "멤버 전용"을 "멤버십 전용"으로 통일 (가입 회원 ≠ 승급 멤버 혼동 방지, 사용자 결정)
+- /admin/members: 죽은 "공개 프로필 보기" 메뉴 삭제(핸들러·프로필 페이지 모두 없던 시안 잔재)
+- /admin/members: "관리자로 승급"(member행) + "관리자 권한 회수"(admin행, 본인 제외 — 마지막 admin 잠금 사고 방지) 추가. updateMemberRole은 원래 admin 지원 — UI만 없었음
+- 확인 사실: 위키 멤버 = 멤버십 (단일 등급, is_wiki_member() 하나로 위키·멤버십 글 모두 게이트)
+- push: e82d725(워딩), 61a7356(admin 액션). tsc·eslint·members E2E 통과
