@@ -6,6 +6,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { requireAdmin } from "./_auth";
+import { logAdminAction } from "@/aicon/log/activity/server";
 
 async function actorId(): Promise<string | null> {
   const supabase = await createClient();
@@ -21,6 +22,7 @@ export async function softDeleteWikiPage(id: string) {
     .update({ deleted_at: new Date().toISOString() })
     .eq("id", id);
   if (error) throw new Error(error.message);
+  logAdminAction("wiki_soft_delete"); // Aicon Log L3
   revalidatePath("/admin/wiki");
 }
 
@@ -32,6 +34,7 @@ export async function restoreWikiPage(id: string) {
     .update({ deleted_at: null })
     .eq("id", id);
   if (error) throw new Error(error.message);
+  logAdminAction("wiki_restore"); // Aicon Log L3
   revalidatePath("/admin/wiki");
 }
 
@@ -40,6 +43,7 @@ export async function purgeWikiPage(id: string) {
   const admin = createAdminClient();
   const { error } = await admin.from("wiki_pages").delete().eq("id", id);
   if (error) throw new Error(error.message);
+  logAdminAction("wiki_purge"); // Aicon Log L3
   revalidatePath("/admin/wiki");
 }
 
@@ -59,6 +63,7 @@ export async function restoreWikiRevision(pageId: string, revisionId: string) {
     .update({ title: rev.title, body_mdx: rev.body_mdx, updated_by: by })
     .eq("id", pageId);
   if (updErr) throw new Error(updErr.message);
+  logAdminAction("wiki_revision_restore"); // Aicon Log L3
 
   revalidatePath(`/admin/wiki/${pageId}/revisions`);
   revalidatePath("/admin/wiki");

@@ -7,6 +7,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { requireAdmin } from "./_auth";
+import { logAdminAction, logActivityEventForCurrentUser } from "@/aicon/log/activity/server";
 
 type Role = "guest" | "member" | "admin";
 type Status = "active" | "suspended";
@@ -30,6 +31,14 @@ export async function updateMemberRole(userId: string, role: Role) {
     })
     .eq("id", userId);
   if (error) throw new Error(error.message);
+  logAdminAction("member_role_update"); // Aicon Log L3
+  if (role === "member" || role === "admin") {
+    // Aicon Log L3 — guest → member/admin 승격
+    logActivityEventForCurrentUser("profile_role_upgrade", {
+      label: role,
+      properties: { target_profile_id: userId, new_role: role },
+    });
+  }
   revalidatePath("/admin/members");
   revalidatePath("/admin");
 }
@@ -47,6 +56,7 @@ export async function updateMemberStatus(userId: string, status: Status) {
     })
     .eq("id", userId);
   if (error) throw new Error(error.message);
+  logAdminAction("member_status_update"); // Aicon Log L3
   revalidatePath("/admin/members");
   revalidatePath("/admin");
 }

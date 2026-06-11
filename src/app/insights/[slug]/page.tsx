@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { MdRender } from "@/components/wiki/md-render";
 import { RsvpButtons } from "./_rsvp-buttons";
+import { logActivityEvent } from "@/aicon/log/activity/server";
 
 export const dynamic = "force-dynamic";
 
@@ -27,6 +28,13 @@ export default async function InsightDetailPage({ params }: { params: Params }) 
 
   const { data: userResult } = await supabase.auth.getUser();
   const userId = userResult.user?.id;
+
+  // Aicon Log L2 — 공유회 상세 열람 (fire-and-forget)
+  logActivityEvent("event_page_view", {
+    userId: userResult.user?.email ?? undefined,
+    pagePath: `/insights/${slug}`,
+    label: slug,
+  });
 
   let myRsvp: "going" | "declined" | "pending" | null = null;
   if (userId) {

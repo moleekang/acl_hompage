@@ -3,10 +3,17 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
+import { logActivityEvent } from "@/aicon/log/activity/server";
 
 export async function POST(request: Request) {
   const supabase = await createClient();
+  const { data } = await supabase.auth.getUser();
   await supabase.auth.signOut();
+
+  // Aicon Log L1 — user_logout (fire-and-forget)
+  if (data.user?.email) {
+    logActivityEvent("user_logout", { userId: data.user.email });
+  }
 
   const url = new URL(request.url);
   return NextResponse.redirect(`${url.origin}/`, { status: 303 });

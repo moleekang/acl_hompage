@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { logActivityEvent } from "@/aicon/log/activity/server";
 
 export const metadata = {
   title: "AICONLAB · 위키",
@@ -30,6 +31,14 @@ export default async function WikiLayout({ children }: { children: ReactNode }) 
   }
 
   const isMember = profile.role === "member" || profile.role === "admin";
+
+  // Aicon Log L2 — 위키 접근 시도 (게이트 통과/차단 결과 포함, fire-and-forget)
+  logActivityEvent("wiki_access_request", {
+    userId: user.email ?? undefined,
+    pagePath: "/llm-wiki",
+    properties: { granted: isMember },
+  });
+
   if (!isMember) {
     // guest — 안내 화면
     return (

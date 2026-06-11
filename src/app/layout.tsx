@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Gaegu, Gowun_Dodum, JetBrains_Mono } from "next/font/google";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { AiconLogTracker } from "@/aicon/log/activity/client";
 import "./globals.css";
 
 // ============================================================
@@ -55,6 +56,8 @@ export default function RootLayout({
       className={`${gaegu.variable} ${gowunDodum.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        {/* Aicon Log — page_view/menu 적재 단일 소스 (soft nav 포함) */}
+        <AiconLogTracker />
         {/* 헤더는 모든 페이지 상단 고정 (sticky) */}
         <Header />
         {/* 각 페이지 콘텐츠가 들어가는 자리 (flex-1로 풋터를 화면 하단에 고정) */}

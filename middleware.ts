@@ -1,10 +1,13 @@
 import { type NextRequest } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
+import { aiconLogMiddleware } from "@/aicon/log/activity/middleware";
 
 // 모든 요청에서 Supabase 세션 쿠키를 갱신한다.
 // 정적 자원·이미지는 제외해서 성능 절약.
 export async function middleware(request: NextRequest) {
-  return await updateSession(request);
+  const response = await updateSession(request);
+  aiconLogMiddleware(request, response); // anon cookie + /call/logs (fire-and-forget)
+  return response;
 }
 
 export const config = {

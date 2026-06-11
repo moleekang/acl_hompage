@@ -6,6 +6,7 @@
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { trackClientEvent } from "@/aicon/log/activity/client";
 
 type Tab = "google" | "email";
 type EmailMode = "login" | "signup";
@@ -94,6 +95,7 @@ function LoginInner() {
         return;
       }
       if (data.session) {
+        trackClientEvent("user_signup", { pagePath: "/login" }); // Aicon Log L1
         router.replace("/");
       } else {
         setSuccessMsg(
@@ -110,6 +112,7 @@ function LoginInner() {
         setFormError(error.message);
         return;
       }
+      trackClientEvent("user_signin", { pagePath: "/login" }); // Aicon Log L1
       router.replace(safeNext(params.get("next")));
     }
   }

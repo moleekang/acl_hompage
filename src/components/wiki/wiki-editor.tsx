@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { MdRender } from "@/components/wiki/md-render";
+import { trackClientEvent } from "@/aicon/log/activity/client";
 
 type Props = {
   slug: string;
@@ -78,6 +79,11 @@ export function WikiEditor({ slug: routeSlug, backHref, afterSaveHref }: Props) 
         return;
       }
     }
+    // Aicon Log L3 — 위키 기여 (저장 성공 시에만)
+    trackClientEvent(isNew ? "wiki_page_create" : "wiki_page_edit", {
+      label: slug,
+      pagePath: `/llm-wiki/${slug}`,
+    });
     router.push(afterSaveHref(slug));
   }
 

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { trackClientEvent } from "@/aicon/log/activity/client";
 
 type Rsvp = "going" | "declined" | "pending";
 
@@ -61,7 +62,11 @@ export function RsvpButtons({ eventId, initial }: { eventId: string; initial: Rs
       .update({ rsvp: next })
       .eq("event_id", eventId)
       .eq("user_id", u.user.id);
-    if (!error) setRsvp(next);
+    if (!error) {
+      setRsvp(next);
+      // Aicon Log L3 — 공유회 RSVP (참석 확정 시에만)
+      if (next === "going") trackClientEvent("event_signup", { label: eventId });
+    }
     setBusy(false);
   }
 

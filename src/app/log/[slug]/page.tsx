@@ -19,6 +19,7 @@ import { getViewerMembership } from "@/lib/membership";
 import { renderNoteBody } from "@/lib/notes/render";
 import { HtmlBody } from "@/components/notes/html-body";
 import { MemberGate } from "@/components/aiconlab/member-gate";
+import { AiconLogEvent } from "@/aicon/log/activity/client";
 
 // 빌드 타임에 모든 글 slug 미리 생성 (SSG) — generateStaticParams는 쿠키 기반 클라이언트를 쓸 수 없어
 // 서비스 롤 클라이언트로 직접 조회한다.
@@ -57,6 +58,8 @@ export default async function PostDetailPage({
 
   return (
     <>
+      {/* Aicon Log L3 — blog_post_read (클라이언트 발사 → SSG 유지) */}
+      <AiconLogEvent name="blog_post_read" label={slug} properties={{ readTime: post.readTime }} />
       <PostHero post={post} cat={cat} />
       {gate ?? <PostBody post={post} />}
       <RelatedSection related={related} />
