@@ -55,12 +55,12 @@ export function MemberDrawer({ member, onClose, onAction }: Props) {
         <div className="drawer-foot">
           {member.role === "guest" && (
             <button type="button" className="btn btn-primary" onClick={() => onAction("promote")}>
-              ★ 위키 멤버로 승급
+              ★ 멤버십으로 승급
             </button>
           )}
           {member.role === "member" && (
             <button type="button" className="btn btn-secondary" onClick={() => onAction("demote")}>
-              위키 멤버 회수
+              멤버십 회수
             </button>
           )}
           {member.role !== "suspended" && (

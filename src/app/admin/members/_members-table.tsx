@@ -20,16 +20,21 @@ const FILTERS: Array<{ k: Filter; label: string }> = [
   { k: "suspended", label: "suspended" },
 ];
 
-function rowActions(role: Role): RowMenuItem[] {
+function rowActions(role: Role, isSelf: boolean): RowMenuItem[] {
   const items: RowMenuItem[] = [];
-  if (role === "guest") items.push({ id: "promote", label: "★ 위키 멤버로 승급", primary: true });
-  if (role === "member") items.push({ id: "demote", label: "위키 멤버 회수" });
+  if (role === "guest") items.push({ id: "promote", label: "★ 멤버십으로 승급", primary: true });
+  if (role === "member") {
+    items.push({ id: "demote", label: "멤버십 회수" });
+    items.push({ id: "promote-admin", label: "관리자로 승급" });
+  }
+  // 본인 admin 권한 회수는 막는다 — 마지막 admin이 스스로 잠기는 사고 방지.
+  if (role === "admin" && !isSelf) items.push({ id: "demote-admin", label: "관리자 권한 회수" });
   if (role !== "suspended") items.push({ id: "suspend", label: "정지" });
   if (role === "suspended") items.push({ id: "unsuspend", label: "정지 해제", primary: true });
   return items;
 }
 
-export function MembersTable({ members }: { members: MemberRow[] }) {
+export function MembersTable({ members, selfId }: { members: MemberRow[]; selfId: string | null }) {
   const [filter, setFilter] = useState<Filter>("all");
   const [query, setQuery] = useState("");
   const [openUid, setOpenUid] = useState<string | null>(null);
@@ -40,10 +45,15 @@ export function MembersTable({ members }: { members: MemberRow[] }) {
     .filter((m) => !query || m.name.includes(query) || m.email.toLowerCase().includes(query.toLowerCase()));
 
   function handleAction(uid: string, role: Role, actionId: string) {
+    const name = members.find((m) => m.id === uid)?.name ?? uid;
+    if (actionId === "promote-admin" && !confirm(`"${name}"에게 관리자 권한을 부여할까요?\nadmin은 멤버·콘텐츠 전체를 관리할 수 있습니다.`)) return;
+    if (actionId === "demote-admin" && !confirm(`"${name}"의 관리자 권한을 회수하고 멤버십으로 내릴까요?`)) return;
     start(async () => {
       try {
         if (actionId === "promote") await updateMemberRole(uid, "member");
         else if (actionId === "demote") await updateMemberRole(uid, "guest");
+        else if (actionId === "promote-admin") await updateMemberRole(uid, "admin");
+        else if (actionId === "demote-admin") await updateMemberRole(uid, "member");
         else if (actionId === "suspend") await updateMemberStatus(uid, "suspended");
         else if (actionId === "unsuspend") await updateMemberStatus(uid, "active");
       } catch (err) {
@@ -127,7 +137,7 @@ export function MembersTable({ members }: { members: MemberRow[] }) {
                   <td className="num">{m.joinedAt}</td>
                   <td className="num">{m.lastLogin || "—"}</td>
                   <td className="actions" onClick={(e) => e.stopPropagation()}>
-                    <RowMenu items={rowActions(m.role)} onSelect={(id) => handleAction(m.id, m.role, id)} />
+                    <RowMenu items={rowActions(m.role, m.id === selfId)} onSelect={(id) => handleAction(m.id, m.role, id)} />
                   </td>
                 </tr>
               ))
