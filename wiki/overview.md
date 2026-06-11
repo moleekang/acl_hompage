@@ -1,5 +1,5 @@
 # Overview — acl_hompage
-> 마지막 업데이트: 2026-05-13
+> 마지막 업데이트: 2026-06-03
 
 ## 프로젝트 목적
 
@@ -8,6 +8,16 @@ AICONLAB 채널·커뮤니티의 공식 홈페이지. "AI로 1인 기업을 만�
 ### 정체성 (메인 페이지에 박제됨)
 - "AI를 실험하고, 같이 배우고, 함께 즐기는 — AI 문화 커뮤니티"
 - 정체성 → 결과물 → 자동화 순서를 절대 바꾸지 않는다 (AICONLAB Way)
+
+## 현재 상태 스냅샷 (2026-06-03)
+
+> log.md에서 확인된 2026-05-13 이후 진척. 아래 "현재 상태 (2026-05-13)"는 빌드 기준 기록으로 보존.
+
+- **라이브 배포** — `aicon.lol` Vercel 연결 완료 (apex+www A 레코드 `76.76.21.21`, SSL 발급, HTTP/2 200). 도메인 등록처 name.com, nameserver 유지. (2026-05-27)
+- **/notes 인사이트 영역** — admin CRUD 추가. `/log`(팀 공식 기록)와 `/notes`(개인 사색) 분위기 분리. posts와 별개 카테고리. (2026-05-27)
+- **슬러그 자동 생성** — `nextSlug(table, prefix)` → `{카테고리}-{순번}` 자동 부여. posts 카테고리는 DB 영문 6종(brand/dev/insight/ops/retro/tool)으로 통일. (→ concepts/slug-rules.md, 2026-05-31)
+- **인코딩 사고 복구** — mojibake로 깨진 testimonials/site_tools/journal_entries를 service_role REST PATCH로 복구. 재발 방지: 마이그레이션은 Supabase 대시보드 SQL editor에서 적용(UTF-8 강제). (2026-05-27)
+- Phase 1~3 + DB 스키마는 아래 기록대로 빌드 완료 상태 유지.
 
 ## 현재 상태 (2026-05-13)
 

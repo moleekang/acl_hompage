@@ -1,5 +1,5 @@
 # Index — acl_hompage
-> 마지막 업데이트: 2026-05-31
+> 마지막 업데이트: 2026-06-11
 
 AICONLAB 홈페이지(Next.js 16 + Supabase) 운영용 로컬 wiki.
 
@@ -8,6 +8,7 @@ AICONLAB 홈페이지(Next.js 16 + Supabase) 운영용 로컬 wiki.
 
 ## Decisions
 - [architecture-v1](decisions/architecture-v1.md) — 백엔드 스택·권한 모델·페이지 분류·빌드 단계 (v1.1 — 2026-05-13)
+- [member-visibility](decisions/member-visibility.md) — posts/notes 글 단위 멤버 전용 공개 범위 + 잠금 카드 노출 (2026-06-11)
 
 ## Entities
 - [db-schema](entities/db-schema.md) — Supabase 테이블·트리거·RLS 정책 인벤토리

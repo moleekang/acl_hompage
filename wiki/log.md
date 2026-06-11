@@ -87,3 +87,17 @@
 - 검증: tsc 통과, 변경 파일 lint 무에러, 기존 DB 슬러그(`record` 의 `1/2/11`, products `pw-prod-*`)와 충돌 없음 확인
 - 상세: concepts/slug-rules.md
 
+## [2026-06-03] lint | overview 현재 상태 스냅샷 갱신
+- overview.md가 2026-05-13에 멈춰 있어, 이후 log 기록을 "현재 상태 스냅샷 (2026-06-03)" 섹션으로 정리(기존 05-13 블록은 보존)
+- 반영 사실(추측 없이 log 확인분만): aicon.lol 라이브 배포, /notes 영역, 슬러그 자동생성, mojibake 복구
+- index.md 날짜 갱신. 이번 세션은 코드 작업 없음 — 문서 동기화만
+
+
+## [2026-06-11] decision | 멤버 전용 글 분리 (posts/notes visibility)
+- 요구: 공개 글 목록(/log, /notes)에서 멤버십 전용 글을 분리. 사용자 결정: 두 영역 모두 + 비멤버에게 목록 잠금 표시(완전 숨김 아님).
+- DB: 0013_member_visibility.sql — posts/notes에 visibility('public'|'member', default public) + RLS public_read를 visibility·is_wiki_member() 조건으로 교체. **수동 적용 필요** (Supabase MCP read-only).
+- 보안 2중: RLS가 anon 직접 조회 차단 + 공개 fetcher는 service-role로 조회하되 비멤버에겐 body_mdx 서버에서 비움(locked=true).
+- UI: 목록 카드 🔒 배지 / 상세 본문 자리 MemberGate(비로그인→로그인, guest→멤버 신청) / notes newtab·raw 라우트도 게이트 처리.
+- admin: posts/notes 폼 "공개 범위" select + 테이블 배지.
+- 검증: tsc·eslint 통과. E2E·수동 확인은 마이그레이션 적용 후.
+- 상세: decisions/member-visibility.md

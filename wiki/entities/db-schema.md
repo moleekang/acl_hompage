@@ -1,5 +1,5 @@
 # DB Schema — Supabase Postgres
-> 마지막 업데이트: 2026-05-13
+> 마지막 업데이트: 2026-06-11
 
 전체 인벤토리. SQL 원본은 `supabase/migrations/000{1,2,3}_*.sql`. 본 페이지는 **요약·인덱스**.
 
@@ -28,6 +28,7 @@ auth.users 1:1 확장. 멤버십 상태와 역할의 단일 진실.
 
 ### `posts`  (0002 + 0003_seed.sql)
 PK = slug. `published_at IS NULL` = draft. cat은 자유 text (현재 6 카테고리: dev, retro, insight, ops, tool, brand). 클라이언트의 categories 매핑이 label·색·glow 제공.
+`visibility` (0013): `public`(기본) | `member` — 멤버 전용 글. notes에도 동일 컬럼. 상세는 [member-visibility](../decisions/member-visibility.md).
 
 ### `products`  (0002 + 0003_seed.sql)
 PK = slug. status: beta/coming/live/retired. order_idx로 진열 순서. `published=true`인 행만 공개 노출.
@@ -53,7 +54,8 @@ PK = slug. status: beta/coming/live/retired. order_idx로 진열 순서. `publis
 | wiki_revisions | is_wiki_member() | (트리거만) | — (append-only) | — |
 | events | admin OR 본인이 초대됨 | admin | admin | admin |
 | event_invitations | 본인 OR admin | admin | 본인(자기 RSVP) · admin(ALL) | admin |
-| posts | published_at IS NOT NULL OR admin | admin | admin | admin |
+| posts | published AND (public OR is_wiki_member()) OR admin (0013) | admin | admin | admin |
+| notes | published AND (public OR is_wiki_member()) OR admin (0013) | admin | admin | admin |
 | products | published OR admin | admin | admin | admin |
 
 ## 초기 admin 시드 (수동, 1회만)
