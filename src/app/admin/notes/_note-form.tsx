@@ -199,7 +199,7 @@ export function NoteForm({ mode, initial }: { mode: Mode; initial: Initial }) {
               onChange={(e) => setVisibility(e.target.value as "public" | "member")}
             >
               <option value="public">전체 공개</option>
-              <option value="member">🔒 멤버 전용</option>
+              <option value="member">🔒 멤버십 전용</option>
             </select>
           </div>
 

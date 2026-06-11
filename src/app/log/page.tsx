@@ -150,7 +150,7 @@ function PostCard({ post, index }: { post: Post; index: number }) {
               letterSpacing: "0.04em",
             }}
           >
-            🔒 멤버 전용
+            🔒 멤버십 전용
           </div>
         )}
         {/* 우하단 — 읽기 시간 배지 */}

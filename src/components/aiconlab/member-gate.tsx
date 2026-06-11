@@ -36,26 +36,26 @@ export function MemberGate({
               color: "var(--fg-1)",
             }}
           >
-            이 글은 멤버 전용이에요
+            이 글은 멤버십 전용이에요
           </div>
           {loggedIn ? (
             <>
               <p style={{ fontSize: 15, color: "var(--fg-2)", margin: 0, lineHeight: 1.7 }}>
-                가입은 환영! 멤버 전용 글을 읽으려면 운영자의 한 번 승급이 필요해요.
+                가입은 환영! 멤버십 전용 글을 읽으려면 운영자의 한 번 승급이 필요해요.
                 <br />
                 아래 메일로 한 줄만 보내주세요 — 어떤 일 하고 계신지.
               </p>
               <a
-                href="mailto:contact@aiconlab.xyz?subject=멤버 신청"
+                href="mailto:contact@aiconlab.xyz?subject=멤버십 신청"
                 className="btn btn-primary"
               >
-                멤버 신청하기 →
+                멤버십 신청하기 →
               </a>
             </>
           ) : (
             <>
               <p style={{ fontSize: 15, color: "var(--fg-2)", margin: 0, lineHeight: 1.7 }}>
-                멤버로 로그인하면 본문을 읽을 수 있어요.
+                멤버십 회원으로 로그인하면 본문을 읽을 수 있어요.
               </p>
               <Link
                 href={`/login?next=${encodeURIComponent(nextPath)}`}

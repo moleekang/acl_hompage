@@ -99,7 +99,7 @@ export function PostsTable({ posts, members }: { posts: PostRow[]; members: Memb
                       <div style={{ fontWeight: 700 }}>
                         {p.title}
                         {p.visibility === "member" && (
-                          <span className="chip" style={{ marginLeft: 8, padding: "2px 8px", fontSize: 11 }}>🔒 멤버 전용</span>
+                          <span className="chip" style={{ marginLeft: 8, padding: "2px 8px", fontSize: 11 }}>🔒 멤버십 전용</span>
                         )}
                       </div>
                       {p.sub && <div style={{ fontSize: 12, color: "var(--fg-3)", marginTop: 2 }}>{p.sub}</div>}

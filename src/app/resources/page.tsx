@@ -167,7 +167,7 @@ export default async function ResourcesPage() {
                 <CardContent className="px-6 pb-6">
                   {res.tier === "members" ? (
                     <Badge className="rounded-full bg-primary text-xs text-primary-foreground">
-                      🔒 멤버 전용
+                      🔒 멤버십 전용
                     </Badge>
                   ) : (
                     <Badge

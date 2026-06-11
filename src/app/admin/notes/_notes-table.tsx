@@ -96,7 +96,7 @@ export function NotesTable({ notes }: { notes: NoteRow[] }) {
                       <div style={{ fontWeight: 700 }}>
                         {n.title}
                         {n.visibility === "member" && (
-                          <span className="chip" style={{ marginLeft: 8, padding: "2px 8px", fontSize: 11 }}>🔒 멤버 전용</span>
+                          <span className="chip" style={{ marginLeft: 8, padding: "2px 8px", fontSize: 11 }}>🔒 멤버십 전용</span>
                         )}
                       </div>
                       {n.sub && <div style={{ fontSize: 12, color: "var(--fg-3)", marginTop: 2 }}>{n.sub}</div>}

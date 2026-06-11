@@ -26,8 +26,6 @@ function rowActions(role: Role): RowMenuItem[] {
   if (role === "member") items.push({ id: "demote", label: "위키 멤버 회수" });
   if (role !== "suspended") items.push({ id: "suspend", label: "정지" });
   if (role === "suspended") items.push({ id: "unsuspend", label: "정지 해제", primary: true });
-  items.push({ divider: true });
-  items.push({ id: "profile", label: "공개 프로필 보기" });
   return items;
 }
 
