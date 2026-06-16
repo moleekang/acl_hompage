@@ -750,3 +750,23 @@ body::before {
   padding: 16px 28px;
   font-size: 17px;
 }
+
+/* /privacy 개인정보처리방침 — Tailwind preflight가 지운 목록/링크 스타일 복구 */
+.privacy-doc ul {
+  list-style: disc;
+  padding-left: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 4px 0;
+}
+.privacy-doc p {
+  margin: 0 0 8px;
+}
+.privacy-doc p:last-child {
+  margin-bottom: 0;
+}
+.privacy-doc a {
+  color: var(--text-mint);
+  text-decoration: underline;
+}

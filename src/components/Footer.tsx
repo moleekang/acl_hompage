@@ -134,10 +134,16 @@ export function Footer() {
           </div>
         </div>
 
-        {/* Footer bottom — 카피라이트 */}
+        {/* Footer bottom — 카피라이트 + 법적 링크 */}
         <div className="mt-16 border-t border-[var(--ink-700)] pt-8 text-xs">
           <p>© 2026 AICONLAB · Build in Public</p>
           <p className="mt-1">통째로 나누며 함께 쌓아갑니다</p>
+          <Link
+            href="/privacy"
+            className="mt-3 inline-block transition-colors hover:text-[var(--paper)]"
+          >
+            개인정보처리방침
+          </Link>
         </div>
       </div>
     </footer>
