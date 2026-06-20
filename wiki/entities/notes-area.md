@@ -1,6 +1,6 @@
 # Notes 영역 (인사이트)
 
-> 마지막 업데이트: 2026-05-27
+> 마지막 업데이트: 2026-06-20
 
 `/log`(팀 블로그)과 별개로 운영하는 **개인 인사이트** 영역. posts 영역 구조를 그대로 미러 + 작성자(author) 표시 추가.
 
@@ -46,6 +46,20 @@ RLS:
 | `src/app/admin/notes/_notes-table.tsx` | RowMenu 액션 (편집/발행토글/삭제) |
 | `src/app/admin/_actions/notes.ts` | createNote/updateNote/publishNote/deleteNote — requireAdmin + revalidatePath(`/admin/notes`,`/notes`,`/notes/[slug]`) |
 | `src/lib/admin/fetchers.ts` | `fetchNotesAdmin()` — profile join 포함 |
+
+## 외부 등록 API + 스킬 (2026-06-20)
+
+admin 웹 UI 없이 인사이트를 등록하는 경로 추가.
+
+| 파일 | 역할 |
+|---|---|
+| `src/app/api/notes/route.ts` | `POST /api/notes` — Bearer 토큰(`NOTES_API_KEY`) 인증 → 검증 → `nextSlug` 재사용 → service-role insert. `publish:true`면 즉시 발행. |
+| `.claude/skills/post-insight/SKILL.md` | 위 API 호출 가이드 Claude 스킬 ("인사이트 올려줘" 트리거) |
+
+- 인증: 세션 아님. `NOTES_API_KEY`(필수, `.env.local`+Vercel) Bearer 토큰. 작성자는 선택 `NOTES_API_AUTHOR_ID`.
+- 검증: `title` 필수, `cat ∈ {youtube,ai,domain}`, render_mode/content_type/visibility allowlist.
+- 슬러그는 서버 자동(`{cat}-{순번}`) — 클라이언트 지정 불가.
+- `NOTES_API_KEY`는 service-role insert 단일 통로 → 서버/CLI 전용, 브라우저 노출 금지.
 
 ## posts와의 차이
 

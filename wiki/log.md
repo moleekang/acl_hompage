@@ -108,3 +108,11 @@
 - /admin/members: "관리자로 승급"(member행) + "관리자 권한 회수"(admin행, 본인 제외 — 마지막 admin 잠금 사고 방지) 추가. updateMemberRole은 원래 admin 지원 — UI만 없었음
 - 확인 사실: 위키 멤버 = 멤버십 (단일 등급, is_wiki_member() 하나로 위키·멤버십 글 모두 게이트)
 - push: e82d725(워딩), 61a7356(admin 액션). tsc·eslint·members E2E 통과
+
+## [2026-06-20] update | 인사이트 외부 등록 API + post-insight 스킬
+- admin 웹 UI 없이 인사이트(/notes) 등록하는 경로 신설 (사용자 요청)
+- `src/app/api/notes/route.ts`: `POST /api/notes` — Bearer 토큰(`NOTES_API_KEY`) 인증 → 검증(title 필수, cat allowlist) → 기존 `nextSlug` 재사용 → service-role insert. `publish:true`면 즉시 발행+공개 캐시 무효화.
+- `.claude/skills/post-insight/SKILL.md`: 위 API 호출 가이드 스킬 ("인사이트 올려줘" 트리거)
+- env: `.env.local`에 `NOTES_API_KEY`(openssl rand -hex 32) 추가. 운영 적용엔 Vercel 환경변수에도 동일 키 필요. 작성자 표시는 선택 `NOTES_API_AUTHOR_ID`.
+- 검증: tsc 통과. dev 서버로 401(토큰없음)/400(잘못된 cat)/201(정상 초안) 3케이스 확인 후 테스트 행(ai-9) service-role REST로 삭제 — 운영 DB 잔재 0.
+- 상세: entities/notes-area.md

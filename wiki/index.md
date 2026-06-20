@@ -1,5 +1,5 @@
 # Index — acl_hompage
-> 마지막 업데이트: 2026-06-11
+> 마지막 업데이트: 2026-06-20
 
 AICONLAB 홈페이지(Next.js 16 + Supabase) 운영용 로컬 wiki.
 
@@ -13,7 +13,7 @@ AICONLAB 홈페이지(Next.js 16 + Supabase) 운영용 로컬 wiki.
 ## Entities
 - [db-schema](entities/db-schema.md) — Supabase 테이블·트리거·RLS 정책 인벤토리
 - [admin-ui](entities/admin-ui.md) — admin 라우트 구조·컴포넌트 매핑
-- [notes-area](entities/notes-area.md) — 인사이트(/notes) 영역 구조 — posts 미러 + author 표시 (2026-05-27)
+- [notes-area](entities/notes-area.md) — 인사이트(/notes) 영역 구조 — posts 미러 + author 표시 + 외부 등록 API/스킬 (2026-06-20)
 
 ## Concepts
 - [slug-rules](concepts/slug-rules.md) — 슬러그(URL) 자동 생성 규칙 `{카테고리}-{순번}` + posts 카테고리 영문/한글 정렬 (2026-05-31)
