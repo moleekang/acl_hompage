@@ -55,6 +55,14 @@ export default function RootLayout({
       lang="ko"
       className={`${gaegu.variable} ${gowunDodum.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
+      <head>
+        {/* Google AdSense — 사이트 aicon.lol 심사/광고 코드. SSR HTML에 남도록 next/script 대신 plain script */}
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1259257494849989"
+          crossOrigin="anonymous"
+        />
+      </head>
       <body className="min-h-full flex flex-col">
         {/* Aicon Log — page_view/menu 적재 단일 소스 (soft nav 포함) */}
         <AiconLogTracker />

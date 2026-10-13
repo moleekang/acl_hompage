@@ -16,9 +16,9 @@ export const config = {
      * 다음을 제외한 모든 경로:
      * - _next/static (정적 빌드 산출물)
      * - _next/image (이미지 최적화)
-     * - favicon, robots, sitemap
+     * - favicon, robots, sitemap, ads.txt
      * - 일반 이미지 확장자
      */
-    "/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|.*\\.(?:svg|png|jpg|jpeg|gif|webp|avif)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|ads.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp|avif)$).*)",
   ],
 };
